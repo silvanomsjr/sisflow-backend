@@ -29,8 +29,5 @@ if __name__ == '__main__':
   else:
     dbStart(config.SQL_HOST, config.SQL_PORT, config.SQL_SCHEMA, config.SQL_USER, config.SQL_PASSWORD)
     smtpStart(config.SMTP_HOST, config.SMTP_PORT, config.SMTP_LOGIN, config.SMTP_PASSWORD)
-
-  exit()
-
-  
+    
   app.run(debug=True)
