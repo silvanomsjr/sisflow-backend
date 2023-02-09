@@ -1,5 +1,5 @@
 __pycache__
 secrets/private-key.pem
-secrets/ppublic-key.pem
+secrets/public-key.pem
 config.py
 *.bak
