@@ -5,3 +5,4 @@ mysql-connector==2.2.9
 pycryptodome==3.17
 PyJWT==2.6.0
 python-dotenv==0.21.1
+gunicorn==20.1.0
