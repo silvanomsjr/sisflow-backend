@@ -19,17 +19,15 @@ api = Api(app)
 api.add_resource(Login, '/login')
 api.add_resource(SignWithCode, '/sign')
 
-if __name__ == '__main__':
+# For production ambients like render.com the environment variables are already loaded
+if not os.getenv('SQL_HOST'):
+  load_dotenv(find_dotenv())
 
-  # For production ambients like render.com the environment variables are already loaded
-  if not os.getenv('SQL_HOST'):
-    load_dotenv(find_dotenv())
+# Start MySQL
+dbStart()
 
-  # Start MySQL
-  dbStart()
+# Start SMTP Server
+smtpStart()
 
-  # Start SMTP Server
-  smtpStart()
-  
-  # Start Flask API
-  app.run(debug=True)
+# Start Flask API
+app.run(debug=True)
