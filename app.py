@@ -22,13 +22,12 @@ api.add_resource(SignWithCode, '/sign')
 
 # For production ambients like render.com the environment variables are already loaded
 if not os.getenv('SQL_HOST'):
+  print('# Loading environment from file')
   load_dotenv(find_dotenv())
-
+print(os.getenv('SQL_HOST'))
+  
 # Start MySQL
 dbStart()
 
 # Start SMTP Server
 smtpStart()
-
-# Start Flask API
-app.run(host='0.0.0.0', debug=True)
