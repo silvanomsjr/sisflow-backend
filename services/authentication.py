@@ -2,11 +2,11 @@ from flask import Flask, abort, request
 from flask_restful import Resource, Api, reqparse
 from base64 import b64decode
 import random
+import os
 
 from utils.dbUtils import *
 from utils.jwtfunctions import jwtEncode
 from utils.smtpMails import sendSignNumber
-from config import SYS_DEBUG, SMTP_LOGIN
    
 class Login(Resource):
     
@@ -76,6 +76,7 @@ class SignWithCode(Resource):
 
     sqlScrypt = ' SELECT id_pessoa AS id FROM tbl_pessoa WHERE email_ins = %s; '
     r = dbGetSingle(sqlScrypt, [(email_ins)])
+
     if r == None or len(r) != 1:
       abort(404, 'Email institucional não encontrado no sistema!')
 
@@ -89,12 +90,17 @@ class SignWithCode(Resource):
     
     dbExecute(sqlScrypt, [sign_code, email_ins])
 
-    if SYS_DEBUG:
+    if os.getenv('SYS_DEBUG') == 'True':
       innerHtml = f'''
       <p> Modo de testes ativo </p>
       <p> Deveria ser enviado a este email: {email_ins} </p>
       '''
-      sendSignNumber(SMTP_LOGIN, sign_code, innerHtml, True)
+      sendSignNumber(
+        os.getenv('SMTP_LOGIN'),
+        sign_code,
+        innerHtml,
+        True)
+
       return {'email_ins': email_ins, 'chave_cadastro': sign_code }, 200
     
     sendSignNumber(email_ins, sign_code)

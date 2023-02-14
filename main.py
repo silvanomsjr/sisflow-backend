@@ -1,13 +1,12 @@
 from flask import Flask, abort
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
-import sys
+import os
+from dotenv import load_dotenv, find_dotenv
 
 from utils.dbUtils import dbStart
 from utils.smtpMails import smtpStart
 from services.authentication import Login, SignWithCode
-
-import config
 
 app = Flask(__name__)
 CORS(
@@ -22,12 +21,15 @@ api.add_resource(SignWithCode, '/sign')
 
 if __name__ == '__main__':
 
-  if config.SYS_CMDLINE_ARGS:
-    dbStart(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-    smtpStart(sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9])
+  # For production ambients like render.com the environment variables are already loaded
+  if not os.getenv('SQL_HOST'):
+    load_dotenv(find_dotenv())
+
+  # Start MySQL
+  dbStart()
+
+  # Start SMTP Server
+  smtpStart()
   
-  else:
-    dbStart(config.SQL_HOST, config.SQL_PORT, config.SQL_SCHEMA, config.SQL_USER, config.SQL_PASSWORD)
-    smtpStart(config.SMTP_HOST, config.SMTP_PORT, config.SMTP_LOGIN, config.SMTP_PASSWORD)
-    
+  # Start Flask API
   app.run(debug=True)

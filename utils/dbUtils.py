@@ -1,16 +1,22 @@
 import mysql.connector
+import os
 
 myDB = None
 myCursor = None
 
-def dbStart(SQL_HOST, SQL_PORT, SQL_SCHEMA, SQL_USER, SQL_PASSWORD):
+def dbStart():
 
   global myDB, myCursor
 
   if myDB is not None:
     return
 
-  myDB = mysql.connector.connect(host=SQL_HOST, port=SQL_PORT, user=SQL_USER, passwd=SQL_PASSWORD)
+  myDB = mysql.connector.connect(
+    host = os.getenv('SQL_HOST'),
+    port = os.getenv('SQL_PORT'),
+    user = os.getenv('SQL_USER'),
+    passwd = os.getenv('SQL_PASSWORD'),
+    auth_plugin='mysql_native_password')
 
   if myDB:
     print('# Connection to database successfull')
@@ -23,16 +29,22 @@ def dbStart(SQL_HOST, SQL_PORT, SQL_SCHEMA, SQL_USER, SQL_PASSWORD):
 
   schemaFound = False
   for db in myCursor:
-    if SQL_SCHEMA == db[0]:
+    if os.getenv('SQL_SCHEMA') == db[0]:
       schemaFound = True
       break
 
   if not schemaFound:
-    print('# schema ' + str(SQL_SCHEMA) + ' not found! creating schema and tables')
-    dbCreate(SQL_HOST, SQL_PORT, SQL_SCHEMA, SQL_USER, SQL_PASSWORD)
+    print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' not found! creating schema and tables')
+    dbCreate()
   else:
-    print('# schema ' + str(SQL_SCHEMA) + ' is in database')
-    myDB = mysql.connector.connect(host=SQL_HOST, port=SQL_PORT, user=SQL_USER, passwd=SQL_PASSWORD, database=SQL_SCHEMA, auth_plugin='mysql_native_password')
+    print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' is in database')
+    myDB = mysql.connector.connect(
+      host = os.getenv('SQL_HOST'),
+      port = os.getenv('SQL_PORT'),
+      user = os.getenv('SQL_USER'),
+      passwd = os.getenv('SQL_PASSWORD'),
+      database = os.getenv('SQL_SCHEMA'),
+      auth_plugin = 'mysql_native_password')
 
   myCursor = myDB.cursor()
 
@@ -126,7 +138,7 @@ def dbGetAll(sqlScrypt, values=None):
 
   return myCursor.fetchall()
 
-def dbCreate(SQL_HOST, SQL_PORT, SQL_SCHEMA, SQL_USER, SQL_PASSWORD):
+def dbCreate():
 
   global myDB, myCursor
 
@@ -135,9 +147,16 @@ def dbCreate(SQL_HOST, SQL_PORT, SQL_SCHEMA, SQL_USER, SQL_PASSWORD):
     return
 
   myCursor = myDB.cursor()
-  myCursor.execute('create schema ' + str(SQL_SCHEMA))
+  myCursor.execute('create schema ' + str(os.getenv('SQL_SCHEMA')))
 
-  myDB = mysql.connector.connect(host=SQL_HOST, port=SQL_PORT, user=SQL_USER, passwd=SQL_PASSWORD, database=SQL_SCHEMA, auth_plugin='mysql_native_password')
+  myDB = mysql.connector.connect(
+    host = os.getenv('SQL_HOST'),
+    port = os.getenv('SQL_PORT'),
+    user = os.getenv('SQL_USER'),
+    passwd = os.getenv('SQL_PASSWORD'),
+    database = os.getenv('SQL_SCHEMA'),
+    auth_plugin = 'mysql_native_password')
+
   myCursor = myDB.cursor()
 
   myCursor.execute(getSqlScrypt('tbl_pessoa'))

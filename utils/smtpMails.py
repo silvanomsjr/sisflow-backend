@@ -2,20 +2,24 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-smtp_server = None
-smtp_from_global = None
+import os
 
-def smtpStart(SMTP_HOST, SMTP_PORT, SMTP_LOGIN, SMTP_PASSWORD):
+smtp_server = None
+
+def smtpStart():
 
   global smtp_server
-  global smtp_from_global
 
-  smtp_from_global = SMTP_HOST
+  smtp_server = smtplib.SMTP(
+    os.getenv('SMTP_HOST'),
+    os.getenv('SMTP_PORT'))
 
-  smtp_server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
   smtp_server.ehlo()
   smtp_server.starttls()
-  smtp_server.login(SMTP_LOGIN, SMTP_PASSWORD)
+
+  smtp_server.login(
+    os.getenv('SMTP_LOGIN'),
+    os.getenv('SMTP_PASSWORD'))
 
   print('# Connection to SMTP successfull')
 
@@ -40,22 +44,20 @@ def smtpSend(mail_from, mail_to, mail_subject, mail_message):
     print("# smtp not started")
     return
 
-  if not smtp_working():
-    smtpStart()
-
   mail = MIMEMultipart()
   mail['From'] = mail_from
   mail['To'] = mail_to
   mail['Subject'] = mail_subject
   mail.attach(MIMEText(mail_message, 'html'))
 
-  smtp_server.sendmail(mail_from, mail_to, mail.as_string())
+  smtp_server.sendmail(
+    mail_from,
+    mail_to,
+    mail.as_string())
 
   smtp_server.quit()
 
 def sendSignNumber(userMail, number, includeInnerHtml = '',includeDebug=False):
-  
-  global smtp_from_global
 
   TmpStr = includeInnerHtml if includeDebug else ''
   html = f'''
@@ -72,7 +74,7 @@ def sendSignNumber(userMail, number, includeInnerHtml = '',includeDebug=False):
   '''
 
   smtpSend(
-    smtp_from_global, 
+    os.getenv('SMTP_LOGIN'), 
     userMail,
     'Confirmação de cadastro Sisges', 
     html
