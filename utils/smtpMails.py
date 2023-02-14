@@ -44,6 +44,12 @@ def smtpSend(mail_from, mail_to, mail_subject, mail_message):
     print("# smtp not started")
     return
 
+  if not smtp_working():
+    smtpStart()
+    if not smtp_working():
+      print('# Could not reconnect to smtp')
+      return
+
   mail = MIMEMultipart()
   mail['From'] = mail_from
   mail['To'] = mail_to
@@ -54,8 +60,6 @@ def smtpSend(mail_from, mail_to, mail_subject, mail_message):
     mail_from,
     mail_to,
     mail.as_string())
-
-  smtp_server.quit()
 
 def sendSignNumber(userMail, number, includeInnerHtml = '',includeDebug=False):
 

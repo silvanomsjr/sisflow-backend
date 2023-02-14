@@ -24,7 +24,6 @@ api.add_resource(SignWithCode, '/sign')
 if not os.getenv('SQL_HOST'):
   print('# Loading environment from file')
   load_dotenv(find_dotenv())
-print(os.getenv('SQL_HOST'))
   
 # Start MySQL
 dbStart()
