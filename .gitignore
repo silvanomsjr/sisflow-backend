@@ -1,5 +1,10 @@
 __pycache__
 secrets/private-key.pem
 secrets/public-key.pem
+
 .env
+.env.example
+.env.local
+.env.staging
+
 *.bak
