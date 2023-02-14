@@ -7,7 +7,12 @@ import os
 from utils.dbUtils import *
 from utils.jwtfunctions import jwtEncode
 from utils.smtpMails import sendSignNumber
-   
+  
+class Teste(Resource):
+
+  def get(self):
+    return 'ola tudo funcionando', 201
+
 class Login(Resource):
     
   def post(self):

@@ -6,7 +6,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from utils.dbUtils import dbStart
 from utils.smtpMails import smtpStart
-from services.authentication import Login, SignWithCode
+from services.authentication import Teste, Login, SignWithCode
 
 app = Flask(__name__)
 CORS(
@@ -16,6 +16,7 @@ CORS(
   expose_headers='Authorization')
 
 api = Api(app)
+api.add_resource(Teste, '/')
 api.add_resource(Login, '/login')
 api.add_resource(SignWithCode, '/sign')
 
