@@ -61,7 +61,7 @@ def smtpSend(mail_from, mail_to, mail_subject, mail_message):
     mail_to,
     mail.as_string())
 
-def sendSignNumber(userMail, number, includeInnerHtml = '',includeDebug=False):
+def sendSignKey(userMail, key, acesstokenUrl, includeInnerHtml = '',includeDebug=False):
 
   TmpStr = includeInnerHtml if includeDebug else ''
   html = f'''
@@ -71,7 +71,8 @@ def sendSignNumber(userMail, number, includeInnerHtml = '',includeDebug=False):
 
     <h1 style="color:blue;">Sisges</h1>
     {TmpStr}
-    <p>Este é seu numero de cadastro: {number} </p>
+    <p>Este é seu código de cadastro: {key} </p>
+    <p>Você também pode continuar o cadastro ao clicar neste <a href="{acesstokenUrl}">link</a></p>
 
     </body>
     </html>

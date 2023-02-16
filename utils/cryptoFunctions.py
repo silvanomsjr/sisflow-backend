@@ -1,6 +1,10 @@
-from pathlib import Path
+import hashlib
 import jwt
 from Crypto.PublicKey import RSA
+
+from pathlib import Path
+import random
+import string
 
 # when first executed generate key pairs
 privatek_path = Path('./secrets/private-key.pem')
@@ -11,7 +15,6 @@ if not privatek_path.is_file() or not publick_path.is_file():
   # private key
   pvk = RSA.generate(2048)
   pvk_str = pvk.exportKey()
-  print(pvk_str)
   with open (privatek_path, "w") as pvk_file:
     print("{}".format(pvk_str.decode()), file=pvk_file)
 
@@ -26,6 +29,21 @@ if not privatek_path.is_file() or not publick_path.is_file():
 
 private_key = open('./secrets/private-key.pem').read()
 public_key = open('./secrets/public-key.pem').read()
+
+# hashes password with random or given salt using sha256
+def getHashPassword(password, salt=None):
+
+  if salt:
+    passSalt = salt
+  else:
+    passSalt = ''.join(
+      random.choice(string.ascii_letters if random.uniform(0,1) > 0.25 else string.digits) 
+      for _ in range(16))
+
+  passBytes = bytes(password + passSalt, 'utf-8')
+  hashPass = hashlib.sha256(passBytes).hexdigest()
+
+  return hashPass, passSalt
 
 def jwtEncode(token_json_data):
 

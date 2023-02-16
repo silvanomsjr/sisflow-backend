@@ -8,7 +8,7 @@ def dbStart():
 
   global myDB, myCursor
 
-  if myDB is not None:
+  if not myDB == None and not myDB.is_connected():
     return
 
   myDB = mysql.connector.connect(
@@ -36,15 +36,17 @@ def dbStart():
   if not schemaFound:
     print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' not found! creating schema and tables')
     dbCreate()
+    print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' and tables created')
   else:
     print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' is in database')
-    myDB = mysql.connector.connect(
-      host = os.getenv('SQL_HOST'),
-      port = os.getenv('SQL_PORT'),
-      user = os.getenv('SQL_USER'),
-      passwd = os.getenv('SQL_PASSWORD'),
-      database = os.getenv('SQL_SCHEMA'),
-      auth_plugin = 'mysql_native_password')
+
+  myDB = mysql.connector.connect(
+    host = os.getenv('SQL_HOST'),
+    port = os.getenv('SQL_PORT'),
+    user = os.getenv('SQL_USER'),
+    passwd = os.getenv('SQL_PASSWORD'),
+    database = os.getenv('SQL_SCHEMA'),
+    auth_plugin = 'mysql_native_password')
 
   myCursor = myDB.cursor()
 
@@ -60,9 +62,8 @@ def dbRollback():
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None:
-    print('# Error, database connection not established')
-    return
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    dbStart()
   
   myDB.rollback()
 
@@ -70,19 +71,17 @@ def dbCommit():
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None:
-    print('# Error, database connection not established')
-    return
-  
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    dbStart()
+
   myDB.commit()
 
 def dbExecute(sqlScrypt, values=None, commit=True):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None:
-    print('# Error, database connection not established')
-    return
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    dbStart()
       
   if values != None:
     myCursor.execute(sqlScrypt, values)
@@ -90,15 +89,15 @@ def dbExecute(sqlScrypt, values=None, commit=True):
     myCursor.execute(sqlScrypt)
   
   if(commit):
+    print('# Operation Commited')
     myDB.commit()
 
 def dbExecuteMany(sqlScrypt, values=None, commit=True):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None:
-    print('# Error, database connection not established')
-    return
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    dbStart()
   
   if values != None:
     myCursor.executemany(sqlScrypt, values)
@@ -106,15 +105,15 @@ def dbExecuteMany(sqlScrypt, values=None, commit=True):
     myCursor.executemany(sqlScrypt)
   
   if(commit):
+    print('# Operation Commited')
     myDB.commit()
 
 def dbGetSingle(sqlScrypt, values=None):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None:
-    print('# Error, database connection not established')
-    return
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    dbStart()
   
   if values != None:
     myCursor.execute(sqlScrypt, values)
@@ -127,9 +126,8 @@ def dbGetAll(sqlScrypt, values=None):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None:
-    print('# Error, database connection not established')
-    return
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    dbStart()
   
   if values != None:
     myCursor.execute(sqlScrypt, values)
@@ -143,8 +141,7 @@ def dbCreate():
   global myDB, myCursor
 
   if myDB is None:
-    print('# Error, database connection not established')
-    return
+    dbStart()
 
   myCursor = myDB.cursor()
   myCursor.execute('create schema ' + str(os.getenv('SQL_SCHEMA')))
@@ -157,10 +154,7 @@ def dbCreate():
     database = os.getenv('SQL_SCHEMA'),
     auth_plugin = 'mysql_native_password')
 
+  # opens and close cursor to avoid sync problens
   myCursor = myDB.cursor()
-
-  myCursor.execute(getSqlScrypt('tbl_pessoa'))
-  myCursor.execute(getSqlScrypt('tbl_aluno'))
-  myCursor.execute(getSqlScrypt('tbl_professor'))
-  myCursor.execute(getSqlScrypt('tbl_usuario'))
-  myCursor.execute(getSqlScrypt('tbl_chave_cadastro'))
+  myCursor.execute(getSqlScrypt('sisges_create'))
+  myCursor.close()
