@@ -37,7 +37,7 @@ class Login(Resource):
       print('# Database error:')
       print(str(e))
       return 'Erro na base de dados', 409
-      
+
     if r == None or len(r) != 10:
       abort(401, 'Usuário não cadastrado!')
     print('# User found')
@@ -154,21 +154,33 @@ class Sign(Resource):
   def get(self):
 
     sign_args = reqparse.RequestParser()
-    sign_args.add_argument('acess_token', location='args', type=str, required=True)
+    sign_args.add_argument('acess_token', location='args', type=str)
+    sign_args.add_argument('email_ins', location='args', type=str)
+    sign_args.add_argument('cad_code', location='args', type=str)
     sign_args = sign_args.parse_args()
 
     print('\n# Starting user Sign code verification')
 
-    acess_token = None
-    try:
-      acess_token = jwtDecode(sign_args['acess_token'])
-    except Exception as e:
-      print('# JWT decoding error:')
-      print(str(e))
-      return 'Codigo de acesso invalido', 401
+    if not sign_args['acess_token'] and (not sign_args['email_ins'] or not sign_args['cad_code']):
+      abort(400, "Missing acess_token token or email_ins and cad_code")
 
-    email_ins = acess_token['email_ins']
-    cad_code = acess_token['cad_code']
+    email_ins = None
+    cad_code = None
+    
+    if sign_args['acess_token']:
+      try:
+        acess_token = jwtDecode(sign_args['acess_token'])
+      except Exception as e:
+        print('# JWT decoding error:')
+        print(str(e))
+        return 'Codigo de acesso invalido', 401
+
+      email_ins = acess_token['email_ins']
+      cad_code = acess_token['cad_code']
+
+    else:
+      email_ins = sign_args['email_ins']
+      cad_code = sign_args['cad_code']
 
     print('# Testing acess token for ' + str(email_ins))
 
