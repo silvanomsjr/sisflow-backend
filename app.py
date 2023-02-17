@@ -7,10 +7,11 @@ from dotenv import load_dotenv, find_dotenv
 from utils.dbUtils import dbStart
 from utils.smtpMails import smtpStart
 from services.authentication import Login, Sign
+from services.receiveFiles import ReceiveFile
 
 app = Flask(__name__)
 CORS(
-  app, 
+  app,
   origins='*',
   headers=['Content-Type', 'Authorization'],
   expose_headers='Authorization')
@@ -18,6 +19,7 @@ CORS(
 api = Api(app)
 api.add_resource(Login, '/login')
 api.add_resource(Sign, '/sign')
+api.add_resource(ReceiveFile, '/file')
 
 # For production ambients like render.com the environment variables are already loaded
 if not os.getenv('SQL_HOST'):
