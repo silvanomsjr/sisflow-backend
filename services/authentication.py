@@ -130,7 +130,7 @@ class Sign(Resource):
       'cad_code': cad_code
     }
     acess_token = jwtEncode(token_data)
-    acess_url = os.getenv('FRONT_BASE_URL') + 'sign/acess_token=' + acess_token
+    acess_url = os.getenv('FRONT_BASE_URL') + 'sign?acess_token=' + acess_token
     
     if os.getenv('SYS_DEBUG') == 'True':
       sendMailTo = os.getenv('SMTP_LOGIN')
@@ -195,7 +195,7 @@ class Sign(Resource):
 
     print('# Verification done')
     if r and len(r) == 2:
-      return True, 200
+      return { 'email_ins': email_ins , 'cad_code' : cad_code}, 200
 
     return False, 401
 
