@@ -1,3 +1,24 @@
+CREATE TABLE config(
+	id INT NOT NULL AUTO_INCREMENT,
+  nome VARCHAR(20),
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE config_path(
+	config_id INT NOT NULL,
+	path_str VARCHAR(256),
+  PRIMARY KEY (config_id),
+  FOREIGN KEY (config_id) REFERENCES config(id)
+);
+
+INSERT INTO config(nome) VALUES
+	("root path key files"),
+  ("root path user files");
+    
+INSERT INTO config_path(config_id, path_str) VALUES
+	(1, "/sisges/secrets/"),
+	(2, "/sisges/userfiles/");
+
 CREATE TABLE conta_usuario(
 	id INT NOT NULL AUTO_INCREMENT,
   email_ins VARCHAR(256) NOT NULL UNIQUE,

@@ -5,7 +5,9 @@ import os
 from dotenv import load_dotenv, find_dotenv
 
 from utils.dbUtils import dbStart
+from utils.sistemConfig import sisConfigStart
 from utils.smtpMails import smtpStart
+from utils.cryptoFunctions import loadGenerateKeys
 from services.authentication import Login, Sign
 from services.receiveFiles import ReceiveFile
 
@@ -28,6 +30,9 @@ if not os.getenv('SQL_HOST'):
   
 # Start MySQL
 dbStart()
-
 # Start SMTP Server
 smtpStart()
+# Load Sistem Configutations
+sisConfigStart()
+# Load Secret Keys
+loadGenerateKeys()

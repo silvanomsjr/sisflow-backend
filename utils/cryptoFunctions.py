@@ -2,33 +2,40 @@ import hashlib
 import jwt
 from Crypto.PublicKey import RSA
 
-from pathlib import Path
+from utils.sistemConfig import getKeysFilePath
 import random
 import string
 
-# when first executed generate key pairs
-privatek_path = Path('./secrets/private-key.pem')
-publick_path = Path('./secrets/public-key.pem')
+private_key = None
+public_key = None
 
-if not privatek_path.is_file() or not publick_path.is_file():
-  
-  # private key
-  pvk = RSA.generate(2048)
-  pvk_str = pvk.exportKey()
-  with open (privatek_path, "w") as pvk_file:
-    print("{}".format(pvk_str.decode()), file=pvk_file)
+# load or create and load keys
+def loadGenerateKeys():
 
-  # public key
-  pbk = pvk.publickey()
-  pbk_str = pbk.exportKey()
-  print(pbk_str)
-  with open (publick_path, "w") as pbk_file:
-    print("{}".format(pbk_str.decode()), file=pbk_file)
-  
-  print('# private and public keys generated')
+  global private_key, public_key
 
-private_key = open('./secrets/private-key.pem').read()
-public_key = open('./secrets/public-key.pem').read()
+  # when first executed generate key pairs
+  privatek_path = getKeysFilePath('private-key.pem')
+  publick_path = getKeysFilePath('public-key.pem')
+
+  if not privatek_path.is_file() or not publick_path.is_file():
+    
+    # private key
+    pvk = RSA.generate(2048)
+    pvk_str = pvk.exportKey()
+    with open(privatek_path, "w") as pvk_file:
+      print("{}".format(pvk_str.decode()), file=pvk_file)
+
+    # public key
+    pbk = pvk.publickey()
+    pbk_str = pbk.exportKey()
+    with open(publick_path, "w") as pbk_file:
+      print("{}".format(pbk_str.decode()), file=pbk_file)
+    
+    print('# private and public keys generated')
+
+  private_key = open(privatek_path).read()
+  public_key = open(publick_path).read()
 
 # hashes password with random or given salt using sha256
 def getHashPassword(password, salt=None):
@@ -47,10 +54,20 @@ def getHashPassword(password, salt=None):
 
 def jwtEncode(token_json_data):
 
+  global private_key
+
+  if not private_key:
+    loadGenerateKeys()
+
   token_jwt = jwt.encode(token_json_data, private_key, algorithm="RS256")
   return token_jwt
 
 def jwtDecode(token_jwt):
+
+  global public_key
+
+  if not public_key:
+    loadGenerateKeys()
     
   token_data = jwt.decode(token_jwt, public_key, algorithms=["RS256"])
   return token_data

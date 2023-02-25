@@ -3,25 +3,9 @@ from flask_restful import Resource, Api, reqparse
 import werkzeug
 
 from utils.dbUtils import *
-import os.path
+from utils.sistemConfig import getUserFilesPath
 import random
 import string
-
-def verifyAndCreateDirs(userName, docType):
-  
-  path = './Document'
-  if(not os.path.isdir(path)):
-    os.makedirs(path)
-  
-  path = path + '/' + userName
-  if(not os.path.isdir(path)):
-    os.makedirs(path)
-
-  path = path + '/' + docType
-  if(not os.path.isdir(path)):
-    os.makedirs(path)
-  
-  return path
 
 class ReceiveFile(Resource):
     
@@ -43,8 +27,9 @@ class ReceiveFile(Resource):
 
     if file:
       
+      # check file data without saving file in disk
       print('# Checking file data')
-      # calculates file size without saving file in disk
+      
       file.seek(0, os.SEEK_END)
       fileSize = round((file.tell()/1024/1024), 2)
       file.seek(0, os.SEEK_SET)
@@ -70,9 +55,10 @@ class ReceiveFile(Resource):
       userId = r[0]
 
       # calculates file path hash
-      print('# Saving file data')
-      path = verifyAndCreateDirs(fileUserName, fileDirName)
+      print('# Generating file hash name')
 
+      userFilePath = None
+      userFileName = None
       pathIsFile = True
       while pathIsFile:
 
@@ -80,21 +66,29 @@ class ReceiveFile(Resource):
           random.choice(string.ascii_letters if random.uniform(0,1) > 0.25 else string.digits) 
           for _ in range(10)) + '.pdf'
 
-        tmpPath = path + '/' + hashPdfCode
-        pathIsFile = os.path.isfile(tmpPath)
-      
-      path = tmpPath
+        userFileName = fileUserName + '_' + fileDirName + '_' + hashPdfCode
+        userFilePath = getUserFilesPath(userFileName)
+        pathIsFile = userFilePath.is_file()
 
-      sqlScrypt = ' INSERT INTO anexo (hash_anexo, id_usuario) VALUES ' \
-	      ' (%s, %s); '
       try:
-        dbExecute(sqlScrypt, [path.replace('/','_').replace('._Document_',''), userId])
+        dbExecute(
+          ' INSERT INTO anexo (hash_anexo, id_usuario) VALUES ' \
+	        ' (%s, %s); ',
+          [userFileName, userId])
       except Exception as e:
         print('# Database insertion error:')
         print(str(e))
         return 'Erro na base de dados', 409
       
-      file.save(tmpPath)
+      print('# Saving file: ' + userFileName)
+
+      try:
+        file.save(userFilePath)
+      except Exception as e:
+        print('# Sistem directory insertion error:')
+        print(str(e))
+        return 'Erro no servidor', 409
+
       print('# File saved')
       return 'ok', 200
     
