@@ -38,7 +38,7 @@ class Login(Resource):
       print(str(e))
       return 'Erro na base de dados', 409
 
-    if r == None or len(r) != 10:
+    if r == None or len(r) != 10 or r[5] == None:
       abort(401, 'Usuário não cadastrado!')
     print('# User found')
     
