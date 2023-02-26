@@ -14,10 +14,10 @@ def loadGenerateKeys():
 
   global private_key, public_key
 
-  # when first executed generate key pairs
   privatek_path = getKeysFilePath('private-key.pem')
   publick_path = getKeysFilePath('public-key.pem')
 
+  # when first executed generate key pair
   if not privatek_path.is_file() or not publick_path.is_file():
     
     # private key
@@ -40,6 +40,7 @@ def loadGenerateKeys():
 # hashes password with random or given salt using sha256
 def getHashPassword(password, salt=None):
 
+  passSalt = None
   if salt:
     passSalt = salt
   else:
@@ -52,6 +53,7 @@ def getHashPassword(password, salt=None):
 
   return hashPass, passSalt
 
+# Encode a json data to creates a jwt token with signature
 def jwtEncode(token_json_data):
 
   global private_key
@@ -62,6 +64,7 @@ def jwtEncode(token_json_data):
   token_jwt = jwt.encode(token_json_data, private_key, algorithm="RS256")
   return token_jwt
 
+# Decode a jwt token verifying its signature
 def jwtDecode(token_jwt):
 
   global public_key
@@ -71,7 +74,8 @@ def jwtDecode(token_jwt):
     
   token_data = jwt.decode(token_jwt, public_key, algorithms=["RS256"])
   return token_data
-    
+  
+# Verify if an token given in request bearer is valid based on jwt signature
 def isAuthTokenValid(args, user_types_required):
 
   token_jwt = args['Authorization'].replace('Bearer ', '')

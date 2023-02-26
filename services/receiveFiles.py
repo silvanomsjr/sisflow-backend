@@ -35,10 +35,10 @@ class ReceiveFile(Resource):
       file.seek(0, os.SEEK_SET)
 
       if '.pdf' not in file.filename:
-        return 'Error: File must be an pdf', 400
+        return 'Erro: O arquivo deve estar no formato pdf', 400
 
       if fileSize > 10.0:
-        return 'Error: File size must not exceed 10MB', 400
+        return 'Erro: O tamanho do arquivo nao pode ultrapassar 10MB', 400
 
       r = None
       sqlScrypt = ' SELECT id, email_ins FROM conta_usuario ' \
