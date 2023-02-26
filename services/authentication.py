@@ -22,6 +22,7 @@ class Login(Resource):
     email_ins, plain_password = b64decode( login_args['Authorization'].replace('Basic ', '') ).decode('utf-8').split(':', 1)
     print('\n# Starting Login authentication for ' + str(email_ins))
 
+    r = None
     sqlScrypt = " SELECT id, email_ins, email_sec, nome, telefone, hash_senha, salt_senha, data_hora_criacao, siglas, jsons " \
       " FROM conta_usuario AS usuario JOIN ( " \
       "   SELECT id_usuario,  " \

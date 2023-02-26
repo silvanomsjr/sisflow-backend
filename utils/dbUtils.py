@@ -34,11 +34,11 @@ def dbStart():
       break
 
   if not schemaFound:
-    print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' not found! creating schema and tables')
+    print('# Schema ' + str(os.getenv('SQL_SCHEMA')) + ' not found! creating schema and tables')
     dbCreate()
-    print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' and tables created')
+    print('# Schema ' + str(os.getenv('SQL_SCHEMA')) + ' and tables created')
   else:
-    print('# schema ' + str(os.getenv('SQL_SCHEMA')) + ' is in database')
+    print('# Schema ' + str(os.getenv('SQL_SCHEMA')) + ' is in database')
 
   myDB = mysql.connector.connect(
     host = os.getenv('SQL_HOST'),
