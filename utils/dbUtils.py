@@ -1,12 +1,18 @@
 import mysql.connector
 import os
+import time
 
+# db variables
 myDB = None
 myCursor = None
 
+# used to refresh db connection
+connTimeOutMin = 10
+lastRequestTime = None
+
 def dbStart():
 
-  global myDB, myCursor
+  global lastRequestTime, myDB, myCursor
 
   if not myDB == None and not myDB.is_connected():
     return
@@ -48,7 +54,26 @@ def dbStart():
     database = os.getenv('SQL_SCHEMA'),
     auth_plugin = 'mysql_native_password')
 
+  lastRequestTime = time.time()
   myCursor = myDB.cursor()
+
+def isConnectedToDb():
+
+  global connTimeOutMin, lastRequestTime, myDB, myCursor
+
+  if myDB is None or myCursor is None or not myDB.is_connected():
+    return False
+  
+  # if the last time a request runs plus timestamp is less than actual time refresh connection if necessary
+  actualTime = time.time()
+  if (lastRequestTime + connTimeOutMin*60) < actualTime:
+    try:
+      dbGetSingle('SELECT 1;')
+    except Exception as e:
+      return False
+      
+  lastRequestTime = actualTime
+  return True
 
 def getSqlScrypt(name):
 
@@ -62,7 +87,7 @@ def dbRollback():
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None or not myDB.is_connected():
+  if not isConnectedToDb():
     dbStart()
   
   myDB.rollback()
@@ -71,7 +96,7 @@ def dbCommit():
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None or not myDB.is_connected():
+  if not isConnectedToDb():
     dbStart()
 
   myDB.commit()
@@ -80,7 +105,7 @@ def dbExecute(sqlScrypt, values=None, commit=True):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None or not myDB.is_connected():
+  if not isConnectedToDb():
     dbStart()
       
   if values != None:
@@ -96,7 +121,7 @@ def dbExecuteMany(sqlScrypt, values=None, commit=True):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None or not myDB.is_connected():
+  if not isConnectedToDb():
     dbStart()
   
   if values != None:
@@ -112,7 +137,7 @@ def dbGetSingle(sqlScrypt, values=None):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None or not myDB.is_connected():
+  if not isConnectedToDb():
     dbStart()
   
   if values != None:
@@ -126,7 +151,7 @@ def dbGetAll(sqlScrypt, values=None):
 
   global myDB, myCursor
 
-  if myDB is None or myCursor is None or not myDB.is_connected():
+  if not isConnectedToDb():
     dbStart()
   
   if values != None:
