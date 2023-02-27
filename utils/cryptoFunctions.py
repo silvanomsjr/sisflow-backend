@@ -80,17 +80,18 @@ def isAuthTokenValid(args, user_types_required):
 
   token_jwt = args['Authorization'].replace('Bearer ', '')
 
+  token_data = None
   try:
     token_data = jwtDecode(token_jwt)
   except:
-    return (False, 'Falha ao decifrar o token, token inválido!')
+    return False, 'Falha ao decifrar o token, token inválido!', None
   
   if not token_data:
-    return (False, 'Token inválido!')
-  
-  token_user_type = token_data['tipo']
+    return False, 'Token inválido!', None
+
+  token_user_type = token_data['siglas']
 
   if token_user_type not in user_types_required:
-    return (False, 'tipo de usuário incorreto!')
+    return False, 'tipo de usuário incorreto!', None
 
-  return (True, '')
+  return True, '', token_data
