@@ -32,7 +32,7 @@ def loadGenerateKeys():
     with open(publick_path, "w") as pbk_file:
       print("{}".format(pbk_str.decode()), file=pbk_file)
     
-    print('# private and public keys generated')
+    print('# Private and public keys generated')
 
   private_key = open(privatek_path).read()
   public_key = open(publick_path).read()
