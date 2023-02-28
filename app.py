@@ -11,7 +11,7 @@ from utils.cryptoFunctions import loadGenerateKeys
 
 from services.authentication import Login, Sign
 from services.receiveFiles import ReceiveFile
-from services.solicitations import Solicitations
+from services.solicitations import Solicitations, Solicitation
 
 app = Flask(__name__)
 CORS(
@@ -25,6 +25,7 @@ api.add_resource(Login, '/login')
 api.add_resource(Sign, '/sign')
 api.add_resource(ReceiveFile, '/file')
 api.add_resource(Solicitations, '/solicitations')
+api.add_resource(Solicitation, '/solicitation')
 
 # For production ambients like render.com the environment variables are already loaded
 if not os.getenv('SQL_HOST'):

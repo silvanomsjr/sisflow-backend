@@ -76,7 +76,7 @@ def jwtDecode(token_jwt):
   return token_data
   
 # Verify if an token given in request bearer is valid based on jwt signature
-def isAuthTokenValid(args, user_types_required):
+def isAuthTokenValid(args, user_types_required=None):
 
   token_jwt = args['Authorization'].replace('Bearer ', '')
 
@@ -89,9 +89,9 @@ def isAuthTokenValid(args, user_types_required):
   if not token_data:
     return False, 'Token inválido!', None
 
-  token_user_type = token_data['siglas']
-
-  if token_user_type not in user_types_required:
-    return False, 'tipo de usuário incorreto!', None
+  if user_types_required:
+    token_user_type = token_data['siglas']
+    if token_user_type not in user_types_required:
+      return False, 'tipo de usuário incorreto!', None
 
   return True, '', token_data

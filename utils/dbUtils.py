@@ -30,7 +30,7 @@ def dbStart():
     print('# Connection to database failed')
     return
 
-  myCursor = myDB.cursor()
+  myCursor = myDB.cursor(buffered=True)
   myCursor.execute('show databases')
 
   schemaFound = False
@@ -55,7 +55,7 @@ def dbStart():
     auth_plugin = 'mysql_native_password')
 
   lastRequestTime = time.time()
-  myCursor = myDB.cursor()
+  myCursor = myDB.cursor(buffered=True)
 
 def isConnectedToDb():
 
@@ -168,7 +168,7 @@ def dbCreate():
   if myDB is None:
     dbStart()
 
-  myCursor = myDB.cursor()
+  myCursor = myDB.cursor(buffered=True)
   myCursor.execute('create schema ' + str(os.getenv('SQL_SCHEMA')))
 
   myDB = mysql.connector.connect(
@@ -180,6 +180,6 @@ def dbCreate():
     auth_plugin = 'mysql_native_password')
 
   # opens and close cursor to avoid sync problens
-  myCursor = myDB.cursor()
+  myCursor = myDB.cursor(buffered=True)
   myCursor.execute(getSqlScrypt('sisges_create'))
   myCursor.close()
