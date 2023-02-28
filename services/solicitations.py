@@ -105,11 +105,11 @@ class Solicitation(Resource):
     solicitations_args = reqparse.RequestParser()
     solicitations_args.add_argument('Authorization', location='headers', type=str, help='Bearer with jwt given by server in user autentication, required', required=True)
     solicitations_args.add_argument('solicitation', location='args', type=int, required=True)
-    solicitations_args.add_argument('solicitation_step', location='args', type=int, required=True)
+    solicitations_args.add_argument('solicitation_step_order', location='args', type=int, required=True)
     solicitations_args = solicitations_args.parse_args()
 
     id_solicitation = solicitations_args['solicitation']
-    id_solicitation_step = solicitations_args['solicitation_step']
+    solicitation_step_order = solicitations_args['solicitation_step_order']
 
     # verify jwt and its signature correctness
     isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitations_args)
@@ -131,15 +131,14 @@ class Solicitation(Resource):
         '     INNER JOIN etapa_solicitacao AS es ON pes.id_etapa_solicitacao = es.id ' \
         '     INNER JOIN solicitacao AS s ON es.id_solicitacao = s.id ' \
         '     LEFT JOIN etapa_solicitacao_pagina_dinamica AS espd ON es.id = espd.id_etapa_solicitacao ' \
-        '     WHERE us.email_ins = %s AND s.id = %s AND es.id = %s; ',
-        [tokenData['email_ins'], id_solicitation, id_solicitation_step])
+        '     WHERE us.email_ins = %s AND s.id = %s AND es.ordem_etapa_solicitacao = %s; ',
+        [tokenData['email_ins'], id_solicitation, solicitation_step_order])
     except Exception as e:
       print('# Database reading error:')
       print(str(e))
       return 'Erro na base de dados', 409
     
     if not queryRes:
-      print(tokenData['email_ins'], id_solicitation, id_solicitation_step)
       abort(401, 'Usuario não possui a etapa de solicitação!')
 
     dados_etapa_solicitacao = '' if not queryRes[5] else json.loads(
@@ -172,7 +171,6 @@ class Solicitation(Resource):
         'anexos_solicitados': anexos_solicitados,
         'enviar_requisicao': True
       }
-      
     }, 200
   
   # put to create solicitations
@@ -254,5 +252,5 @@ class Solicitation(Resource):
     print('# Operation done!')
 
     return 'ok', 200
-
+      
   # post to resolve solicitations
