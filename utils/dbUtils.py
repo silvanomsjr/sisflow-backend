@@ -54,7 +54,6 @@ def dbStart():
     database = os.getenv('SQL_SCHEMA'),
     auth_plugin = 'mysql_native_password')
 
-  lastRequestTime = time.time()
   myCursor = myDB.cursor(buffered=True)
 
 def isConnectedToDb():
@@ -66,7 +65,7 @@ def isConnectedToDb():
   
   # if the last time a request runs plus timestamp is less than actual time refresh connection if necessary
   actualTime = time.time()
-  if (lastRequestTime + connTimeOutMin*60) < actualTime:
+  if not lastRequestTime or (lastRequestTime+connTimeOutMin*60 < actualTime):
     try:
       dbGetSingle('SELECT 1;')
     except Exception as e:
