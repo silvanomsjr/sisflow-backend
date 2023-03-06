@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv, find_dotenv
 
 from utils.dbUtils import dbStart
-from utils.sistemConfig import sisConfigStart
+from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
 from utils.smtpMails import smtpStart
 from utils.cryptoFunctions import loadGenerateKeys
 
@@ -27,10 +27,15 @@ api.add_resource(ReceiveFile, '/file')
 api.add_resource(Solicitations, '/solicitations')
 api.add_resource(Solicitation, '/solicitation')
 
-# For production ambients like render.com the environment variables are already loaded
+# For homol and production ambients like render.com the environment variables are already loaded
 if not os.getenv('SQL_HOST'):
-  print('# Loading environment from file')
+  print('# Loading and checking environment from .env')
+
   load_dotenv(find_dotenv())
+  missingVar = getMissingEnvironmentVar()
+  if missingVar:
+    print('# Error - Missing ' + str(missingVar) + ' environment variable')
+    exit()
   
 # Start MySQL
 dbStart()

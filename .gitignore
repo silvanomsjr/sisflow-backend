@@ -1,8 +1,4 @@
 __pycache__
-secrets/private-key.pem
-secrets/public-key.pem
-
-Document
 
 .env
 .env.local
