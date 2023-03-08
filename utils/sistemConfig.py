@@ -2,6 +2,7 @@ from utils.dbUtils import *
 from pathlib import Path
 # pathlib paths works both for windows and unix OSs
 
+coordinatorMail = None
 keyFilesPath = None
 userFilesPath = None
 
@@ -36,7 +37,33 @@ def getMissingEnvironmentVar():
   return None
 
 def sisConfigStart():
+  loadMails()
   loadPaths()
+
+def loadMails():
+
+  global coordinatorMail
+  
+  if not coordinatorMail:
+
+    queryRes = None
+    try:
+      queryRes = dbGetSingle(
+        ' SELECT mail_str ' \
+	      '   FROM config AS c JOIN config_mail AS cm ON c.id = cm.config_id ' \
+        '   WHERE c.nome = \'coordinator mail\'; ')
+      
+      if not queryRes:
+        raise Exception('No return for sistem root config mail for coordinator ' + str(queryRes))
+    
+    except Exception as e:
+      print('# Database config reading error:')
+      print(str(e))
+    
+    print(queryRes)
+    coordinatorMail = queryRes[0]
+
+    print('# Coordinator mail: ' + str(coordinatorMail))
 
 def loadPaths():
 
@@ -76,6 +103,10 @@ def loadPaths():
 
     print('# Key files path: ' + str(keyFilesPath.resolve()))
     print('# User file storage root path: ' + str(userFilesPath.resolve()))
+
+def getCoordinatorMail():
+  global coordinatorMail
+  return coordinatorMail
 
 def getKeysFilePath(keyFileName):
   global keyFilesPath

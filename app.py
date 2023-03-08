@@ -28,7 +28,7 @@ api.add_resource(Solicitations, '/solicitations')
 api.add_resource(Solicitation, '/solicitation')
 
 # For homol and production ambients like render.com the environment variables are already loaded
-if not os.getenv('SQL_HOST'):
+if getMissingEnvironmentVar():
   print('# Loading and checking environment from .env')
 
   load_dotenv(find_dotenv())
