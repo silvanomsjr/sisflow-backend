@@ -90,6 +90,6 @@ class ReceiveFile(Resource):
         return 'Erro no servidor', 409
 
       print('# File saved')
-      return 'ok', 200
+      return { 'user_file_name' : userFileName }, 200
     
     return 'Error: Missing request file', 400

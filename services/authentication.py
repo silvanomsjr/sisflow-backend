@@ -9,7 +9,7 @@ import time
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import jwtEncode, jwtDecode, getHashPassword
-from utils.smtpMails import sendSignKey
+from utils.smtpMails import smtpSend
 
 class Login(Resource):
     
@@ -23,7 +23,7 @@ class Login(Resource):
     print('\n# Starting Login authentication for ' + str(email_ins))
 
     r = None
-    sqlScrypt = " SELECT id, email_ins, email_sec, nome, telefone, hash_senha, salt_senha, data_hora_criacao, siglas, jsons " \
+    sqlScrypt = " SELECT id, email_ins, email_sec, nome, sexo, curso, telefone, hash_senha, salt_senha, data_hora_criacao, siglas, jsons " \
       " FROM conta_usuario AS usuario JOIN ( " \
       "   SELECT id_usuario,  " \
       "     GROUP_CONCAT(sigla SEPARATOR ',') AS siglas, " \
@@ -39,24 +39,26 @@ class Login(Resource):
       print(str(e))
       return 'Erro na base de dados', 409
 
-    if r == None or len(r) != 10 or r[5] == None:
+    if r == None or len(r) != 12 or r[7] == None:
       abort(401, 'Usuário não cadastrado!')
     print('# User found')
     
-    hash_p, _ = getHashPassword(plain_password, r[6])
+    hash_p, _ = getHashPassword(plain_password, r[8])
 
-    if hash_p != r[5]:
+    if hash_p != r[7]:
       abort(401, 'Senha incorreta!')
     print('# Password verifyed')
     
-    jsons = '' if not r[9] else json.loads(r[9].decode('utf-8'))
+    jsons = '' if not r[11] else json.loads(r[11].decode('utf-8'))
     token_data = {
       'email_ins': r[1],
       'email_sec': r[2],
       'nome': r[3],
-      'telefone': r[4],
-      'data_hora_criacao': str(r[7]),
-      'siglas' : r[8], 
+      'sexo': r[4],
+      'curso': r[5],
+      'telefone': r[6],
+      'data_hora_criacao': str(r[9]),
+      'siglas' : r[10], 
       'jsons': jsons
     }
 
@@ -123,26 +125,16 @@ class Sign(Resource):
 
     print('# Sending mail')
 
-    sendMailTo = email_ins
-    sendInnerHtml = ''
-    sendDebug = False
-    token_data = {
-      'email_ins': email_ins,
-      'cad_code': cad_code
-    }
-    acess_token = jwtEncode(token_data)
+    acess_token = jwtEncode({ 'email_ins': email_ins, 'cad_code': cad_code })
     acess_url = os.getenv('FRONT_BASE_URL') + 'sign?acess_token=' + acess_token
     
-    if os.getenv('SYS_DEBUG') == 'True':
-      sendMailTo = os.getenv('SMTP_LOGIN')
-      sendInnerHtml = f'''
-      <p> Modo de testes ativo </p>
-      <p> Deveria ser enviado a este email: {email_ins} </p>
-      '''
-      sendDebug = True
+    innerMailHtml = f'''
+      <p>Este é seu código de cadastro: {cad_code} </p>
+      <p>Você também pode continuar o cadastro ao clicar neste <a href="{acess_url}">link</a></p>
+    '''
 
     try:
-      sendSignKey(sendMailTo, cad_code, acess_url, sendInnerHtml, sendDebug)
+      smtpSend(email_ins, 'Confirmação de cadastro Sisges', innerMailHtml)
     except Exception as e:
       print('# SMTP error:')
       print(str(e))

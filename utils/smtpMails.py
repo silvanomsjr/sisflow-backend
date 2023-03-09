@@ -4,20 +4,20 @@ from email.mime.text import MIMEText
 
 import os
 
-smtp_server = None
+smtpServer = None
 
 def smtpStart():
 
-  global smtp_server
+  global smtpServer
 
-  smtp_server = smtplib.SMTP(
+  smtpServer = smtplib.SMTP(
     os.getenv('SMTP_HOST'),
     os.getenv('SMTP_PORT'))
 
-  smtp_server.ehlo()
-  smtp_server.starttls()
+  smtpServer.ehlo()
+  smtpServer.starttls()
 
-  smtp_server.login(
+  smtpServer.login(
     os.getenv('SMTP_LOGIN'),
     os.getenv('SMTP_PASSWORD'))
 
@@ -25,10 +25,10 @@ def smtpStart():
 
 def smtp_working():
 
-  global smtp_server
+  global smtpServer
   
   try:
-    status = smtp_server.noop()[0]
+    status = smtpServer.noop()[0]
   except:  # smtplib.SMTPServerDisconnected
     status = -1
 
@@ -36,12 +36,12 @@ def smtp_working():
     return True
   return False
 
-def smtpSend(mail_from, mail_to, mail_subject, mail_message):
+def smtpSend(mailTo, mailSubject, mailInnerHtml):
 
-  global smtp_server
+  global smtpServer
 
-  if not smtp_server:
-    print("# smtp not started")
+  if not smtpServer:
+    print("# Smtp not started")
     return
 
   if not smtp_working():
@@ -50,37 +50,31 @@ def smtpSend(mail_from, mail_to, mail_subject, mail_message):
       print('# Could not reconnect to smtp')
       return
 
+  mailToTmp = None
+  mailHtml = None
+  if os.getenv('SYS_DEBUG') == 'True':
+    mailToTmp = os.getenv('SMTP_LOGIN')
+    mailHtml = f'''
+    <!DOCTYPE html><html><body><h1 style="color:blue;">Sisges</h1>
+    {mailInnerHtml}
+    <br><p> Modo de testes ativo </p><p> Deveria ser enviado a este email: {mailTo} </p>
+    </body></html>
+    '''
+  else:
+    mailToTmp = mailTo
+    mailHtml = f'''
+    <!DOCTYPE html><html><body><h1 style="color:blue;">Sisges</h1>
+    {mailInnerHtml}
+    </body></html>
+    '''
+
   mail = MIMEMultipart()
-  mail['From'] = mail_from
-  mail['To'] = mail_to
-  mail['Subject'] = mail_subject
-  mail.attach(MIMEText(mail_message, 'html'))
+  mail['From'] = os.getenv('SMTP_LOGIN')
+  mail['To'] = mailToTmp
+  mail['Subject'] = mailSubject
+  mail.attach(MIMEText(mailHtml, 'html'))
 
-  smtp_server.sendmail(
-    mail_from,
-    mail_to,
+  smtpServer.sendmail(
+    os.getenv('SMTP_LOGIN'),
+    mailToTmp,
     mail.as_string())
-
-def sendSignKey(userMail, key, acesstokenUrl, includeInnerHtml = '',includeDebug=False):
-
-  TmpStr = includeInnerHtml if includeDebug else ''
-  html = f'''
-    <!DOCTYPE html>
-    <html>
-    <body>
-
-    <h1 style="color:blue;">Sisges</h1>
-    {TmpStr}
-    <p>Este é seu código de cadastro: {key} </p>
-    <p>Você também pode continuar o cadastro ao clicar neste <a href="{acesstokenUrl}">link</a></p>
-
-    </body>
-    </html>
-  '''
-
-  smtpSend(
-    os.getenv('SMTP_LOGIN'), 
-    userMail,
-    'Confirmação de cadastro Sisges', 
-    html
-  )
