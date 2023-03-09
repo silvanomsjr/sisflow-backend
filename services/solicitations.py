@@ -130,7 +130,7 @@ class Solicitation(Resource):
         ' SELECT s.nome AS nome_solicitacao, pes.decisao, pes.motivo, pes.data_hora_inicio, pes.data_hora_fim, ' \
         ' pes.json_dados AS dados_etapa_solicitacao, es.ordem_etapa_solicitacao, es.descricao, es.duracao_maxima_dias, ' \
         ' esp.nome_pagina_estatica, pd.titulo, pd.perfis_permitidos, pd.top_inner_html, pd.mid_inner_html, pd.bot_inner_html, ' \
-        ' pd.anexos_solicitados, pd.botao_solicitar ' \
+        ' pd.inputs, pd.anexos, pd.select_anexos, pd.botao_solicitar ' \
         '   FROM conta_usuario AS us ' \
         '     INNER JOIN possui_etapa_solicitacao AS pes ON us.id = pes.id_usuario ' \
         '     INNER JOIN etapa_solicitacao AS es ON pes.id_etapa_solicitacao = es.id ' \
@@ -150,8 +150,14 @@ class Solicitation(Resource):
     dados_etapa_solicitacao = '' if not queryRes[5] else json.loads(
       queryRes[5] if isinstance(queryRes[5],str) else queryRes[5].decode('utf-8'))
 
-    anexos_solicitados = '' if not queryRes[15] else json.loads(
+    inputs = '' if not queryRes[15] else json.loads(
       queryRes[15] if isinstance(queryRes[15],str) else queryRes[15].decode('utf-8'))
+    
+    anexos = '' if not queryRes[16] else json.loads(
+      queryRes[16] if isinstance(queryRes[16],str) else queryRes[16].decode('utf-8'))
+    
+    selectAnexos = '' if not queryRes[17] else json.loads(
+      queryRes[17] if isinstance(queryRes[17],str) else queryRes[17].decode('utf-8'))
 
     print('# Operation Done!')
 
@@ -174,8 +180,10 @@ class Solicitation(Resource):
         'top_inner_html': sistemStrParser(queryRes[12], tokenData),
         'mid_inner_html': sistemStrParser(queryRes[13], tokenData),
         'bot_inner_html': sistemStrParser(queryRes[14], tokenData),
-        'anexos_solicitados': anexos_solicitados,
-        'botao_solicitar': queryRes[16]
+        'inputs': inputs,
+        'anexos': anexos,
+        'select_anexos' : selectAnexos,
+        'botao_solicitar': queryRes[18]
       }
     }, 200
   
@@ -282,13 +290,13 @@ class Solicitation(Resource):
     if not isTokenValid:
       abort(401, errorMsg)
 
-    print('\n# Starting post to resolve solicitation for ' + tokenData['email_ins'])
+    print('\n# Starting post to resolve solicitation for ' + tokenData['email_ins'], solicitationId, solicitationStepOrder, solicitationData )
 
     print('# Reading data from DB')
     queryRes = None
     try:
       queryRes = dbGetSingle(
-        ' SELECT us.id, es.id, pes.decisao, pes.data_hora_fim, pes.json_dados, pd.anexos_solicitados ' \
+        ' SELECT us.id, es.id, pes.decisao, pes.data_hora_fim, pes.json_dados, pd.inputs, pd.anexos, pd.select_anexos ' \
         '   FROM conta_usuario AS us ' \
         '     INNER JOIN possui_etapa_solicitacao AS pes ON us.id = pes.id_usuario ' \
         '     INNER JOIN etapa_solicitacao AS es ON pes.id_etapa_solicitacao = es.id ' \
@@ -311,8 +319,18 @@ class Solicitation(Resource):
     solicitationStepId = queryRes[1]
     decision = queryRes[2]
     solicitationStepEndDateTime = queryRes[3]
-    solicitationStepData = '' if not queryRes[4] else json.loads(queryRes[4] if isinstance(queryRes[4],str) else queryRes[4].decode('utf-8'))
-    dinamicPageFileAttachments = '' if not queryRes[5] else json.loads(queryRes[5] if isinstance(queryRes[5],str) else queryRes[5].decode('utf-8'))
+
+    solicitationStepData = '' if not queryRes[4] else json.loads(
+      queryRes[4] if isinstance(queryRes[4],str) else queryRes[4].decode('utf-8'))
+    
+    dinamicPageInputs = '' if not queryRes[5] else json.loads(
+      queryRes[5] if isinstance(queryRes[5],str) else queryRes[5].decode('utf-8'))
+    
+    dinamicPageFileAttachments = '' if not queryRes[6] else json.loads(
+      queryRes[6] if isinstance(queryRes[6],str) else queryRes[6].decode('utf-8'))
+    
+    dinamicPageSelectFileAttachments = '' if not queryRes[7] else json.loads(
+      queryRes[7] if isinstance(queryRes[7],str) else queryRes[7].decode('utf-8'))
 
     if decision != 'Em analise':
       abort(401, 'Esta solicitação está com status ' + str(decision) + '!')
@@ -320,14 +338,25 @@ class Solicitation(Resource):
     if solicitationStepData:
       abort(401, 'Esta etapa da solicitação já foi realizada aguarde sua conclusão!')
 
-    if datetime.datetime.now() > solicitationStepEndDateTime:
+    if solicitationStepEndDateTime and datetime.datetime.now() > solicitationStepEndDateTime:
       abort(401, 'Esta etapa da solicitação foi expirada!')
     
-    # Checks if all required attachments are valid
-    if dinamicPageFileAttachments:
+    # Checks if all required inputs are valid
+    if dinamicPageInputs and dinamicPageInputs[0]:
+      
+      for dpInp in dinamicPageInputs:
+        if dpInp['required']:
+          found = False
 
-      if not solicitationData['attachments']:
-        abort(401, 'Anexo da solicitação está faltando!')
+          for solInp in solicitationData['inputs']:
+            if solInp['label_txt'] == dpInp['label_txt']:
+              found = True
+          
+          if not found:
+            abort(401, 'Input da solicitação está faltando!')
+
+    # Checks if all required attachments are valid
+    if dinamicPageFileAttachments and dinamicPageFileAttachments[0]:
 
       for dpAtt in dinamicPageFileAttachments:
         if dpAtt['required']:
@@ -347,13 +376,17 @@ class Solicitation(Resource):
           if not found:
             abort(401, 'Anexo da solicitação está faltando!')
     
+    # Checks if all required select attachments are valid - incomplete
+    if dinamicPageSelectFileAttachments and dinamicPageSelectFileAttachments[0]:
+      pass
+    
     try:
       queryRes = dbGetSingle(
         ' SELECT es.id, duracao_maxima_dias ' \
         '   FROM etapa_solicitacao AS es ' \
         '     INNER JOIN solicitacao AS s ON es.id_solicitacao = s.id ' \
-        '     WHERE es.ordem_etapa_solicitacao = %s; ',
-        [(solicitationStepOrder+1)])
+        '     WHERE s.id = %s AND es.ordem_etapa_solicitacao = %s; ',
+        [solicitationId, solicitationStepOrder+1])
     except Exception as e:
       print('# Database reading error:')
       print(str(e))
