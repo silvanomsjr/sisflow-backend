@@ -132,12 +132,15 @@ def dbExecuteMany(sqlScrypt, values=None, commit=True):
     print('# Operation Commited')
     myDB.commit()
 
-def dbGetSingle(sqlScrypt, values=None):
+def dbGetSingle(sqlScrypt, values=None, commitToUpdate=True):
 
   global myDB, myCursor
 
   if not isConnectedToDb():
     dbStart()
+  
+  if(commitToUpdate):
+    myDB.commit()
   
   if values != None:
     myCursor.execute(sqlScrypt, values)
@@ -146,12 +149,15 @@ def dbGetSingle(sqlScrypt, values=None):
 
   return myCursor.fetchone()
 
-def dbGetAll(sqlScrypt, values=None):
+def dbGetAll(sqlScrypt, values=None, commitToUpdate=True):
 
   global myDB, myCursor
 
   if not isConnectedToDb():
     dbStart()
+
+  if(commitToUpdate):
+    myDB.commit()
   
   if values != None:
     myCursor.execute(sqlScrypt, values)
