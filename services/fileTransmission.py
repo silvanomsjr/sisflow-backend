@@ -1,13 +1,79 @@
-from flask import Flask, abort, request
+from flask import Flask, abort, request, send_file
 from flask_restful import Resource, Api, reqparse
 import werkzeug
 
 from utils.dbUtils import *
+from utils.cryptoFunctions import isAuthTokenValid
 from utils.sistemConfig import getUserFilesPath
 import random
 import string
 
-class ReceiveFile(Resource):
+class FileTransmission(Resource):
+
+  def get(self):
+
+    downloadArgs = reqparse.RequestParser()
+    downloadArgs.add_argument('bearer', location='args', type=str, help='Bearer token in url, used to authentication, required!', required=True)
+    downloadArgs.add_argument('file_name', location='args', type=str, required=True)
+    downloadArgs = downloadArgs.parse_args()
+
+    # verify jwt and its signature correctness
+    downloadArgs['Authorization'] = 'Bearer ' + downloadArgs['bearer']
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(downloadArgs)
+    if not isTokenValid:
+      abort(401, errorMsg)
+
+    userId = tokenData['id_usuario']
+    fileName = downloadArgs['file_name']
+
+    # checks if file exists
+    fileFound = False
+    try:
+      if dbGetSingle(
+          ' SELECT hash_anexo FROM anexo WHERE hash_anexo = %s; ',
+          [fileName]):
+        fileFound = True
+    except Exception as e:
+      print('# Database reading error:')
+      print(str(e))
+      return 'Erro na base de dados', 409
+    
+    if not fileFound:
+      return 'Arquivo não encontrado!', 404
+
+    # checks user acess
+    fileAcessAllowed = False
+
+    if 'A' in tokenData['perfis'] or 'C' in tokenData['perfis']:
+      fileAcessAllowed = True
+    else:
+      try:
+        if dbGetSingle(
+            ' SELECT an.hash_anexo ' \
+            '   FROM anexo AS an LEFT JOIN possui_anexo AS pan ON an.id = pan.id_anexo ' \
+            '   WHERE pan.id_usuario = %s AND an.hash_anexo = %s; ',
+            [userId, fileName]):
+          fileAcessAllowed = True
+      except Exception as e:
+        print('# Database reading error:')
+        print(str(e))
+        return 'Erro na base de dados', 409
+
+    if not fileAcessAllowed:
+      return 'Acesso ao arquivo não permitido!', 401
+
+    # removes hash part of name if possible
+    simpleFileName = 'download.pdf'
+
+    findOneUnd = fileName.find('_')
+    if findOneUnd != -1:
+
+      findTwoUnd = fileName.find('_', findOneUnd+1)
+      if findTwoUnd != -1:
+        simpleFileName = fileName[0:findTwoUnd] + '.pdf'
+
+    filePath = getUserFilesPath(fileName)
+    return send_file(filePath, as_attachment = True, download_name = simpleFileName)
     
   def post(self):
     

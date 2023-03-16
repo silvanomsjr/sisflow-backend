@@ -10,7 +10,7 @@ from utils.smtpMails import smtpStart
 from utils.cryptoFunctions import loadGenerateKeys
 
 from services.authentication import Login, Sign
-from services.receiveFiles import ReceiveFile
+from services.fileTransmission import FileTransmission
 from services.solicitations import CoordinatorSolicitations, ProfessorSolicitations, StudentSolicitations
 from services.solicitation import Solicitation
 
@@ -24,7 +24,7 @@ CORS(
 api = Api(app)
 api.add_resource(Login, '/login')
 api.add_resource(Sign, '/sign')
-api.add_resource(ReceiveFile, '/file')
+api.add_resource(FileTransmission, '/file')
 api.add_resource(CoordinatorSolicitations, '/coordinator/solicitations')
 api.add_resource(ProfessorSolicitations, '/professor/solicitations')
 api.add_resource(StudentSolicitations, '/student/solicitations')
