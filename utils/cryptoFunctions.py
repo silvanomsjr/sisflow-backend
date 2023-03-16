@@ -6,36 +6,36 @@ from utils.sistemConfig import getKeysFilePath
 import random
 import string
 
-private_key = None
-public_key = None
+privateKey = None
+publicKey = None
 
 # load or create and load keys
 def loadGenerateKeys():
 
-  global private_key, public_key
+  global privateKey, publicKey
 
-  privatek_path = getKeysFilePath('private-key.pem')
-  publick_path = getKeysFilePath('public-key.pem')
+  privateKPath = getKeysFilePath('private-key.pem')
+  publicKPath = getKeysFilePath('public-key.pem')
 
   # when first executed generate key pair
-  if not privatek_path.is_file() or not publick_path.is_file():
+  if not privateKPath.is_file() or not publicKPath.is_file():
     
     # private key
     pvk = RSA.generate(2048)
-    pvk_str = pvk.exportKey()
-    with open(privatek_path, "w") as pvk_file:
-      print("{}".format(pvk_str.decode()), file=pvk_file)
+    pvkStr = pvk.exportKey()
+    with open(privateKPath, "w") as pvkFile:
+      print("{}".format(pvkStr.decode()), file=pvkFile)
 
     # public key
     pbk = pvk.publickey()
-    pbk_str = pbk.exportKey()
-    with open(publick_path, "w") as pbk_file:
-      print("{}".format(pbk_str.decode()), file=pbk_file)
+    pbkStr = pbk.exportKey()
+    with open(publicKPath, "w") as pbkFile:
+      print("{}".format(pbkStr.decode()), file=pbkFile)
     
     print('# Private and public keys generated')
 
-  private_key = open(privatek_path).read()
-  public_key = open(publick_path).read()
+  privateKey = open(privateKPath).read()
+  publicKey = open(publicKPath).read()
 
 # hashes password with random or given salt using sha256
 def getHashPassword(password, salt=None):
@@ -54,44 +54,51 @@ def getHashPassword(password, salt=None):
   return hashPass, passSalt
 
 # Encode a json data to creates a jwt token with signature
-def jwtEncode(token_json_data):
+def jwtEncode(tokenJsonData):
 
-  global private_key
+  global privateKey
 
-  if not private_key:
+  if not privateKey:
     loadGenerateKeys()
 
-  token_jwt = jwt.encode(token_json_data, private_key, algorithm="RS256")
-  return token_jwt
+  tokenJwt = jwt.encode(tokenJsonData, privateKey, algorithm="RS256")
+  return tokenJwt
 
 # Decode a jwt token verifying its signature
-def jwtDecode(token_jwt):
+def jwtDecode(tokenJwt):
 
-  global public_key
+  global publicKey
 
-  if not public_key:
+  if not publicKey:
     loadGenerateKeys()
     
-  token_data = jwt.decode(token_jwt, public_key, algorithms=["RS256"])
+  token_data = jwt.decode(tokenJwt, publicKey, algorithms=["RS256"])
   return token_data
   
-# Verify if an token given in request bearer is valid based on jwt signature
-def isAuthTokenValid(args, user_types_required=None):
+# Verify if an jwt token given in request bearer is valid based on jwt signature and its profile
+def isAuthTokenValid(args, profilesRequired=None):
 
-  token_jwt = args['Authorization'].replace('Bearer ', '')
+  tokenJwt = args['Authorization'].replace('Bearer ', '')
 
-  token_data = None
+  tokenData = None
   try:
-    token_data = jwtDecode(token_jwt)
+    tokenData = jwtDecode(tokenJwt)
   except:
     return False, 'Falha ao decifrar o token, token inválido!', None
   
-  if not token_data:
+  if not tokenData:
     return False, 'Token inválido!', None
 
-  if user_types_required:
-    token_user_type = token_data['siglas']
-    if token_user_type not in user_types_required:
+  if profilesRequired:
+    tokenProfiles = tokenData['perfis']
+
+    acessAllowed = False
+
+    for profile in tokenProfiles:
+      if profile in profilesRequired:
+        acessAllowed = True
+    
+    if not acessAllowed:
       return False, 'tipo de usuário incorreto!', None
 
-  return True, '', token_data
+  return True, '', tokenData

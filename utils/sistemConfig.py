@@ -134,10 +134,10 @@ def sistemStrParser(str, userData):
     if 'ifMale?' in command:
       str = str.replace(substrP, command.replace('ifMale?','').split(':::')[ 0 if userData['sexo'] == 'M' else 1 ])
 
-    # course differences
+    # course differences, works only users with student profiles
     if 'ifBCC?' in command:
-      if userData['curso']:
-        str = str.replace(substrP, command.replace('ifBCC?','').split(':::')[ 0 if userData['curso'] == 'BCC' else 1 ])
+      if userData['perfil_aluno'] and userData['perfil_aluno']['curso']:
+        str = str.replace(substrP, command.replace('ifBCC?','').split(':::')[ 0 if userData['perfil_aluno']['curso'] == 'BCC' else 1 ])
       else:
         str = str.replace(substrP, '')
     

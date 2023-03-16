@@ -15,109 +15,155 @@ class Login(Resource):
     
   def post(self):
     
-    login_args = reqparse.RequestParser()
-    login_args.add_argument('Authorization', location='headers', type=str, help='Email and hash password of the user, used to authentication, required!', required=True)
-    login_args = login_args.parse_args()
+    loginArgs = reqparse.RequestParser()
+    loginArgs.add_argument('Authorization', location='headers', type=str, help='Email and hash password of the user, used to authentication, required!', required=True)
+    loginArgs = loginArgs.parse_args()
 
-    email_ins, plain_password = b64decode( login_args['Authorization'].replace('Basic ', '') ).decode('utf-8').split(':', 1)
-    print('\n# Starting Login authentication for ' + str(email_ins))
+    mailIns, plainPassword = b64decode( loginArgs['Authorization'].replace('Basic ', '') ).decode('utf-8').split(':', 1)
+    print('\n# Starting Login authentication for ' + str(mailIns))
 
-    r = None
-    sqlScrypt = " SELECT id, email_ins, email_sec, nome, sexo, curso, telefone, hash_senha, salt_senha, data_hora_criacao, siglas, jsons " \
-      " FROM conta_usuario AS usuario JOIN ( " \
-      "   SELECT id_usuario,  " \
-      "     GROUP_CONCAT(sigla SEPARATOR ',') AS siglas, " \
-      "     GROUP_CONCAT(json_dados SEPARATOR ',') AS jsons " \
-      "     FROM possui_perfil AS pper JOIN perfil AS per ON pper.id = per.id  " \
-      "           GROUP BY id_usuario " \
-      " ) AS perfis ON usuario.id = perfis.id_usuario " \
-      "   WHERE email_ins = %s; "
+    userRawData = None
     try:
-      r = dbGetSingle(sqlScrypt, [(email_ins)])
+      userRawData = dbGetSingle(
+        " SELECT id, email_ins, email_sec, nome, sexo, telefone, hash_senha, salt_senha, data_hora_criacao " \
+        "   FROM conta_usuario WHERE email_ins = %s; ",
+        [(mailIns)])
     except Exception as e:
       print('# Database error:')
       print(str(e))
       return 'Erro na base de dados', 409
 
-    if r == None or len(r) != 12 or r[7] == None:
+    if userRawData == None or len(userRawData) != 9 or userRawData[6] == None:
       abort(401, 'Usuário não cadastrado!')
     print('# User found')
     
-    hash_p, _ = getHashPassword(plain_password, r[8])
+    hashP, _ = getHashPassword(plainPassword, userRawData[7])
 
-    if hash_p != r[7]:
+    if hashP != userRawData[6]:
       abort(401, 'Senha incorreta!')
     print('# Password verifyed')
-    
-    jsons = '' if not r[11] else json.loads(r[11].decode('utf-8'))
-    token_data = {
-      'email_ins': r[1],
-      'email_sec': r[2],
-      'nome': r[3],
-      'sexo': r[4],
-      'curso': r[5],
-      'telefone': r[6],
-      'data_hora_criacao': str(r[9]),
-      'siglas' : r[10], 
-      'jsons': jsons
+
+    # initial user data token creation
+    userData = {
+      'id_usuario': userRawData[0],
+      'email_ins': userRawData[1],
+      'email_sec': userRawData[2],
+      'nome': userRawData[3],
+      'sexo': userRawData[4],
+      'telefone': userRawData[5],
+      'data_hora_criacao': str(userRawData[8])
     }
 
-    jwt_token = jwtEncode(token_data)
+    userRawProfiles = []
+    try:
+      userRawProfiles = dbGetAll(
+        " SELECT p.id, p.data_hora_inicio, p.data_hora_fim, " \
+        " padmin.id, " \
+        " paluno.id, paluno.matricula, paluno.curso, " \
+        " pprof.id, pprof.siape, " \
+        " pcoor.id, pcoor.siape " \
+        "   FROM conta_usuario AS us " \
+        "   INNER JOIN possui_perfil AS p ON us.id = p.id_usuario " \
+        "   LEFT JOIN perfil_admin AS padmin ON p.id = padmin.id " \
+        "   LEFT JOIN perfil_aluno AS paluno ON p.id = paluno.id " \
+        "   LEFT JOIN perfil_professor AS pprof ON p.id = pprof.id " \
+        "   LEFT JOIN perfil_coordenador AS pcoor ON p.id = pcoor.id " \
+        "   WHERE us.email_ins = %s; ",
+      [(mailIns)])
+    except Exception as e:
+      print('# Database error:')
+      print(str(e))
+      return 'Erro na base de dados', 409
 
-    print('# Authentication done!')
-    return jwt_token, 200
+    if userRawProfiles == None:
+      abort(401, 'Usuário desativado, consulte o coordenador para reativar!')
+      
+    print(userRawProfiles)
+    
+    userProfiles = []
+    for profile in userRawProfiles:
+      # admin
+      if profile[3]:
+        userProfiles.append("A")
+      # student
+      elif profile[4]:
+        userProfiles.append("S")
+        userData['perfil_aluno'] = {
+          'matricula' : profile[5],
+          'curso' : profile[6]
+        }
+      # professor
+      elif profile[7]:
+        userProfiles.append("P")
+        userData['perfil_professor'] = {
+          'siape' : profile[8]
+        }
+      # coordinator
+      elif profile[9]:
+        userProfiles.append("C")
+        userData['perfil_coordenador'] = {
+          'siape' : profile[10]
+        }
+
+    userData['perfis'] = userProfiles
+
+    jwtRoken = jwtEncode(userData)
+    print('# User profile verifyed, authentication done')
+    return jwtRoken, 200
 
 class Sign(Resource):
 
   # post to create and send mail with sign code 
   def post(self):
 
-    sign_args = reqparse.RequestParser()
-    sign_args.add_argument('email_ins', type=str, required=True)
-    sign_args = sign_args.parse_args()
+    signArgs = reqparse.RequestParser()
+    signArgs.add_argument('email_ins', type=str, required=True)
+    signArgs = signArgs.parse_args()
 
-    email_ins = sign_args['email_ins']
-    print('\n# Starting user Get Authentication Code for ' + str(email_ins))
-    
-    cad_code = ''.join(
-      random.choice(string.ascii_letters if random.uniform(0,1) > 0.25 else string.digits) 
-      for _ in range(10))
-
+    mailIns = signArgs['email_ins']
+    print('\n# Starting user Get Authentication Code for ' + str(mailIns))
     print('# Verifying data consistency')
 
-    r = None
-    sqlScrypt = ' SELECT email_ins, hash_senha FROM conta_usuario ' \
-      ' WHERE email_ins = %s; '
+    queryRes = None
     try:
-      r = dbGetSingle(sqlScrypt, [(email_ins)])
+      queryRes = dbGetSingle(
+        ' SELECT email_ins, hash_senha FROM conta_usuario ' \
+        '   WHERE email_ins = %s; ',
+        [(mailIns)])
     except Exception as e:
       print('# Database searching error:')
       print(str(e))
       return 'Erro na base de dados', 409
 
-    if r == None:
+    if queryRes == None:
       abort(404, 'Email institucional não encontrado no sistema!')
 
-    if r[1] != None:
+    if queryRes[1] != None:
       abort(401, 'Email já utilizado!')
 
-    sqlScrypt = ' SELECT email_ins, codigo FROM validacao_email ' \
-      ' WHERE email_ins = %s; '
     try:
-      r = dbGetSingle(sqlScrypt, [(email_ins)])
+      queryRes = dbGetSingle(
+        ' SELECT email_ins, codigo FROM validacao_email ' \
+        '   WHERE email_ins = %s; ',
+        [(mailIns)])
     except Exception as e:
       print('# Database searching error:')
       print(str(e))
       return 'Erro na base de dados', 409
 
     print('# Data ok, updating auth table')
-    if r != None and len(r) != 0:
+    signCode = ''.join(
+      random.choice(string.ascii_letters if random.uniform(0,1) > 0.25 else string.digits) 
+      for _ in range(10))
+
+    sqlScrypt = ''
+    if queryRes != None and len(queryRes) != 0:
       sqlScrypt = ' UPDATE validacao_email SET codigo = %s WHERE email_ins = %s; '
     else:
       sqlScrypt = ' INSERT INTO validacao_email (codigo, email_ins) VALUES (%s,%s); '
       
     try:
-      dbExecute(sqlScrypt, [cad_code, email_ins])
+      dbExecute(sqlScrypt, [signCode, mailIns])
     except Exception as e:
       print('# Database insertion error:')
       print(str(e))
@@ -125,16 +171,16 @@ class Sign(Resource):
 
     print('# Sending mail')
 
-    acess_token = jwtEncode({ 'email_ins': email_ins, 'cad_code': cad_code })
-    acess_url = os.getenv('FRONT_BASE_URL') + 'sign?acess_token=' + acess_token
+    acessToken = jwtEncode({ 'email_ins': mailIns, 'cad_code': signCode })
+    acessUrl = os.getenv('FRONT_BASE_URL') + 'sign?acess_token=' + acessToken
     
     innerMailHtml = f'''
-      <p>Este é seu código de cadastro: {cad_code} </p>
-      <p>Você também pode continuar o cadastro ao clicar neste <a href="{acess_url}">link</a></p>
+      <p>Este é seu código de cadastro: {signCode} </p>
+      <p>Você também pode continuar o cadastro ao clicar neste <a href="{acessUrl}">link</a></p>
     '''
 
     try:
-      smtpSend(email_ins, 'Confirmação de cadastro Sisges', innerMailHtml)
+      smtpSend(mailIns, 'Confirmação de cadastro Sisges', innerMailHtml)
     except Exception as e:
       print('# SMTP error:')
       print(str(e))
@@ -146,104 +192,109 @@ class Sign(Resource):
   # Get to verify cad code
   def get(self):
 
-    sign_args = reqparse.RequestParser()
-    sign_args.add_argument('acess_token', location='args', type=str)
-    sign_args.add_argument('email_ins', location='args', type=str)
-    sign_args.add_argument('cad_code', location='args', type=str)
-    sign_args = sign_args.parse_args()
+    signArgs = reqparse.RequestParser()
+    signArgs.add_argument('acess_token', location='args', type=str)
+    signArgs.add_argument('email_ins', location='args', type=str)
+    signArgs.add_argument('cad_code', location='args', type=str)
+    signArgs = signArgs.parse_args()
 
     print('\n# Starting user Sign code verification')
 
-    if not sign_args['acess_token'] and (not sign_args['email_ins'] or not sign_args['cad_code']):
+    if not signArgs['acess_token'] and (not signArgs['email_ins'] or not signArgs['cad_code']):
       abort(400, "Missing acess_token token or email_ins and cad_code")
 
-    email_ins = None
-    cad_code = None
+    mailIns = None
+    signCode = None
     
-    if sign_args['acess_token']:
+    if signArgs['acess_token']:
       try:
-        acess_token = jwtDecode(sign_args['acess_token'])
+        acessToken = jwtDecode(signArgs['acess_token'])
       except Exception as e:
         print('# JWT decoding error:')
         print(str(e))
         return 'Codigo de acesso invalido', 401
 
-      email_ins = acess_token['email_ins']
-      cad_code = acess_token['cad_code']
+      mailIns = acessToken['email_ins']
+      signCode = acessToken['cad_code']
 
     else:
-      email_ins = sign_args['email_ins']
-      cad_code = sign_args['cad_code']
+      mailIns = signArgs['email_ins']
+      signCode = signArgs['cad_code']
 
-    print('# Testing acess token for ' + str(email_ins))
+    print('# Testing acess token for ' + str(mailIns))
 
-    sqlScrypt = ' SELECT email_ins, codigo FROM validacao_email ' \
-      '  WHERE email_ins = %s AND codigo = %s; '
+    queryRes = None
     try:
-      r = dbGetSingle(sqlScrypt, [email_ins, cad_code])
+      queryRes = dbGetSingle(
+        ' SELECT email_ins, codigo FROM validacao_email ' \
+        '   WHERE email_ins = %s AND codigo = %s; ',
+        [mailIns, signCode])
     except Exception as e:
       print('# Database searching error:')
       print(str(e))
       return 'Erro na base de dados', 409
 
-    print('# Verification done')
-    if r and len(r) == 2:
-      return { 'email_ins': email_ins , 'cad_code' : cad_code}, 200
+    if queryRes and len(queryRes) == 2:
+      print('# Verification ok')
+      return { 'email_ins': mailIns , 'cad_code' : signCode}, 200
 
+    print('# Verification not ok')
     return False, 401
 
   # put a new user given a cad code
   def put(self):
     
-    sign_args = reqparse.RequestParser()
-    sign_args.add_argument('email_ins', type=str, required=True)
-    sign_args.add_argument('email_sec', type=str)
-    sign_args.add_argument('telefone', type=str)
-    sign_args.add_argument('senha', type=str, required=True)
-    sign_args.add_argument('cad_code', type=str, required=True)
-    sign_args = sign_args.parse_args()
+    signArgs = reqparse.RequestParser()
+    signArgs.add_argument('email_ins', type=str, required=True)
+    signArgs.add_argument('email_sec', type=str)
+    signArgs.add_argument('telefone', type=str)
+    signArgs.add_argument('senha', type=str, required=True)
+    signArgs.add_argument('cad_code', type=str, required=True)
+    signArgs = signArgs.parse_args()
 
-    email_ins = sign_args['email_ins']
-    email_sec = sign_args['email_sec'] if sign_args['email_sec'] else ""
-    phone_num = sign_args['telefone'] if sign_args['telefone'] else ""
-    plain_pass = sign_args['senha']
-    cad_code = sign_args['cad_code']
+    mailIns = signArgs['email_ins']
+    mailSec = signArgs['email_sec'] if signArgs['email_sec'] else ""
+    phoneNum = signArgs['telefone'] if signArgs['telefone'] else ""
+    plainPass = signArgs['senha']
+    signCode = signArgs['cad_code']
     
-    print('\n# Starting user Sign Authentication for ' + str(email_ins))
+    print('\n# Starting user Sign Authentication for ' + str(mailIns))
     print('# Verifying data consistency')
 
-    r = None
-    sqlScrypt = ' SELECT id, email_ins, hash_senha FROM conta_usuario ' \
-      ' WHERE email_ins = %s; '
+    queryRes = None
     try:
-      r = dbGetSingle(sqlScrypt, [(email_ins)])
+      queryRes = dbGetSingle(
+        ' SELECT id, email_ins, hash_senha FROM conta_usuario ' \
+        '   WHERE email_ins = %s; ',
+        [(mailIns)])
     except Exception as e:
       print('# Database searching error:')
       print(str(e))
       return 'Erro na base de dados', 409
 
-    if r == None:
+    if queryRes == None:
       abort(404, 'Email institucional não encontrado no sistema!')
 
-    if r[2] != None:
+    if queryRes[2] != None:
       abort(401, 'Email já utilizado!')
 
-    sqlScrypt = ' SELECT email_ins, codigo FROM validacao_email ' \
-      '  WHERE email_ins = %s AND codigo = %s; '
     try:
-      r = dbGetSingle(sqlScrypt, [email_ins, cad_code])
+      queryRes = dbGetSingle(
+        ' SELECT email_ins, codigo FROM validacao_email ' \
+        '   WHERE email_ins = %s AND codigo = %s; ',
+        [mailIns, signCode])
     except Exception as e:
       print('# Database searching error:')
       print(str(e))
       return 'Erro na base de dados', 409
 
-    if r == None or len(r) != 2:
+    if queryRes == None or len(queryRes) != 2:
       abort(401, 'Chave de cadastro inválida para este email!')
       
     print('# Registering user')
 
-    hash_pass, salt_pass = getHashPassword(plain_pass)
-    datetime_now = time.strftime('%Y-%m-%d %H:%M:%S')
+    hashPass, saltPass = getHashPassword(plainPass)
+    datetimeNow = time.strftime('%Y-%m-%d %H:%M:%S')
     
     sqlScrypt = ' UPDATE conta_usuario SET ' \
       ' email_sec = %s, ' \
@@ -253,7 +304,7 @@ class Sign(Resource):
       ' data_hora_criacao = %s ' \
       ' WHERE email_ins = %s '
     try:
-      dbExecute(sqlScrypt, [email_sec, phone_num, hash_pass, salt_pass, datetime_now, email_ins])
+      dbExecute(sqlScrypt, [mailSec, phoneNum, hashPass, saltPass, datetimeNow, mailIns])
     except Exception as e:
       print('# Database insertion error:')
       print(str(e))
