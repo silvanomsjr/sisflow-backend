@@ -3,6 +3,7 @@ from pathlib import Path
 # pathlib paths works both for windows and unix OSs
 
 coordinatorMail = None
+coordinatorName = None
 keyFilesPath = None
 userFilesPath = None
 
@@ -42,14 +43,14 @@ def sisConfigStart():
 
 def loadMails():
 
-  global coordinatorMail
+  global coordinatorMail, coordinatorName
   
   if not coordinatorMail:
 
     queryRes = None
     try:
       queryRes = dbGetSingle(
-        ' SELECT mail_str ' \
+        ' SELECT mail_str, nome_str ' \
 	      '   FROM config AS c JOIN config_mail AS cm ON c.id = cm.config_id ' \
         '   WHERE c.nome = \'coordinator mail\'; ')
       
@@ -61,8 +62,9 @@ def loadMails():
       print(str(e))
     
     coordinatorMail = queryRes[0]
+    coordinatorName = queryRes[1]
 
-    print('# Coordinator mail: ' + str(coordinatorMail))
+    print('# Coordinator ' + str(coordinatorName) + ' mail: ' + str(coordinatorMail))
 
 def loadPaths():
 
@@ -129,6 +131,10 @@ def sistemStrParser(str, userData):
     # put user name
     if 'userName' in command:
       str = str.replace(substrP, userData['nome'])
+    
+    # put coordinator name
+    if 'coordinatorName' in command:
+      str = str.replace(substrP, getCoordinatorName())
 
     # gender differences
     if 'ifMale?' in command:
@@ -152,6 +158,10 @@ def sistemStrParser(str, userData):
 def getCoordinatorMail():
   global coordinatorMail
   return coordinatorMail
+
+def getCoordinatorName():
+  global coordinatorName
+  return coordinatorName
 
 def getKeysFilePath(keyFileName):
   global keyFilesPath
