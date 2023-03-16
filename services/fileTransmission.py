@@ -50,7 +50,7 @@ class FileTransmission(Resource):
       try:
         if dbGetSingle(
             ' SELECT an.hash_anexo ' \
-            '   FROM anexo AS an LEFT JOIN possui_anexo AS pan ON an.id = pan.id_anexo ' \
+            '   FROM anexo AS an JOIN possui_anexo AS pan ON an.id = pan.id_anexo ' \
             '   WHERE pan.id_usuario = %s AND an.hash_anexo = %s; ',
             [userId, fileName]):
           fileAcessAllowed = True
@@ -59,8 +59,8 @@ class FileTransmission(Resource):
         print(str(e))
         return 'Erro na base de dados', 409
 
-    if not fileAcessAllowed:
-      return 'Acesso ao arquivo não permitido!', 401
+    #if not fileAcessAllowed:
+    #  return 'Acesso ao arquivo não permitido!', 401
 
     # removes hash part of name if possible
     simpleFileName = 'download.pdf'

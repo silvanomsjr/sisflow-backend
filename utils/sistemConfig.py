@@ -105,56 +105,6 @@ def loadPaths():
     print('# Key files path: ' + str(keyFilesPath.resolve()))
     print('# User file storage root path: ' + str(userFilesPath.resolve()))
 
-def getParserSubstring(str):
-  
-  substrStart = str.find('[[[')
-  if substrStart == -1:
-    return None
-  
-  substrEnd = str.find(']]]',substrStart)
-  if substrEnd == -1:
-    print('# Warning, Error while parsing an string, parser not closed')
-    return None
-
-  return str[substrStart:substrEnd+3]
-
-# parses a given string changing text options based on user data
-def sistemStrParser(str, userData):
-
-  if not str:
-    return None
-  
-  substrP = getParserSubstring(str)
-  while substrP:
-    command = substrP.replace('[[[','').replace(']]]','').strip()
-
-    # put user name
-    if 'userName' in command:
-      str = str.replace(substrP, userData['nome'])
-    
-    # put coordinator name
-    if 'coordinatorName' in command:
-      str = str.replace(substrP, getCoordinatorName())
-
-    # gender differences
-    if 'ifMale?' in command:
-      str = str.replace(substrP, command.replace('ifMale?','').split(':::')[ 0 if userData['sexo'] == 'M' else 1 ])
-
-    # course differences, works only users with student profiles
-    if 'ifBCC?' in command:
-      if userData['perfil_aluno'] and userData['perfil_aluno']['curso']:
-        str = str.replace(substrP, command.replace('ifBCC?','').split(':::')[ 0 if userData['perfil_aluno']['curso'] == 'BCC' else 1 ])
-      else:
-        str = str.replace(substrP, '')
-    
-    # avoid loops when not configured correctly
-    else:
-      str = str.replace(substrP, '')
-
-    substrP = getParserSubstring(str)
-  
-  return str
-
 def getCoordinatorMail():
   global coordinatorMail
   return coordinatorMail
