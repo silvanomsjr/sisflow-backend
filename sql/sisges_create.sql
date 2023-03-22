@@ -1,3 +1,6 @@
+CREATE SCHEMA sisgesteste;
+USE sisgesteste;
+
 /* Sistem configurations */
 CREATE TABLE config(
 	id INT NOT NULL AUTO_INCREMENT,
@@ -131,7 +134,7 @@ INSERT INTO user_account (institutional_email, secondary_email, user_name, gende
     ("prof.asoares@ufu.br","prof.asoares@gmail.com", "Alexsandro Santos Soares", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
 	("professor@ufu.br", "professor@gmail.com","Professor Renato", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("aluno@ufu.br", "aluno@gmail.com","Aluno Vitor", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
-	("viniciuscalixto.grad@ufu.br", "viniciuscalixto.grad@gmail.com","Vinicius Calixto Rocha", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now());
+	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
 
 INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
 	("admin", "ADM", NULL),
