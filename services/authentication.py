@@ -19,15 +19,15 @@ class Login(Resource):
     loginArgs.add_argument('Authorization', location='headers', type=str, help='Email and hash password of the user, used to authentication, required!', required=True)
     loginArgs = loginArgs.parse_args()
 
-    mailIns, plainPassword = b64decode( loginArgs['Authorization'].replace('Basic ', '') ).decode('utf-8').split(':', 1)
-    print('\n# Starting Login authentication for ' + str(mailIns))
+    emailIns, plainPassword = b64decode( loginArgs['Authorization'].replace('Basic ', '') ).decode('utf-8').split(':', 1)
+    print('\n# Starting Login authentication for ' + str(emailIns))
 
     userRawData = None
     try:
       userRawData = dbGetSingle(
-        " SELECT id, email_ins, email_sec, nome, sexo, telefone, hash_senha, salt_senha, data_hora_criacao " \
-        "   FROM conta_usuario WHERE email_ins = %s; ",
-        [(mailIns)])
+        " SELECT id, institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime " \
+        "   FROM user_account WHERE email_ins = %s; ",
+        [(emailIns)])
     except Exception as e:
       print('# Database error:')
       print(str(e))
@@ -45,71 +45,72 @@ class Login(Resource):
 
     # initial user data token creation
     userData = {
-      'id_usuario': userRawData[0],
-      'email_ins': userRawData[1],
-      'email_sec': userRawData[2],
-      'nome': userRawData[3],
-      'sexo': userRawData[4],
-      'telefone': userRawData[5],
-      'data_hora_criacao': str(userRawData[8])
+      "user_id": userRawData[0],
+      "institutional_email": userRawData[1],
+      "secondary_email": userRawData[2],
+      "user_name": userRawData[3],
+      "gender": userRawData[4],
+      "phone": userRawData[5],
+      "creation_datetime": str(userRawData[8])
     }
 
     userRawProfiles = []
     try:
-      userRawProfiles = dbGetAll(
-        " SELECT p.id, p.data_hora_inicio, p.data_hora_fim, " \
-        " padmin.id, " \
-        " paluno.id, paluno.matricula, paluno.curso, " \
-        " pprof.id, pprof.siape, " \
-        " pcoor.id, pcoor.siape " \
-        "   FROM conta_usuario AS us " \
-        "   INNER JOIN possui_perfil AS p ON us.id = p.id_usuario " \
-        "   LEFT JOIN perfil_admin AS padmin ON p.id = padmin.id " \
-        "   LEFT JOIN perfil_aluno AS paluno ON p.id = paluno.id " \
-        "   LEFT JOIN perfil_professor AS pprof ON p.id = pprof.id " \
-        "   LEFT JOIN perfil_coordenador AS pcoor ON p.id = pcoor.id " \
-        "   WHERE us.email_ins = %s; ",
-      [(mailIns)])
+      userRawProfiles = dbGetAll((
+        " SELECT p.profile_name, p.profile_acronym, p.profile_dynamic_fields_metadata, "
+        " uhp.user_dinamyc_profile_fields_data, uhp.start_datetime, uhp.end_datetime, "
+        " uhpcoordinator.siape, "
+        " uhpprofessor.siape, "
+        " uhpstudent.matricula, uhpstudent.course, "
+        "   FROM user_account AS us "
+        "   INNER JOIN user_has_profile AS uhp ON us.id = uhp.user_id "
+        "   INNER JOIN profile AS p ON uhp.profile_id = p.id "
+        "   LEFT JOIN user_has_profile_coordinator_data AS uhpcoordinator ON uhp.id = uhpcoordinator.user_has_profile_id "
+        "   LEFT JOIN user_has_profile_student_data AS uhpstudent ON uhp.id = uhpstudent.user_has_profile_id "
+        "   LEFT JOIN user_has_profile_professor_data AS uhpprofessor ON uhp.id = uhpprofessor.user_has_profile_id "
+        "   WHERE us.id = %s; "),
+      [(userData["user_id"])])
     except Exception as e:
-      print('# Database error:')
+      print("# Database error:")
       print(str(e))
-      return 'Erro na base de dados', 409
+      return "Erro na base de dados", 409
 
     if userRawProfiles == None:
-      abort(401, 'Usuário desativado, consulte o coordenador para reativar!')
+      abort(401, "Usuário desativado, consulte o coordenador para reativar!")
       
     print(userRawProfiles)
     
     userProfiles = []
     for profile in userRawProfiles:
-      # admin
-      if profile[3]:
-        userProfiles.append("A")
-      # student
-      elif profile[4]:
-        userProfiles.append("S")
-        userData['perfil_aluno'] = {
-          'matricula' : profile[5],
-          'curso' : profile[6]
-        }
+
+      userProfile = {}
+      userProfile["profile_name"] = profile[0]
+      userProfile["profile_acronym"] = profile[1]
+      userProfile["profile_dynamic_fields_metadata"] = profile[2]
+      userProfile["user_dinamyc_profile_fields_data"] = profile[3]
+      userProfile["start_datetime"] = profile[4]
+      userProfile["end_datetime"] = profile[5]
+
+      # coordinator
+      if profile[6]:
+        userProfile["siape"] = profile[6]
+
       # professor
       elif profile[7]:
-        userProfiles.append("P")
-        userData['perfil_professor'] = {
-          'siape' : profile[8]
-        }
-      # coordinator
-      elif profile[9]:
-        userProfiles.append("C")
-        userData['perfil_coordenador'] = {
-          'siape' : profile[10]
-        }
+        userProfile["siape"] = profile[7]
 
-    userData['perfis'] = userProfiles
+      # student
+      elif profile[8]:
+        userProfile["matricula"] = profile[8]
+        userProfile["course"] = profile[9]
+      
+      userProfiles.append(userProfile)
 
-    jwtRoken = jwtEncode(userData)
+    userData['profiles'] = userProfiles
+
+    jwtToken = jwtEncode(userData)
     print('# User profile verifyed, authentication done')
-    return jwtRoken, 200
+    return jwtToken, 200
 
 class Sign(Resource):
 

@@ -49,13 +49,13 @@ def loadMails():
 
     queryRes = None
     try:
-      queryRes = dbGetSingle(
-        ' SELECT mail_str, nome_str ' \
-	      '   FROM config AS c JOIN config_mail AS cm ON c.id = cm.config_id ' \
-        '   WHERE c.nome = \'coordinator mail\'; ')
+      queryRes = dbGetSingle((
+        ' SELECT mail, mail_name '
+	      '   FROM config AS c JOIN config_mail AS cm ON c.id = cm.config_id '
+        '   WHERE c.config_name = \'coordinator mail\'; '))
       
       if not queryRes:
-        raise Exception('No return for sistem root config mail for coordinator ' + str(queryRes))
+        raise Exception('No return for coordinator config mail ' + str(queryRes))
     
     except Exception as e:
       print('# Database config reading error:')
@@ -77,9 +77,9 @@ def loadPaths():
 
     queryRes = []
     try:
-      queryRes = dbGetAll(
-        ' SELECT nome, path_str ' \
-	      '   FROM config AS c JOIN config_path AS cp ON c.id = cp.config_id; ')
+      queryRes = dbGetAll((
+        ' SELECT config_name, system_path '
+	      '   FROM config AS c JOIN config_system_path AS csp ON c.id = csp.config_id; '))
       
       if not queryRes:
         raise Exception('No return for sistem root config path query ' + str(queryRes))
