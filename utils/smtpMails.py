@@ -11,17 +11,17 @@ def smtpStart():
   global smtpServer
 
   smtpServer = smtplib.SMTP(
-    os.getenv('SMTP_HOST'),
-    os.getenv('SMTP_PORT'))
+    os.getenv("SMTP_HOST"),
+    os.getenv("SMTP_PORT"))
 
   smtpServer.ehlo()
   smtpServer.starttls()
 
   smtpServer.login(
-    os.getenv('SMTP_LOGIN'),
-    os.getenv('SMTP_PASSWORD'))
+    os.getenv("SMTP_LOGIN"),
+    os.getenv("SMTP_PASSWORD"))
 
-  print('# Connection to SMTP successfull')
+  print("# Connection to SMTP successfull")
 
 def smtp_working():
 
@@ -47,13 +47,13 @@ def smtpSend(mailTo, mailSubject, mailInnerHtml):
   if not smtp_working():
     smtpStart()
     if not smtp_working():
-      print('# Could not reconnect to smtp')
+      print("# Could not reconnect to smtp")
       return
 
   mailToTmp = None
   mailHtml = None
-  if os.getenv('SYS_DEBUG') == 'True':
-    mailToTmp = os.getenv('SMTP_LOGIN')
+  if os.getenv("SYS_DEBUG") == "True":
+    mailToTmp = os.getenv("SMTP_LOGIN")
     mailHtml = f'''
     <!DOCTYPE html><html><body><h1 style="color:blue;">Sisges</h1>
     {mailInnerHtml}
@@ -69,12 +69,12 @@ def smtpSend(mailTo, mailSubject, mailInnerHtml):
     '''
 
   mail = MIMEMultipart()
-  mail['From'] = os.getenv('SMTP_LOGIN')
-  mail['To'] = mailToTmp
-  mail['Subject'] = mailSubject
-  mail.attach(MIMEText(mailHtml, 'html'))
+  mail["From"] = os.getenv("SMTP_LOGIN")
+  mail["To"] = mailToTmp
+  mail["Subject"] = mailSubject
+  mail.attach(MIMEText(mailHtml, "html"))
 
   smtpServer.sendmail(
-    os.getenv('SMTP_LOGIN'),
+    os.getenv("SMTP_LOGIN"),
     mailToTmp,
     mail.as_string())

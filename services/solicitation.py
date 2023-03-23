@@ -6,7 +6,7 @@ import datetime
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
 from utils.smtpMails import smtpSend
-from utils.sistemConfig import getCoordinatorMail
+from utils.sistemConfig import getCoordinatorEmail
 from utils.utils import getFormatedMySQLJSON, sistemStrParser
 
 # Data from single solicitation
@@ -400,7 +400,7 @@ class Solicitation(Resource):
           smtpSend('professor@ufu.br', mail['subject'], mail['msgHtml'])
 
         if mail['sendToCoordinator']:
-          smtpSend(getCoordinatorMail(), mail['subject'], mail['msgHtml'])
+          smtpSend(getCoordinatorEmail(), mail['subject'], mail['msgHtml'])
       
       print('# Operation done!')
 

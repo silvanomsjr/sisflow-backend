@@ -18,41 +18,41 @@ def dbStart():
     return
 
   myDB = mysql.connector.connect(
-    host = os.getenv('SQL_HOST'),
-    port = os.getenv('SQL_PORT'),
-    user = os.getenv('SQL_USER'),
-    passwd = os.getenv('SQL_PASSWORD'),
-    auth_plugin='mysql_native_password')
+    host = os.getenv("SQL_HOST"),
+    port = os.getenv("SQL_PORT"),
+    user = os.getenv("SQL_USER"),
+    passwd = os.getenv("SQL_PASSWORD"),
+    auth_plugin="mysql_native_password")
 
   if myDB:
-    print('# Connection to database successfull')
+    print("# Connection to database successfull")
   else:
-    print('# Connection to database failed')
+    print("# Connection to database failed")
     return
 
   myCursor = myDB.cursor(buffered=True)
-  myCursor.execute('show databases')
+  myCursor.execute("show databases")
 
   schemaFound = False
   for db in myCursor:
-    if os.getenv('SQL_SCHEMA') == db[0]:
+    if os.getenv("SQL_SCHEMA") == db[0]:
       schemaFound = True
       break
 
   if not schemaFound:
-    print('# Schema ' + str(os.getenv('SQL_SCHEMA')) + ' not found! creating schema and tables')
+    print("# Schema " + str(os.getenv("SQL_SCHEMA")) + " not found! creating schema and tables")
     dbCreate()
-    print('# Schema ' + str(os.getenv('SQL_SCHEMA')) + ' and tables created')
+    print("# Schema " + str(os.getenv("SQL_SCHEMA")) + " and tables created")
   else:
-    print('# Schema ' + str(os.getenv('SQL_SCHEMA')) + ' is in database')
+    print("# Schema " + str(os.getenv("SQL_SCHEMA")) + " is in database")
 
   myDB = mysql.connector.connect(
-    host = os.getenv('SQL_HOST'),
-    port = os.getenv('SQL_PORT'),
-    user = os.getenv('SQL_USER'),
-    passwd = os.getenv('SQL_PASSWORD'),
-    database = os.getenv('SQL_SCHEMA'),
-    auth_plugin = 'mysql_native_password')
+    host = os.getenv("SQL_HOST"),
+    port = os.getenv("SQL_PORT"),
+    user = os.getenv("SQL_USER"),
+    passwd = os.getenv("SQL_PASSWORD"),
+    database = os.getenv("SQL_SCHEMA"),
+    auth_plugin = "mysql_native_password")
 
   myCursor = myDB.cursor(buffered=True)
 
@@ -67,7 +67,7 @@ def isConnectedToDb():
   actualTime = time.time()
   if not lastRequestTime or (lastRequestTime+connTimeOutMin*60 < actualTime):
     try:
-      dbGetSingle('SELECT 1;')
+      dbGetSingle("SELECT 1;")
     except Exception as e:
       return False
       
@@ -76,7 +76,7 @@ def isConnectedToDb():
 
 def getSqlScrypt(name):
 
-  textFile = open('./sql/' + name + '.sql', 'r')
+  textFile = open("./sql/" + name + ".sql", 'r')
   strFile = textFile.read()
   textFile.close()
 
@@ -113,7 +113,7 @@ def dbExecute(sqlScrypt, values=None, commit=True):
     myCursor.execute(sqlScrypt)
   
   if(commit):
-    print('# Operation Commited')
+    print("# Operation Commited")
     myDB.commit()
 
 def dbExecuteMany(sqlScrypt, values=None, commit=True):
@@ -129,7 +129,7 @@ def dbExecuteMany(sqlScrypt, values=None, commit=True):
     myCursor.executemany(sqlScrypt)
   
   if(commit):
-    print('# Operation Commited')
+    print("# Operation Commited")
     myDB.commit()
 
 def dbGetSingle(sqlScrypt, values=None, commitToUpdate=True):
@@ -174,17 +174,17 @@ def dbCreate():
     dbStart()
 
   myCursor = myDB.cursor(buffered=True)
-  myCursor.execute('create schema ' + str(os.getenv('SQL_SCHEMA')))
+  myCursor.execute("create schema " + str(os.getenv("SQL_SCHEMA")))
 
   myDB = mysql.connector.connect(
-    host = os.getenv('SQL_HOST'),
-    port = os.getenv('SQL_PORT'),
-    user = os.getenv('SQL_USER'),
-    passwd = os.getenv('SQL_PASSWORD'),
-    database = os.getenv('SQL_SCHEMA'),
-    auth_plugin = 'mysql_native_password')
+    host = os.getenv("SQL_HOST"),
+    port = os.getenv("SQL_PORT"),
+    user = os.getenv("SQL_USER"),
+    passwd = os.getenv("SQL_PASSWORD"),
+    database = os.getenv("SQL_SCHEMA"),
+    auth_plugin = "mysql_native_password")
 
   # opens and close cursor to avoid sync problens
   myCursor = myDB.cursor(buffered=True)
-  myCursor.execute(getSqlScrypt('sisges_create'))
+  myCursor.execute(getSqlScrypt("sisges_create"))
   myCursor.close()

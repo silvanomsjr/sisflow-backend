@@ -11,18 +11,42 @@ def getFormatedMySQLJSON(mysqlJSON):
   if isinstance(mysqlJSON, str):
     return json.loads(mysqlJSON)
   
-  return json.loads(mysqlJSON.decode('utf-8'))
+  return json.loads(mysqlJSON.decode("utf-8"))
+
+# Returns all user profile acronyms in a list
+def getUserTokenProfileAcronymsFormated(userToken):
+
+  if not userToken or not userToken["profiles"]:
+    return []
+  
+  profileAcronyms = []
+  for profile in userToken["profiles"]:
+    profileAcronyms.append(profile["profile_acronym"])
+  
+  return profileAcronyms
+
+# Return a profile object from user token
+def getUserTokenProfile(userToken, profileAcronym):
+
+  if not userToken or not userToken["profiles"]:
+    return None
+  
+  for profile in userToken["profiles"]:
+    if profile["profile_acronym"] == profileAcronym:
+      return profile
+  
+  return None
 
 # PARSER - get parser token substring
 def getParserSubstring(str):
   
-  substrStart = str.find('[[[')
+  substrStart = str.find("[[[")
   if substrStart == -1:
     return None
   
-  substrEnd = str.find(']]]',substrStart)
+  substrEnd = str.find("]]]",substrStart)
   if substrEnd == -1:
-    print('# Warning, Error while parsing an string, parser not closed')
+    print("# Warning, Error while parsing an string, parser not closed")
     return None
 
   return str[substrStart:substrEnd+3]
@@ -35,24 +59,27 @@ def sistemStrParser(str, userData):
   
   substrP = getParserSubstring(str)
   while substrP:
-    command = substrP.replace('[[[','').replace(']]]','').strip()
+    command = substrP.replace("[[[",'').replace("]]]",'').strip()
 
     # put user name
-    if 'userName' in command:
-      str = str.replace(substrP, userData['nome'])
+    if "userName" in command:
+      str = str.replace(substrP, userData["user_name"])
     
     # put coordinator name
-    if 'coordinatorName' in command:
+    if "coordinatorName" in command:
       str = str.replace(substrP, getCoordinatorName())
 
     # gender differences
-    if 'ifMale?' in command:
-      str = str.replace(substrP, command.replace('ifMale?','').split(':::')[ 0 if userData['sexo'] == 'M' else 1 ])
+    if "ifMale?" in command:
+      str = str.replace(substrP, command.replace("ifMale?",'').split(":::")[ 0 if userData["gender"] == 'M' else 1 ])
 
     # course differences, works only users with student profiles
-    if 'ifBCC?' in command:
-      if userData.get('perfil_aluno'):
-        str = str.replace(substrP, command.replace('ifBCC?','').split(':::')[ 0 if userData['perfil_aluno']['curso'] == 'BCC' else 1 ])
+    if "ifBCC?" in command:
+      
+      studentProfile = getUserTokenProfile("STU")
+
+      if studentProfile and studentProfile["course"]:
+        str = str.replace(substrP, command.replace("ifBCC?",'').split(":::")[ 0 if studentProfile["course"] == "BCC" else 1 ])
       else:
         str = str.replace(substrP, '')
     
