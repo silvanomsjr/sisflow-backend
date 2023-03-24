@@ -257,17 +257,24 @@ CREATE TABLE user_has_solicitation(
     professor_siape VARCHAR(15),
     solicitation_id INT NOT NULL,
     actual_solicitation_step_order INT NOT NULL,
-    
-    decision ENUM('Em analise', 'Deferido', 'Indeferido') NOT NULL,
-    reason VARCHAR(100),
-    start_datetime DATETIME NOT NULL,
-    end_datetime DATETIME,
-    
     solicitation_user_data JSON,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES user_account(id),
     FOREIGN KEY (professor_siape) REFERENCES user_has_profile_professor_data(siape),
     FOREIGN KEY (solicitation_id) REFERENCES solicitation(id)
+);
+
+CREATE TABLE user_has_solicitation_step(
+	id INT NOT NULL AUTO_INCREMENT,
+    user_has_solicitation_id INT NOT NULL,
+    solicitation_step_id INT NOT NULL,
+    decision ENUM('Em analise', 'Deferido', 'Indeferido') NOT NULL,
+    reason VARCHAR(100),
+    start_datetime DATETIME NOT NULL,
+    end_datetime DATETIME,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_has_solicitation_id) REFERENCES user_has_solicitation(id),
+    FOREIGN KEY (solicitation_step_id) REFERENCES solicitation_step(id)
 );
 
 INSERT INTO solicitation (solicitation_name) VALUES 

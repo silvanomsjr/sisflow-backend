@@ -5,7 +5,6 @@ import werkzeug
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
 from utils.sistemConfig import getUserFilesPath
-from utils.utils import getUserTokenProfileAcronymsFormated
 import random
 import string
 
@@ -46,9 +45,7 @@ class FileTransmission(Resource):
     # checks user acess
     fileAcessAllowed = False
 
-    userProfileAcronyms = getUserTokenProfileAcronymsFormated(tokenData)
-
-    if "ADM" in userProfileAcronyms or "COO" in userProfileAcronyms:
+    if "ADM" in tokenData['profile_acronyms'] or "COO" in tokenData['profile_acronyms']:
       fileAcessAllowed = True
     else:
       try:

@@ -13,18 +13,6 @@ def getFormatedMySQLJSON(mysqlJSON):
   
   return json.loads(mysqlJSON.decode("utf-8"))
 
-# Returns all user profile acronyms in a list
-def getUserTokenProfileAcronymsFormated(userToken):
-
-  if not userToken or not userToken["profiles"]:
-    return []
-  
-  profileAcronyms = []
-  for profile in userToken["profiles"]:
-    profileAcronyms.append(profile["profile_acronym"])
-  
-  return profileAcronyms
-
 # Return a profile object from user token
 def getUserTokenProfile(userToken, profileAcronym):
 
@@ -52,7 +40,7 @@ def getParserSubstring(str):
   return str[substrStart:substrEnd+3]
 
 # PARSER - parses a given string changing text options based on user data
-def sistemStrParser(str, userData):
+def sistemStrParser(str, studentData):
 
   if not str:
     return None
@@ -63,7 +51,7 @@ def sistemStrParser(str, userData):
 
     # put user name
     if "userName" in command:
-      str = str.replace(substrP, userData["user_name"])
+      str = str.replace(substrP, studentData["user_name"])
     
     # put coordinator name
     if "coordinatorName" in command:
@@ -71,12 +59,12 @@ def sistemStrParser(str, userData):
 
     # gender differences
     if "ifMale?" in command:
-      str = str.replace(substrP, command.replace("ifMale?",'').split(":::")[ 0 if userData["gender"] == 'M' else 1 ])
+      str = str.replace(substrP, command.replace("ifMale?",'').split(":::")[ 0 if studentData["gender"] == 'M' else 1 ])
 
     # course differences, works only users with student profiles
     if "ifBCC?" in command:
       
-      studentProfile = getUserTokenProfile("STU")
+      studentProfile = getUserTokenProfile(studentData, "STU")
 
       if studentProfile and studentProfile["course"]:
         str = str.replace(substrP, command.replace("ifBCC?",'').split(":::")[ 0 if studentProfile["course"] == "BCC" else 1 ])

@@ -18,26 +18,26 @@ app = Flask(__name__)
 CORS(
   app,
   origins='*',
-  headers=['Content-Type', 'Authorization'],
-  expose_headers='Authorization')
+  headers=["Content-Type", "Authorization"],
+  expose_headers="Authorization")
 
 api = Api(app)
-api.add_resource(Login, '/login')
-api.add_resource(Sign, '/sign')
-api.add_resource(FileTransmission, '/file')
-api.add_resource(CoordinatorSolicitations, '/coordinator/solicitations')
-api.add_resource(ProfessorSolicitations, '/professor/solicitations')
-api.add_resource(StudentSolicitations, '/student/solicitations')
-api.add_resource(Solicitation, '/solicitation')
+api.add_resource(Login, "/login")
+api.add_resource(Sign, "/sign")
+api.add_resource(FileTransmission, "/file")
+api.add_resource(CoordinatorSolicitations, "/coordinator/solicitations")
+api.add_resource(ProfessorSolicitations, "/professor/solicitations")
+api.add_resource(StudentSolicitations, "/student/solicitations")
+api.add_resource(Solicitation, "/solicitation")
 
 # For homol and production ambients like render.com the environment variables are already loaded
 if getMissingEnvironmentVar():
-  print('# Loading and checking environment from .env')
+  print("# Loading and checking environment from .env")
 
   load_dotenv(find_dotenv())
   missingVar = getMissingEnvironmentVar()
   if missingVar:
-    print('# Error - Missing ' + str(missingVar) + ' environment variable')
+    print("# Error - Missing " + str(missingVar) + " environment variable")
     exit()
   
 # Start MySQL

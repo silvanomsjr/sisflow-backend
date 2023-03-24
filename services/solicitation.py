@@ -16,256 +16,363 @@ class Solicitation(Resource):
   def get(self):
 
     solicitationsArgs = reqparse.RequestParser()
-    solicitationsArgs.add_argument('Authorization', location='headers', type=str, help='Bearer with jwt given by server in user autentication, required', required=True)
-    solicitationsArgs.add_argument('student_id', location='args', type=int, required=True)
-    solicitationsArgs.add_argument('solicitation_id', location='args', type=int, required=True)
-    solicitationsArgs.add_argument('solicitation_step_order', location='args', type=int, required=True)
-    solicitationsArgs.add_argument('solicitation_profile', location='args', type=str, required=True)
+    solicitationsArgs.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
+    solicitationsArgs.add_argument("user_has_step_id", location="args", type=int, required=True)
     solicitationsArgs = solicitationsArgs.parse_args()
 
     # verify jwt and its signature correctness
     isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs)
     if not isTokenValid:
       abort(401, errorMsg)
-    
-    studentId = solicitationsArgs['student_id']
-    solicitationId = solicitationsArgs['solicitation_id']
-    solicitationStepOrder = solicitationsArgs['solicitation_step_order']
-    solicitationProfile = solicitationsArgs['solicitation_profile']
 
-    if not 'A' in tokenData['perfis'] and not 'C' in tokenData['perfis']:
-      if solicitationProfile == 'C' or solicitationProfile == 'A':
-        abort(401, 'Acesso a solicitação não permitido!')
-      if solicitationProfile == 'P' and 'S' in tokenData['perfis']:
-        abort(401, 'Acesso a solicitação não permitido!')
+    userHasStepId = solicitationsArgs["user_has_step_id"]
 
-    print('\n# Starting get single solicitation for ' + tokenData['email_ins'] + '\n# Reading data from DB')
+    print("\n# Starting get single solicitation for " + tokenData["institutional_email"] + "\n# Reading data from DB")
+
     queryRes = None
     try:
       queryRes = dbGetSingle(
-        ' SELECT s.nome AS nome_solicitacao, pes.decisao, pes.motivo, pes.data_hora_inicio, pes.data_hora_fim, ' \
-        ' pes.json_dados AS dados_etapa_solicitacao, es.ordem_etapa_solicitacao, es.sequencia_perfis_editores, es.descricao, ' \
-        ' es.duracao_maxima_dias, esp.nome_pagina_estatica, pes.perfil_editor_atual, esp.perfil_editor_pagina, pd.titulo, pd.top_inner_html, ' \
-        ' pd.mid_inner_html, pd.bot_inner_html, pd.inputs, pd.downloads, pd.uploads, pd.select_uploads, pd.botao_solicitar ' \
-        '   FROM conta_usuario AS us ' \
-        '     INNER JOIN possui_etapa_solicitacao AS pes ON us.id = pes.id_usuario ' \
-        '     INNER JOIN etapa_solicitacao AS es ON pes.id_etapa_solicitacao = es.id ' \
-        '     INNER JOIN solicitacao AS s ON es.id_solicitacao = s.id ' \
-			  '     INNER JOIN etapa_solicitacao_pagina AS esp ON es.id = esp.id_etapa_solicitacao ' \
-        '     LEFT JOIN pagina_dinamica AS pd ON esp.id_pagina_dinamica = pd.id ' \
-        '     WHERE us.id=%s AND s.id=%s AND es.ordem_etapa_solicitacao=%s AND esp.perfil_editor_pagina=%s; ',
-        [studentId, solicitationId, solicitationStepOrder, solicitationProfile])
+        " SELECT uhs.user_id, uc_pro.id AS professor_id "
+        "   FROM user_has_solicitation_step AS uhss "
+        "     JOIN user_has_solicitation AS uhs ON uhss.user_has_solicitation_id = uhs.id "
+        "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
+        "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
+        "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
+        "   WHERE uhss.id = %s; ",
+        [(userHasStepId)])
     except Exception as e:
-      print('# Database reading error:')
+      print("# Database reading error:")
       print(str(e))
-      return 'Erro na base de dados', 409
+      return "Erro na base de dados", 409
+
+    if not queryRes:
+      abort(401, "Usuario não possui a etapa de solicitação!")
+
+    studentId = queryRes[0]
+    professorId = queryRes[1]
+
+    if not "ADM" in tokenData["profile_acronyms"] and not "COO" in tokenData["profile_acronyms"]:
+      if tokenData["user_id"] != studentId and tokenData["user_id"] != professorId:
+        abort(401, "Acesso a solicitação não permitido!")
+
+    try:
+      queryRes = dbGetSingle(
+        " SELECT uc_stu.user_name, uc_stu.institutional_email, uc_stu.secondary_email, uc_stu.gender, "
+        " uc_stu.phone, uc_stu.creation_datetime, uhpsd.matricula, uhpsd.course, "
+
+        " uc_pro.user_name, uc_pro.institutional_email, uc_pro.secondary_email, uc_pro.gender, "
+        " uc_pro.phone, uc_pro.creation_datetime, uhppd.siape, "
+
+        " s.solicitation_name, "
+        " ssprof.profile_acronym, ss.step_order_in_solicitation, ss.step_description, ss.step_max_duration_days, "
+        " uhs.actual_solicitation_step_order, uhs.solicitation_user_data, "
+        " uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
+
+        " ssp.use_dynamic_page, ssp.static_page_name, "
+        " dp.title, dp.top_inner_html, dp.mid_inner_html, dp.bot_inner_html, dp.inputs, dp.downloads, "
+        " dp.uploads, dp.select_uploads, dp.is_solicitation_button_active "
+        
+        "   FROM user_account AS uc_stu "
+        "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
+        "     JOIN user_has_profile_student_data AS uhpsd ON uhp_stu.id = uhpsd.user_has_profile_id "
+        "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
+        "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
+        "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
+        "     JOIN solicitation_step AS ss ON s.id = ss.solicitation_id "
+        "     JOIN profile AS ssprof ON ss.step_profile_editor = ssprof.id "
+        "     JOIN solicitation_step_page AS ssp ON ss.id = ssp.solicitation_step_id "
+        "     LEFT JOIN dynamic_page AS dp ON ssp.dynamic_page_id = dp.id "
+        "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
+        "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
+        "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
+        "   WHERE uc_stu.id = %s AND uhss.id = %s; ",
+        [studentId, userHasStepId])
+    except Exception as e:
+      print("# Database reading error:")
+      print(str(e))
+      return "Erro na base de dados", 409
     
     if not queryRes:
-      abort(401, 'Usuario não possui a etapa de solicitação!')
+      abort(401, "Usuario não possui a etapa de solicitação!")
 
-    print('# Operation Done!')
+    print("# Operation Done!")
+    print(tokenData)
 
-    # resolve this line
-    tokenData['perfil_aluno'] = {'curso':'BCC'}
+    # Refactor this in future
+    studentParserToken={
+      "user_name": queryRes[0],
+      "gender": queryRes[3],
+      "profiles": [{
+        "profile_acronym":"STU",
+        "matricula": queryRes[6],
+        "course": queryRes[7]
+      }]
+    }
+
     return {
-      'etapa_solicitacao': {
-        'nome_solicitacao': queryRes[0],
-        'decisao': queryRes[1],
-        'motivo': queryRes[2],
-        'data_hora_inicio': str(queryRes[3]),
-        'data_hora_fim': str(queryRes[4]),
-        'dados_etapa_solicitacao': getFormatedMySQLJSON(queryRes[5]),
-        'ordem_etapa_solicitacao': queryRes[6],
-        'sequencia_perfis_editores': queryRes[7],
-        'descricao': queryRes[8],
-        'duracao_maxima_dias': queryRes[9],
-        'nome_pagina_estatica': queryRes[10],
-        'perfil_editor_atual': queryRes[11],
-        'perfil_editor_pagina': queryRes[12]
+      "student": {
+        "user_name": queryRes[0],
+        "institutional_email": queryRes[1],
+        "secondary_email": queryRes[2],
+        "gender": queryRes[3],
+        "phone": queryRes[4],
+        "creation_datetime": str(queryRes[5]),
+        "matricula": queryRes[6],
+        "course": queryRes[7]
       },
-      'pagina_dinamica': {
-        'titulo': sistemStrParser(queryRes[13], tokenData),
-        'top_inner_html': sistemStrParser(queryRes[14], tokenData),
-        'mid_inner_html': sistemStrParser(queryRes[15], tokenData),
-        'bot_inner_html': sistemStrParser(queryRes[16], tokenData),
-        'inputs': getFormatedMySQLJSON(queryRes[17]),
-        'downloads': getFormatedMySQLJSON(queryRes[18]),
-        'uploads': getFormatedMySQLJSON(queryRes[19]),
-        'select_uploads' : getFormatedMySQLJSON(queryRes[20]),
-        'botao_solicitar': queryRes[21]
-      }
+      "professor": {
+        "user_name": queryRes[8],
+        "institutional_email": queryRes[9],
+        "secondary_email": queryRes[10],
+        "gender": queryRes[11],
+        "phone": queryRes[12],
+        "creation_datetime": str(queryRes[13]),
+        "siape": queryRes[14]
+      },
+      "solicitation":{
+        "solicitation_name": queryRes[15],
+        "step_profile_editor_acronym": queryRes[16],
+        "step_order_in_solicitation": queryRes[17],
+        "step_description": queryRes[18],
+        "step_max_duration_days": queryRes[19],
+        "actual_solicitation_step_order": queryRes[20],
+        "solicitation_user_data": getFormatedMySQLJSON(queryRes[21]),
+        "decision": queryRes[22],
+        "reason": queryRes[23],
+        "start_datetime": str(queryRes[24]),
+        "end_datetime": str(queryRes[25]),
+        "page": {
+          "use_dynamic_page": queryRes[26],
+          "static_page_name": queryRes[27],
+          "title": sistemStrParser(queryRes[28], studentParserToken),
+          "top_inner_html": sistemStrParser(queryRes[29], studentParserToken),
+          "mid_inner_html": sistemStrParser(queryRes[30], studentParserToken),
+          "bot_inner_html": sistemStrParser(queryRes[31], studentParserToken),
+          "inputs": getFormatedMySQLJSON(queryRes[32]),
+          "downloads": getFormatedMySQLJSON(queryRes[33]),
+          "uploads": getFormatedMySQLJSON(queryRes[34]),
+          "select_uploads": getFormatedMySQLJSON(queryRes[35]),
+          "is_solicitation_button_active": queryRes[36]
+        }
+      },
     }, 200
   
   # put to create solicitations - works only for students
   def put(self):
 
     solicitationsArgs = reqparse.RequestParser()
-    solicitationsArgs.add_argument('Authorization', location='headers', type=str, help='Bearer with jwt given by server in user autentication, required', required=True)
-    solicitationsArgs.add_argument('id_solicitacao', type=int, required=True)
+    solicitationsArgs.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
+    solicitationsArgs.add_argument("solicitation_id", location="json", type=int, required=True)
     solicitationsArgs = solicitationsArgs.parse_args()
 
-    solicitationId = solicitationsArgs['id_solicitacao']
-
     # verify jwt and its signature correctness
-    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs, ['S'])
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs, ["STU"])
     if not isTokenValid:
       abort(401, errorMsg)
 
-    print('\n# Starting put Single Solicitation for ' + tokenData['email_ins'])
+    solicitationId = solicitationsArgs["solicitation_id"]
+    userId = tokenData["user_id"]
+
+    print("\n# Starting put Single Solicitation for " + tokenData["institutional_email"] + "\n# Reading data from DB")
     
+    stepId = None
+    stepMaxDurationDays = None
     queryRes = None
-    userId = None
     try:
-      print('# Reading data from DB')
       queryRes = dbGetSingle(
-        ' SELECT id ' \
-        '   FROM conta_usuario ' \
-        '   WHERE email_ins = %s; ',
-        [(tokenData['email_ins'])])
-
-      if not queryRes:
-        raise Exception('No userId return for user with ' + str(tokenData['email_ins']))
-      
-      userId = queryRes[0]
-
-      queryRes = dbGetSingle(
-        ' SELECT es.id, duracao_maxima_dias ' \
-        '   FROM solicitacao AS s JOIN etapa_solicitacao AS es ON s.id = es.id_solicitacao ' \
-        '   WHERE s.id = %s AND ordem_etapa_solicitacao = 1; ',
+        " SELECT ss.id, ss.step_max_duration_days "
+        "   FROM solicitation AS s JOIN solicitation_step AS ss ON s.id = ss.solicitation_id "
+        "   WHERE s.id = %s AND step_order_in_solicitation = 1; ",
         [(solicitationId)])
 
       if not queryRes:
-        raise Exception('No step with code 1 return for solicitation with ' + str(tokenData['email_ins']))
+        raise Exception("No step with code 1 return for solicitation with id " + str(solicitationId))
       
-      solicitationStepId = queryRes[0]
-      maxDurationDays = queryRes[1]
+      stepId = queryRes[0]
+      stepMaxDurationDays = queryRes[1]
 
-      print('# Parsing data')
       queryRes = dbGetSingle(
-        ' SELECT s.id	FROM conta_usuario AS us ' \
-	      '   JOIN possui_etapa_solicitacao AS pes ON us.id = pes.id_usuario ' \
-	      '   JOIN etapa_solicitacao AS es ON pes.id_etapa_solicitacao = es.id ' \
-	      '   JOIN solicitacao AS s ON es.id_solicitacao = s.id ' \
-	      '   WHERE s.id = %s AND us.id = %s; ',
+        " SELECT s.id	FROM user_account AS us "
+	      "   JOIN user_has_solicitation AS uhs ON us.id = uhs.user_id "
+	      "   JOIN solicitation AS s ON uhs.solicitation_id = s.id "
+	      "   WHERE s.id = %s AND us.id = %s; ",
         [solicitationId, userId])
 
     except Exception as e:
-      print('# Database reading error:')
+      print("# Database reading error:")
       print(str(e))
-      return 'Erro na base de dados', 409
+      return "Erro na base de dados", 409
 
     if queryRes:
-      abort(401, 'Você já possui essa solicitação!')
+      abort(401, "Você já possui essa solicitação!")
     
     # set created date and finish date based on max day interval from solicitation step
-    createdDate = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    finishDate = None if not maxDurationDays else (datetime.datetime.now() + datetime.timedelta(days=maxDurationDays)).strftime('%Y-%m-%d %H:%M:%S')
+    createdDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    finishDate = None if not stepMaxDurationDays else (datetime.datetime.now() + datetime.timedelta(days=stepMaxDurationDays)).strftime("%Y-%m-%d %H:%M:%S")
 
+    userHasSolId = None
+    userHasSolStepId = None
     try:
+      # insert user solicitation
       dbExecute(
-        ' INSERT INTO possui_etapa_solicitacao ' \
-        ' (id_usuario, siape_orientador, id_etapa_solicitacao, perfil_editor_atual, decisao, motivo, data_hora_inicio, data_hora_fim) VALUES ' \
-        '   (%s, "SIAPERENATO", %s, "S", "Em analise", "Aguardando o envio de dados pelo aluno", %s, %s); ',
-        [userId, solicitationStepId, createdDate, finishDate])
-    except Exception as e:
-      print('# Database reading error:')
-      print(str(e))
-      return 'Erro na base de dados', 409
+        " INSERT INTO user_has_solicitation "
+        " (user_id, professor_siape, solicitation_id, actual_solicitation_step_order, solicitation_user_data) VALUES "
+        "   (%s, \"SIAPERENATO\", %s, 1, NULL); ",
+        [userId, solicitationId], False)
 
-    print('# Operation done!')
-    return 'ok', 200
+      # select added user solicitation id
+      queryRes = dbGetSingle(
+        " SELECT uhs.id "
+        "   FROM user_has_solicitation AS uhs "
+        "   WHERE uhs.user_id = %s AND solicitation_id = %s; ",
+        [userId, solicitationId], False)
+      
+      if not queryRes:
+        raise Exception("No return for user_has_solicitation insertion ")
+
+      userHasSolId = queryRes[0]
+
+      # insert user solicitation step
+      dbExecute(
+        " INSERT INTO user_has_solicitation_step "
+        " (user_has_solicitation_id, solicitation_step_id, decision, reason, start_datetime, end_datetime) VALUES "
+        "   (%s, %s, \"Em analise\", \"Aguardando o envio de dados pelo aluno\", %s, %s); ",
+        [userHasSolId, stepId, createdDate, finishDate], False)
+
+      # select added user solicitation step id
+      queryRes = dbGetSingle(
+        " SELECT uhss.id "
+        "   FROM user_has_solicitation_step AS uhss "
+        "   WHERE uhss.user_has_solicitation_id = %s AND uhss.solicitation_step_id = %s; ",
+        [userHasSolId, stepId], False)
+
+      if not queryRes:
+        raise Exception("No return for user_has_solicitation_step insertion ")
+      
+      userHasSolStepId = queryRes[0]
+      
+    except Exception as e:
+      dbRollback()
+      print("# Database reading error:")
+      print(str(e))
+      return "Erro na base de dados", 409
+
+    dbCommit()
+    print("# Operation done!")
+    return { "user_has_solicitation_id": userHasSolId, "user_has_step_id": userHasSolStepId }, 200
       
   # post to resolve solicitations
   def post(self):
 
     solicitationsArgs = reqparse.RequestParser()
     solicitationsArgs.add_argument('Authorization', location='headers', type=str, help='Bearer with jwt given by server in user autentication, required', required=True)
-    solicitationsArgs.add_argument('student_id', location='json', type=int, required=True)
-    solicitationsArgs.add_argument('solicitation_id', location='json', type=int, required=True)
-    solicitationsArgs.add_argument('solicitation_step_order', location='json', type=int, required=True)
-    solicitationsArgs.add_argument('solicitation_data', location='json', required=True)
+    solicitationsArgs.add_argument('user_has_step_id', location='json', type=int, required=True)
+    solicitationsArgs.add_argument('decision', location='json', type=int, required=True)
+    solicitationsArgs.add_argument('reason', location='json', required=True)
+    solicitationsArgs.add_argument('solicitation_user_data', location='json', required=True)
     solicitationsArgs = solicitationsArgs.parse_args()
-
-    studentId = solicitationsArgs['student_id']
-    solicitationId = solicitationsArgs['solicitation_id']
-    solicitationStepOrder = solicitationsArgs['solicitation_step_order']
-    solicitationData = solicitationsArgs['solicitation_data']
-
-    if solicitationData:
-      solicitationData = json.loads(
-        solicitationData.replace("\'", "\"") if isinstance(solicitationData, str) else solicitationData.decode('utf-8'))
 
     # verify jwt and its signature correctness
     isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs)
     if not isTokenValid:
       abort(401, errorMsg)
 
-    print('\n# Starting post to resolve solicitation for ' + tokenData['email_ins'], solicitationId, solicitationStepOrder, solicitationData )
+    userHasStepId = solicitationsArgs['user_has_step_id']
+    decision = solicitationsArgs['decision']
+    reason = solicitationsArgs['reason']
+    solicitationUserData = solicitationsArgs['solicitation_user_data']
 
-    print('# Reading data from DB')
+    if solicitationUserData:
+      solicitationUserData = json.loads(
+        solicitationUserData.replace("\'", "\"") if isinstance(solicitationUserData, str) else solicitationUserData.decode('utf-8'))
+    
+    print("\n# Starting post to resolve solicitation for " + tokenData["institutional_email"] + "\n# Reading data from DB")
+
     queryRes = None
     try:
       queryRes = dbGetSingle(
-        ' SELECT us.id, es.id, es.sequencia_perfis_editores, pes.perfil_editor_atual, pes.decisao, pes.data_hora_fim, pes.json_dados, pd.inputs, pd.uploads, pd.select_uploads ' \
-        '   FROM conta_usuario AS us ' \
-        '     INNER JOIN possui_etapa_solicitacao AS pes ON us.id = pes.id_usuario ' \
-        '     INNER JOIN etapa_solicitacao AS es ON pes.id_etapa_solicitacao = es.id ' \
-        '     INNER JOIN solicitacao AS s ON es.id_solicitacao = s.id ' \
-			  '     LEFT JOIN etapa_solicitacao_pagina AS esp ON es.id = esp.id_etapa_solicitacao ' \
-        '     LEFT JOIN pagina_dinamica AS pd ON esp.id_pagina_dinamica = pd.id ' \
-        '     WHERE us.id = %s AND s.id = %s AND es.ordem_etapa_solicitacao = %s; ',
-        [studentId, solicitationId, solicitationStepOrder])
+        " SELECT uhs.user_id AS student_id, uc_pro.id AS professor_id, "
+        " uhs.solicitation_id, uhs.actual_solicitation_step_order, uhs.solicitation_user_data, "
+        " uhss.solicitation_step_id, uhss.start_datetime, uhss.end_datetime, "
+        " ss.step_order_in_solicitation, ssprof.profile_acronym, "
+        " dp.inputs, dp.uploads, dp.select_uploads "
+        "   FROM user_has_solicitation_step AS uhss "
+        "     JOIN user_has_solicitation AS uhs ON uhss.user_has_solicitation_id = uhs.id "
+        "     JOIN solicitation_step AS ss ON uhss.solicitation_step_id = ss.id "
+        "     JOIN profile AS ssprof ON ss.step_profile_editor = ssprof.id "
+        "     JOIN solicitation_step_page AS ssp ON ss.id = ssp.solicitation_step_id "
+        "     LEFT JOIN dynamic_page AS dp ON ssp.dynamic_page_id = dp.id "
+        "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
+        "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
+        "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
+        "   WHERE uhss.id = %s; ",
+        [(userHasStepId)])
     except Exception as e:
-      print('# Database reading error:')
+      print("# Database reading error:")
       print(str(e))
-      return 'Erro na base de dados', 409
-    
+      return "Erro na base de dados", 409
+
     if not queryRes:
-      abort(401, 'Usuario não possui a etapa de solicitação!')
+      abort(401, "Usuario não possui a etapa de solicitação!")
     
+    studentId = queryRes[0]
+    professorId = queryRes[1]
+    solicitationId = queryRes[2]
+    actualStepOrder = queryRes[3]
+    oldSolicitationUserData = getFormatedMySQLJSON(queryRes[4])
+    stepId = queryRes[5]
+    stepStartDatetime = queryRes[6]
+    stepEndDatetime = queryRes[7]
+    stepOrder = queryRes[8]
+    stepProfileAcronymEditor = queryRes[9]
+    pageInputs = getFormatedMySQLJSON(queryRes[10])
+    pageUploads = getFormatedMySQLJSON(queryRes[11])
+    pageSelectUploads = getFormatedMySQLJSON(queryRes[12])
+
+    # Verify solicitation args correcteness
     print('# Validating data')
 
-    userId = queryRes[0]
-    solicitationStepId = queryRes[1]
-    solicitationProfileSeq = queryRes[2]
-    solicitationActualProfile = queryRes[3]
-    decision = queryRes[4]
-    solicitationStepEndDateTime = queryRes[5]
-    solicitationStepData = getFormatedMySQLJSON(queryRes[6])
-    dinamicPageInputs = getFormatedMySQLJSON(queryRes[7])
-    dinamicPageFileAttachments = getFormatedMySQLJSON(queryRes[8])
-    dinamicPageSelectFileAttachments = getFormatedMySQLJSON(queryRes[9])
+    # user acess
+    if not "ADM" in tokenData["profile_acronyms"] and not "COO" in tokenData["profile_acronyms"]:
+      if tokenData["user_id"] != studentId and tokenData["user_id"] != professorId:
+        abort(401, "Edição a solicitação não permitida!")
 
-    if decision != 'Em analise':
-      abort(401, 'Esta solicitação está com status ' + str(decision) + '!')
-    #if solicitationStepData:
-    #  abort(401, 'Esta etapa da solicitação já foi realizada aguarde sua conclusão!')
-    if solicitationStepEndDateTime and datetime.datetime.now() > solicitationStepEndDateTime:
+    if not stepProfileAcronymEditor in tokenData["profile_acronyms"]:
+      abort(401, "Perfil editor a solicitação inválido!")
+      
+    if actualStepOrder!=stepOrder:
+      abort(401, "Solicitação está fora de ordem!")
+
+    # data validation
+    if stepStartDatetime and datetime.datetime.now() < stepStartDatetime:
+      abort(401, 'Esta etapa da solicitação não foi iniciada!')
+
+    if stepEndDatetime and datetime.datetime.now() > stepEndDatetime:
       abort(401, 'Esta etapa da solicitação foi expirada!')
     
     # Checks if all required inputs are valid
-    if dinamicPageInputs and dinamicPageInputs[0]:
+    if pageInputs and pageInputs[0]:
       
-      for dpInp in dinamicPageInputs:
-        if dpInp['required']:
+      for pInp in pageInputs:
+        if pInp['required']:
           found = False
 
-          for solInp in solicitationData['inputs']:
-            if solInp['label_txt'] == dpInp['label_txt']:
+          for solInp in solicitationUserData['inputs']:
+            if solInp['label_txt'] == pInp['label_txt']:
               found = True
           
           if not found:
             abort(401, 'Input da solicitação está faltando!')
 
     # Checks if all required attachments are valid
-    if dinamicPageFileAttachments and dinamicPageFileAttachments[0]:
+    if pageUploads and pageUploads[0]:
 
-      for dpAtt in dinamicPageFileAttachments:
-        if dpAtt['required']:
+      for pUpl in pageUploads:
+        if pUpl['required']:
           found = False
 
-          for solAtt in solicitationData['attachments']:
-            if solAtt['file_abs_type'] == dpAtt['file_abs_type']:
+          for solAtt in solicitationUserData['attachments']:
+            if solAtt['file_abs_type'] == pUpl['file_abs_type']:
               try:
                 if dbGetSingle(
                     ' SELECT an.hash_anexo ' \

@@ -77,6 +77,7 @@ class Login(Resource):
     if userRawProfiles == None:
       abort(401, "Usuário desativado, consulte o coordenador para reativar!")
     
+    userProfilesAcronyms = []
     userProfiles = []
     for profile in userRawProfiles:
 
@@ -87,6 +88,8 @@ class Login(Resource):
       userProfile["user_dinamyc_profile_fields_data"] = profile[3]
       userProfile["start_datetime"] = str(profile[4])
       userProfile["end_datetime"] = str(profile[5])
+
+      userProfilesAcronyms.append(userProfile["profile_acronym"])
 
       # coordinator
       if profile[6]:
@@ -104,6 +107,7 @@ class Login(Resource):
       userProfiles.append(userProfile)
 
     userData["profiles"] = userProfiles
+    userData["profile_acronyms"] = userProfilesAcronyms
 
     print(userData)
     jwtToken = jwtEncode(userData)
