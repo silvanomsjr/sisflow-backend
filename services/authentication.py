@@ -109,7 +109,6 @@ class Login(Resource):
     userData["profiles"] = userProfiles
     userData["profile_acronyms"] = userProfilesAcronyms
 
-    print(userData)
     jwtToken = jwtEncode(userData)
     print("# User profile verifyed, authentication done")
     return jwtToken, 200

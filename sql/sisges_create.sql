@@ -322,9 +322,9 @@ INSERT INTO solicitation_step (solicitation_id, step_profile_editor, step_order_
 
 INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_sent_to_professor, is_sent_to_coordinator) VALUES 
 	(
-		'Sistema de estágios - Solicitação de avaliação dos históricos e complementos',
+		'Sistema de estágios - Solicitação de avaliação dos históricos',
         '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
-		'<p>Você solicitou ao coordenador de estágios a avaliação dos seus históricos e comprovante de vínculo empregatício.</p>'
+		'<p>Você solicitou ao coordenador de estágios a avaliação dos seus históricos.</p>'
 			'<p>O coordenador de estágios possui até 4 dias úteis para realizar a avaliação retornando se a solicitação foi deferida ou indeferida.</p>'
 			'<br>'
 			'<p>Não esqueça de verificar sua caixa de mensagens e a plataforma de estágios para novidades neste período.</p>',
@@ -333,7 +333,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
     (
 		'Sistema de estágios - Solicitação de avaliação dos históricos completa',
         '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
-			'<p>O coordenador avaliou os históricos e comprovante de vínculo empregatício.</p>'
+			'<p>O coordenador avaliou seus documentos enviados.</p>'
 			'<p>Verifique o status da avaliação no sistema de estágios.</p>',
         TRUE, FALSE, FALSE
     ),
@@ -345,21 +345,36 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
 			'<br>'
 			'<p>Não esqueça de verificar sua caixa de mensagens e a plataforma de estágios para novidades neste período.</p>',
         TRUE, FALSE, FALSE
+    ),
+    (
+		'Sistema de estágios - Solicitação de assinaturas completa',
+        '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
+			'<p>Os documentos para início de estágio foram assinados.</p>'
+			'<p>Com estes documentos é possível dar início ao estágio, não se esqueça de produzir relatórios parciais '
+            'durante o período em estágio e o relatório final na conclusão.</p>',
+        TRUE, FALSE, FALSE
     );
 
 INSERT INTO solicitation_step_dynamic_mail (solicitation_step_id, dynamic_mail_id) VALUES
 	(1, 1),
     (2, 2),
     (3, 3),
+    (5, 4),
+    
     (7, 1),
     (8, 2),
     (9, 3),
+    (11, 4),
+    
     (13, 1),
     (14, 2),
     (15, 3),
+    (17, 4),
+    
     (19, 1),
     (20, 2),
-    (21, 3);
+    (21, 3),
+    (23, 4);
     
 INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html, inputs, downloads, uploads, select_uploads, is_solicitation_button_active) VALUES 
 	(
@@ -381,8 +396,8 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         NULL,
         NULL,
         '[
-			{"label_txt" : "Envie seu histórico textual", "file_abs_type" : "HistTextual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
-			{"label_txt" : "Envie seu histórico visual", "file_abs_type" : "HistVisual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
+			{ "file_content_id" : "HistTextual", "label_txt" : "Envie seu histórico textual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
+			{ "file_content_id" : "HistVisual", "label_txt" : "Envie seu histórico visual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
 		]',
 		'[{
 			"label_txt" : "Escolha o tipo de vínculo",
@@ -396,20 +411,6 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
             "required": true,
             "missing_msg": "O envio do comprovante de vínculo empregatício é obrigatório!"
 		}]',
-		TRUE
-	),
-    (
-        'Solicitação de inicio de estágio obrigatório com vínculo - Verificação de documentos pela coordenação',
-        '<p>Olá coordenador [[[coordinatorName]]]. Segue abaixo a documentação do aluno para download caso necessário:</p>',
-		'',
-        '',
-        NULL,
-        '[
-			{"label_txt" : "Download do histórico textual", "file_abs_type" : "HistTextual" },
-			{"label_txt" : "Download do histórico visual", "file_abs_type" : "HistVisual" }
-		]',
-        NULL,
-		NULL,
 		TRUE
 	),
     (
@@ -431,8 +432,8 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         NULL,
         NULL,
         '[
-			{"label_txt" : "Envie seu histórico textual", "file_abs_type" : "HistTextual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
-			{"label_txt" : "Envie seu histórico visual", "file_abs_type" : "HistVisual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
+			{ "file_content_id" : "HistTextual", "label_txt" : "Envie seu histórico textual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
+			{ "file_content_id" : "HistVisual", "label_txt" : "Envie seu histórico visual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
 		]',
 		NULL,
 		TRUE
@@ -453,8 +454,8 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         NULL,
         NULL,
         '[
-			{"label_txt" : "Envie seu histórico textual", "file_abs_type" : "HistTextual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
-			{"label_txt" : "Envie seu histórico visual", "file_abs_type" : "HistVisual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
+			{ "file_content_id" : "HistTextual", "label_txt" : "Envie seu histórico textual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
+			{ "file_content_id" : "HistVisual", "label_txt" : "Envie seu histórico visual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
 		]',
 		NULL,
 		TRUE
@@ -475,9 +476,23 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         NULL,
         NULL,
         '[
-			{"label_txt" : "Envie seu histórico textual", "file_abs_type" : "HistTextual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
-			{"label_txt" : "Envie seu histórico visual", "file_abs_type" : "HistVisual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!"}
+			{ "file_content_id" : "HistTextual", "label_txt" : "Envie seu histórico textual", "required": true, "missing_msg": "O envio do histórico textual é obrigatório!" },
+			{ "file_content_id" : "HistVisual", "label_txt" : "Envie seu histórico visual", "required": true, "missing_msg": "O envio do histórico visual é obrigatório!" }
 		]',
+		NULL,
+		TRUE
+	),
+    (
+        'Solicitação de inicio de estágio - Verificação de documentos pela coordenação',
+        '<p>Olá coordenador [[[coordinatorName]]]. Segue abaixo a documentação do aluno para download caso necessário:</p>',
+		'',
+        '',
+        NULL,
+        '[
+			{ "file_content_id" : "HistTextual", "label_txt" : "Download do histórico textual" },
+			{ "file_content_id" : "HistVisual", "label_txt" : "Download do histórico visual" }
+		]',
+        NULL,
 		NULL,
 		TRUE
 	),
@@ -497,18 +512,18 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
             ]
 		}]',
         NULL,
-        '[{"label_txt" : "Envie o PA com sua assinatura", "file_abs_type" : "PA", "required": true, "missing_msg": "O envio do PA é obrigatório!" }]',
+        '[{ "file_content_id" : "PAALUNO", "label_txt" : "Envie o plano de atividades com sua assinatura", "required": true, "missing_msg": "O envio do plano de atividades é obrigatório!" }]',
 		NULL,
 		TRUE
 	),
     (
         'Solicitação de inicio de estágio - Assinatura do professor orientador',
-        '<p>Olá orientador. Segue abaixo o PA enviado pelo aluno para a sua assinatura:</p>',
+        '<p>Olá orientador. Segue abaixo o plano de atividades enviado pelo aluno para a sua assinatura:</p>',
 		'',
         '',
         NULL,
-        '[{"label_txt" : "Download do PA", "file_abs_type" : "PA" }]',
-        '[{"label_txt" : "Envie o PA com sua assinatura", "file_abs_type" : "PA", "required": true, "missing_msg": "O envio do PA é obrigatório!" }]',
+        '[{ "file_content_id" : "PAALUNO", "label_txt" : "Download do PA" }]',
+        '[{ "file_content_id" : "PAPROFESSOR", "label_txt" : "Envie o PA com sua assinatura", "required": true, "missing_msg": "O envio do PA é obrigatório!" }]',
 		NULL,
 		TRUE
 	),
@@ -519,12 +534,24 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         '',
         NULL,
         '[
-			{"label_txt" : "Download do PA Aluno", "file_abs_type" : "PA" },
-            {"label_txt" : "Download do PA Professor", "file_abs_type" : "PA" }
+			{ "file_content_id" : "PAALUNO", "label_txt" : "Download do PA Aluno" },
+            { "file_content_id" : "PAPROFESSOR", "label_txt" : "Download do PA Professor" }
 		]',
-        '[{"label_txt" : "Envie o PA com sua assinatura", "file_abs_type" : "PA", "required": true, "missing_msg": "O envio do PA é obrigatório!" }]',
+        '[{ "file_content_id" : "PACOORDENADOR", "label_txt" : "Envie o PA com sua assinatura", "required": true, "missing_msg": "O envio do PA é obrigatório!" }]',
 		NULL,
 		TRUE
+	),
+    (
+        'Solicitação de inicio de estágio - Concluída',
+        '<p>Com todas as assinaturas a solicitação está concluída você já pode iniciar o estágio</p>'
+        '<p>Realize o download abaixo da documentação assinada</p>',
+		'',
+        '',
+        NULL,
+        '[{ "file_content_id" : "PACOORDENADOR", "label_txt" : "Download do plano de atividades assinado" }]',
+        NULL,
+        NULL,
+		FALSE
 	),
     (
         'Solicitação de inicio de estágio - Assinatura [[[ifMale?do aluno:::da aluna]]]',
@@ -542,8 +569,46 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
             ]
 		}]',
         NULL,
-        '[{"label_txt" : "Envie o TCE com sua assinatura", "file_abs_type" : "TCE", "required": true, "missing_msg": "O envio do TCE é obrigatório!" },
-			{"label_txt" : "Envie o PA com sua assinatura", "file_abs_type" : "PA", "required": false, "missing_msg": "O envio do PA é opcional desde que suas informações estejam no TCE" }]',
+        '[
+			{ "file_content_id" : "TCEALUNO", "label_txt" : "Envie o Termo de Compromisso de Estágio(TCE) com sua assinatura", "required": true, "missing_msg": "O envio do TCE é obrigatório!" },
+			{ "file_content_id" : "PAALUNO", "label_txt" : "Envie o Plano de atividades(PA) com sua assinatura", "required": false, "missing_msg": "O envio do PA é opcional desde que suas informações estejam no TCE" }
+		]',
+		NULL,
+		TRUE
+	),
+    (
+        'Solicitação de inicio de estágio - Assinatura do professor orientador',
+        '<p>Olá orientador. Segue abaixo o plano de atividades enviado pelo aluno para a sua assinatura:</p>',
+		'',
+        '',
+        NULL,
+        '[
+			{ "file_content_id" : "PAALUNO", "label_txt" : "Download do plano de atividades(PA) do aluno" },
+            { "file_content_id" : "TCEALUNO", "label_txt" : "Download do Termo de Compromisso de Estágio(TCE) do aluno" }
+		]',
+        '[
+			{ "file_content_id" : "PAPROFESSOR", "label_txt" : "Envie o plano de atividades(PA) com sua assinatura", "required": true, "missing_msg": "O envio do PA é obrigatório!" },
+            { "file_content_id" : "TCEPROFESSOR", "label_txt" : "Envie o Termo de Compromisso de Estágio(TCE) com sua assinatura", "required": true, "missing_msg": "O envio do TCE é obrigatório!" }
+		]',
+		NULL,
+		TRUE
+	),
+    (
+        'Solicitação de inicio de estágio - Assinatura do coordenador',
+        '<p>Olá coordenador. Segue abaixo o PA enviado pelo professor orientador e aluno para a sua assinatura:</p>',
+		'',
+        '',
+        NULL,
+        '[
+			{ "file_content_id" : "PAALUNO", "label_txt" : "Download do PA Aluno" },
+            { "file_content_id" : "PAPROFESSOR", "label_txt" : "Download do PA Professor" },
+            { "file_content_id" : "TCEALUNO", "label_txt" : "Download do TCE Aluno" },
+            { "file_content_id" : "TCEPROFESSOR", "label_txt" : "Download do TCE Professor" }
+		]',
+        '[
+			{ "file_content_id" : "PACOORDENADOR", "label_txt" : "Envie o Plano de Atividades(PA) com sua assinatura", "required": true, "missing_msg": "O envio do PA é obrigatório!" },
+            { "file_content_id" : "TCECOORDENADOR", "label_txt" : "Envie o Termo de Compromisso de Estágio(TCE) com sua assinatura", "required": true, "missing_msg": "O envio do TCE é obrigatório!" }
+		]',
 		NULL,
 		TRUE
 	),
@@ -554,8 +619,11 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
 		'',
         '',
         NULL,
+        '[
+			{ "file_content_id" : "PACOORDENADOR", "label_txt" : "Download do plano de atividades assinado" },
+            { "file_content_id" : "TCECOORDENADOR", "label_txt" : "Download do Termo de Compromisso de Estágio assinado" }
+		]',
         NULL,
-        '[{"label_txt" : "Download dos documentos assinados", "file_abs_type" : "TCE", "required": true, "missing_msg": "O envio do TCE é obrigatório!" }]',
         NULL,
 		FALSE
 	),
@@ -567,7 +635,7 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         '',
         NULL,
         NULL,
-        '[{"label_txt" : "Envie o relatório parcial com sua assinatura", "file_abs_type" : "RelParcial", "required": true, "missing_msg": "O envio do relatório parcial é obrigatório!"}]',
+        '[{ "file_content_id" : "RelParcial", "label_txt" : "Envie o relatório parcial com sua assinatura", "required": true, "missing_msg": "O envio do relatório parcial é obrigatório!" }]',
         NULL,
 		TRUE
 	),
@@ -579,7 +647,7 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         '',
         NULL,
         NULL,
-        '[{"label_txt" : "Relatório parcial completo", "file_abs_type" : "RelParcial", "required": true, "missing_msg": "O download do relatório parcial é obrigatório!" }]',
+        '[{ "file_content_id" : "RelParcial", "label_txt" : "Relatório parcial completo", "required": true, "missing_msg": "O download do relatório parcial é obrigatório!" }]',
         NULL,
 		FALSE
 	),
@@ -591,7 +659,7 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         '',
         NULL,
         NULL,
-        '[{"label_txt" : "Envie o relatório final com sua assinatura", "file_abs_type" : "RelFinal", "required": true, "missing_msg": "O envio do relatório final é obrigatório!" }]',
+        '[{ "file_content_id" : "RelFinal", "label_txt" : "Envie o relatório final com sua assinatura", "required": true, "missing_msg": "O envio do relatório final é obrigatório!" }]',
         NULL,
 		TRUE
 	),
@@ -603,42 +671,42 @@ INSERT INTO dynamic_page (title, top_inner_html, mid_inner_html, bot_inner_html,
         '',
         NULL,
         NULL,
-        '[{"label_txt" : "Relatório final completo", "file_abs_type" : "RelFinal", "required": true, "missing_msg": "O download do relatório final é obrigatório!" }]',
+        '[{ "file_content_id" : "RelFinal", "label_txt" : "Relatório final completo", "required": true, "missing_msg": "O download do relatório final é obrigatório!" }]',
         NULL,
 		FALSE
 	);
 
 INSERT INTO solicitation_step_page (solicitation_step_id, use_dynamic_page, dynamic_page_id, static_page_name) VALUES
 	(1, TRUE, 1, NULL),
-    (2, TRUE, 2, NULL),
+    (2, TRUE, 5, NULL),
     (3, TRUE, 6, NULL),
     (4, TRUE, 7, NULL),
     (5, TRUE, 8, NULL),
-    (6, TRUE, 10, NULL),
+    (6, TRUE, 9, NULL),
     
-    (7, TRUE, 3, NULL),
-    (8, TRUE, 2, NULL),
-    (9, TRUE, 9, NULL),
-    (10, TRUE, 7, NULL),
-    (11, TRUE, 8, NULL),
-    (12, TRUE, 10, NULL),
+    (7, TRUE, 2, NULL),
+    (8, TRUE, 5, NULL),
+    (9, TRUE, 10, NULL),
+    (10, TRUE, 11, NULL),
+    (11, TRUE, 12, NULL),
+    (12, TRUE, 13, NULL),
     
-    (13, TRUE, 4, NULL),
-    (14, TRUE, 2, NULL),
-    (15, TRUE, 9, NULL),
-    (16, TRUE, 7, NULL),
-    (17, TRUE, 8, NULL),
-    (18, TRUE, 10, NULL),
+    (13, TRUE, 3, NULL),
+    (14, TRUE, 5, NULL),
+    (15, TRUE, 10, NULL),
+    (16, TRUE, 11, NULL),
+    (17, TRUE, 12, NULL),
+    (18, TRUE, 13, NULL),
     
-    (19, TRUE, 5, NULL),
-    (20, TRUE, 2, NULL),
-    (21, TRUE, 9, NULL),
-    (22, TRUE, 7, NULL),
-    (23, TRUE, 8, NULL),
-    (24, TRUE, 10, NULL),
+    (19, TRUE, 4, NULL),
+    (20, TRUE, 5, NULL),
+    (21, TRUE, 10, NULL),
+    (22, TRUE, 11, NULL),
+    (23, TRUE, 12, NULL),
+    (24, TRUE, 13, NULL),
     
-    (25, TRUE, 11, NULL),
-    (26, TRUE, 12, NULL),
+    (25, TRUE, 14, NULL),
+    (26, TRUE, 15, NULL),
     
-    (27, TRUE, 13, NULL),
-    (28, TRUE, 14, NULL);
+    (27, TRUE, 16, NULL),
+    (28, TRUE, 17, NULL);

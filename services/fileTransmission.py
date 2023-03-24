@@ -45,7 +45,7 @@ class FileTransmission(Resource):
     # checks user acess
     fileAcessAllowed = False
 
-    if "ADM" in tokenData['profile_acronyms'] or "COO" in tokenData['profile_acronyms']:
+    if "ADM" in tokenData["profile_acronyms"] or "COO" in tokenData["profile_acronyms"]:
       fileAcessAllowed = True
     else:
       try:

@@ -19,7 +19,7 @@ class CoordinatorSolicitations(Resource):
     if not isTokenValid:
       abort(401, errorMsg)
 
-    print("\n# Starting get Coordinator Solicitations for " + tokenData["institutional_email"] + '\n# Reading data from DB')
+    print("\n# Starting get Coordinator Solicitations for " + tokenData["institutional_email"] + "\n# Reading data from DB")
 
     queryRes = None
     returnData = []
@@ -38,8 +38,8 @@ class CoordinatorSolicitations(Resource):
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
         "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
-        "     JOIN solicitation_step AS ss ON s.id = ss.solicitation_id  "
-        "     JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
+        "     JOIN solicitation_step AS ss ON ss.id = uhss.solicitation_step_id "
+        "     LEFT JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
         "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
         "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
         "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
@@ -51,7 +51,7 @@ class CoordinatorSolicitations(Resource):
           "student_id": solic[0],
           "student_name": solic[1],
           "professor_id": solic[2],
-          "professor_name": solic[3] if solic[3] else '---',
+          "professor_name": solic[3] if solic[3] else "---",
           "solicitation_id": solic[4],
           "solicitation_name": solic[5],
           "step_id": solic[6],
@@ -108,21 +108,21 @@ class ProfessorSolicitations(Resource):
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
         "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
-        "     JOIN solicitation_step AS ss ON s.id = ss.solicitation_id  "
-        "     JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
+        "     JOIN solicitation_step AS ss ON ss.id = uhss.solicitation_step_id "
         "     JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
         "     JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
         "     JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
-        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order AND uc_pro.id = %s AND profile_acronym=\"PRO\" "
+        "     LEFT JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
+        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order AND uc_pro.id = %s AND (profile_acronym = \"PRO\" OR profile_acronym  IS NULL) "
         "     ORDER BY start_datetime DESC; ",
-        [(tokenData['user_id'])])
+        [(tokenData["user_id"])])
     
       for solic in queryRes:
         returnData.append({
           "student_id": solic[0],
           "student_name": solic[1],
           "professor_id": solic[2],
-          "professor_name": solic[3] if solic[3] else '---',
+          "professor_name": solic[3] if solic[3] else "---",
           "solicitation_id": solic[4],
           "solicitation_name": solic[5],
           "step_id": solic[6],
@@ -180,21 +180,21 @@ class StudentSolicitations(Resource):
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
         "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
-        "     JOIN solicitation_step AS ss ON s.id = ss.solicitation_id  "
-        "     JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
+        "     JOIN solicitation_step AS ss ON ss.id = uhss.solicitation_step_id "
+        "     LEFT JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
         "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
         "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
         "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
-        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order AND uc_stu.id = %s AND profile_acronym=\"STU\" "
+        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order AND uc_stu.id = %s AND (profile_acronym = \"STU\" OR profile_acronym  IS NULL) "
         "     ORDER BY start_datetime DESC; ",
-        [(tokenData['user_id'])])
+        [(tokenData["user_id"])])
     
       for solic in queryRes:
         returnData.append({
           "student_id": solic[0],
           "student_name": solic[1],
           "professor_id": solic[2],
-          "professor_name": solic[3] if solic[3] else '---',
+          "professor_name": solic[3] if solic[3] else "---",
           "solicitation_id": solic[4],
           "solicitation_name": solic[5],
           "step_id": solic[6],
