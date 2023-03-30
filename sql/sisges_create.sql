@@ -189,36 +189,70 @@ CREATE EVENT mail_validation_code_expiration
 	COMMENT 'Remove mail validation codes after it expires'
 	DO DELETE FROM mail_validation WHERE validation_code_expires_in < NOW();
 
-/* Solicitation and its associated dynamic data */
+
+
+/* Solicitation and its associated dynamic data - Solicitation is the state machine */
 CREATE TABLE solicitation(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_name VARCHAR(256),
     PRIMARY KEY (id)
 );
 
-CREATE TABLE solicitation_step(
-	id INT NOT NULL AUTO_INCREMENT,
-    solicitation_id INT NOT NULL,
-    step_profile_editor INT,
-    step_order_in_solicitation INT NOT NULL,
-    step_description VARCHAR(256),
-    step_max_duration_days INT,
-    PRIMARY KEY (id),
-    FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
-    FOREIGN KEY (step_profile_editor) REFERENCES profile(id)
-);
-
 CREATE TABLE dynamic_page(
 	id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(256) NOT NULL,
-    top_inner_html VARCHAR(2000),
-    mid_inner_html VARCHAR(2000),
-    bot_inner_html VARCHAR(2000),
     inputs JSON,
-    downloads JSON,
-    uploads JSON,
     select_uploads JSON,
     is_solicitation_button_active BOOL DEFAULT TRUE,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE dynamic_component_inner_html(
+	id INT NOT NULL AUTO_INCREMENT,
+    inner_html VARCHAR(2000),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE dynamic_component_input(
+	id INT NOT NULL AUTO_INCREMENT,
+    input_name VARCHAR(30) UNIQUE NOT NULL,
+    input_type ENUM('text', 'date') NOT NULL,
+    input_required BOOL DEFAULT TRUE NOT NULL,
+    input_missing_message VARCHAR(200) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (id, input_type)
+);
+
+CREATE TABLE dynamic_component_input_date_rule(
+	id INT NOT NULL AUTO_INCREMENT,
+    dynamic_component_input_id INT NOT NULL,
+    dynamic_component_input_type ENUM('text', 'date') NOT NULL,
+    rule_type ENUM('must-be-in', 'must-not-be-in') NOT NULL,
+    rule_message_type ENUM('warn', 'error') NOT NULL,
+    rule_start_days INT,
+    rule_end_days INT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (dynamic_component_input_id, dynamic_component_input_type) REFERENCES dynamic_component_input(id, input_type),
+    CHECK (dynamic_component_input_type = 'date')
+);
+
+CREATE TABLE dynamic_component_upload(
+	id INT NOT NULL AUTO_INCREMENT,
+    upload_label VARCHAR(50) NOT NULL,
+    upload_name VARCHAR(30) UNIQUE NOT NULL,
+    upload_required BOOL DEFAULT TRUE NOT NULL,
+    upload_missing_message VARCHAR(200) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE dynamic_component_download(
+	id INT NOT NULL AUTO_INCREMENT,
+    download_label VARCHAR(50),
+    download_from ENUM ('internal-upload', 'external-link') NOT NULL,
+    internal_upload_name VARCHAR(30),
+    external_download_link VARCHAR(500),
+    CHECK ( (internal_upload_name IS NOT NULL AND external_link IS NULL) OR (upload_name IS NULL AND external_link IS NOT NULL) ),
+    FOREIGN KEY (internal_upload_name) REFERENCES dynamic_component_upload(upload_name),
     PRIMARY KEY (id)
 );
 
@@ -232,22 +266,25 @@ CREATE TABLE dynamic_mail(
     PRIMARY KEY (id)
 );
 
-CREATE TABLE solicitation_step_page(
-	solicitation_step_id INT NOT NULL,
-    use_dynamic_page BOOL DEFAULT TRUE,
-    dynamic_page_id INT,
-    static_page_name VARCHAR(100),
-    PRIMARY KEY (solicitation_step_id),
-    FOREIGN KEY (solicitation_step_id) REFERENCES solicitation_step(id),
-    FOREIGN KEY (dynamic_page_id) REFERENCES dynamic_page(id)
+CREATE TABLE solicitation_state(
+	id INT NOT NULL AUTO_INCREMENT,
+    solicitation_id INT NOT NULL,
+    state_profile_editor INT,
+    state_description VARCHAR(256),
+    state_max_duration_days INT,
+    state_dynamic_page_id INT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
+    FOREIGN KEY (step_profile_editor) REFERENCES profile(id),
+    FOREIGN KEY (state_dynamic_page_id) REFERENCES dynamic_page(id)
 );
 
-CREATE TABLE solicitation_step_dynamic_mail(
+CREATE TABLE solicitation_state_dynamic_mail(
 	id INT NOT NULL AUTO_INCREMENT,
-    solicitation_step_id INT NOT NULL,
+    solicitation_state_id INT NOT NULL,
     dynamic_mail_id INT NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (solicitation_step_id) REFERENCES solicitation_step(id),
+    FOREIGN KEY (solicitation_state_id) REFERENCES solicitation_state(id),
     FOREIGN KEY (dynamic_mail_id) REFERENCES dynamic_mail(id)
 );
 
