@@ -59,14 +59,14 @@ class Login(Resource):
         " SELECT p.profile_name, p.profile_acronym, p.profile_dynamic_fields_metadata, "
         " uhp.user_dinamyc_profile_fields_data, uhp.start_datetime, uhp.end_datetime, "
         " uhpcoordinator.siape, "
-        " uhpprofessor.siape, "
+        " uhpadvisor.siape, "
         " uhpstudent.matricula, uhpstudent.course "
         "   FROM user_account AS us "
         "   INNER JOIN user_has_profile AS uhp ON us.id = uhp.user_id "
         "   INNER JOIN profile AS p ON uhp.profile_id = p.id "
         "   LEFT JOIN user_has_profile_coordinator_data AS uhpcoordinator ON uhp.id = uhpcoordinator.user_has_profile_id "
         "   LEFT JOIN user_has_profile_student_data AS uhpstudent ON uhp.id = uhpstudent.user_has_profile_id "
-        "   LEFT JOIN user_has_profile_professor_data AS uhpprofessor ON uhp.id = uhpprofessor.user_has_profile_id "
+        "   LEFT JOIN user_has_profile_advisor_data AS uhpadvisor ON uhp.id = uhpadvisor.user_has_profile_id "
         "   WHERE us.id = %s; ",
       [(userData["user_id"])])
     except Exception as e:
@@ -95,7 +95,7 @@ class Login(Resource):
       if profile[6]:
         userProfile["siape"] = profile[6]
 
-      # professor
+      # advisor
       elif profile[7]:
         userProfile["siape"] = profile[7]
 

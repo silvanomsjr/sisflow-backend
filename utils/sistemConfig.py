@@ -141,11 +141,11 @@ def loadHolidays():
     try:
       dbExecute(
         " INSERT INTO config (config_name) VALUES (%s); ",
-        [(str('year ' + actualYear))], False)
+        [(str("year " + actualYear))], False)
 
       configId = dbGetSingle(
         " SELECT id FROM config WHERE config_name = %s; ",
-        [(str('year ' + actualYear))], False)
+        [(str("year " + actualYear))], False)
 
       if not configId:
         raise Exception(" No configId return for inserted actual year")
@@ -158,8 +158,8 @@ def loadHolidays():
       for holiday in holidaysRes:
         dbExecute(
           " INSERT INTO config_year_holiday (year, get_by, holiday_name, holiday_date) VALUES "
-          "   (%s, 'API', %s, %s); ",
-          [actualYear, holiday['name'], holiday['date']], False)
+          "   (%s, \'API\', %s, %s); ",
+          [actualYear, holiday["name"], holiday["date"]], False)
     except Exception as e:
       dbRollback()
       print("# Database reading error:")
@@ -178,13 +178,14 @@ def loadHolidays():
 
   holidayData = []
   for holiday in queryRes:
-
     holidayData.append({
       "year": holiday[0],
       "get_from": holiday[1],
       "holiday_name": holiday[2],
       "holiday_date": str(holiday[3])
     })
+  
+  print("# Holidays configurated")
     
 def getCoordinatorEmail():
   global coordinatorEmail

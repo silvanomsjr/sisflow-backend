@@ -1,6 +1,7 @@
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from threading import Thread
 
 import os
 
@@ -37,6 +38,9 @@ def smtp_working():
   return False
 
 def smtpSend(mailTo, mailSubject, mailInnerHtml):
+  Thread(target=smtpSendTask, args=(mailTo, mailSubject, mailInnerHtml)).start()
+
+def smtpSendTask(mailTo, mailSubject, mailInnerHtml):
 
   global smtpServer
 
