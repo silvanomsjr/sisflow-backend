@@ -34,7 +34,7 @@ CREATE TABLE config_year_holiday(
     id INT NOT NULL AUTO_INCREMENT,
     year INT NOT NULL,
     get_by ENUM('API', 'Personalized'),
-    holiday_name VARCHAR(30) NOT NULL UNIQUE,
+    holiday_name VARCHAR(50) NOT NULL UNIQUE,
     holiday_date DATE NOT NULL UNIQUE,
     PRIMARY KEY (id),
     FOREIGN KEY (year) REFERENCES config_year(year)

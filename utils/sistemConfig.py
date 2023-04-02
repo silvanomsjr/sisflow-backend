@@ -1,11 +1,16 @@
-from utils.dbUtils import *
+import datetime
 from pathlib import Path
+import requests
+
+from utils.dbUtils import *
+
 # pathlib paths works both for windows and unix OSs
 
 coordinatorEmail = None
 coordinatorName = None
 keyFilesPath = None
 userFilesPath = None
+holidayData = None
 
 def getMissingEnvironmentVar():
 
@@ -40,6 +45,7 @@ def getMissingEnvironmentVar():
 def sisConfigStart():
   loadMails()
   loadPaths()
+  loadHolidays()
 
 def loadMails():
 
@@ -105,6 +111,81 @@ def loadPaths():
     print("# Key files path: " + str(keyFilesPath.resolve()))
     print("# User file storage root path: " + str(userFilesPath.resolve()))
 
+def loadHolidays():
+
+  global holidayData
+
+  actualYear = str(datetime.datetime.today().year)
+
+  queryRes = None
+  try:
+    queryRes = dbGetSingle(
+      " SELECT year FROM config_year WHERE year = %s; ",
+      [(actualYear)])
+  except Exception as e:
+    print("# Database reading error:")
+    print(str(e))
+    return "Erro na base de dados", 409
+
+  if not queryRes:
+    print("# Loading holidays from external API")
+  
+    holidaysRes = None
+    try:
+      holidaysRes = requests.get('https://brasilapi.com.br/api/feriados/v1/' + actualYear).json()
+    except Exception as e:
+      print("# Error trying to load holidays from external API")
+      print(str(e))
+      return " Error reading brasilapi, consider using another holiday api if this error continues"
+
+    try:
+      dbExecute(
+        " INSERT INTO config (config_name) VALUES (%s); ",
+        [(str('year ' + actualYear))], False)
+
+      configId = dbGetSingle(
+        " SELECT id FROM config WHERE config_name = %s; ",
+        [(str('year ' + actualYear))], False)
+
+      if not configId:
+        raise Exception(" No configId return for inserted actual year")
+      configId = configId[0]
+
+      dbExecute(
+        " INSERT INTO config_year (config_id, year) VALUES (%s, %s); ",
+        [configId, actualYear], False)
+      
+      for holiday in holidaysRes:
+        dbExecute(
+          " INSERT INTO config_year_holiday (year, get_by, holiday_name, holiday_date) VALUES "
+          "   (%s, 'API', %s, %s); ",
+          [actualYear, holiday['name'], holiday['date']], False)
+    except Exception as e:
+      dbRollback()
+      print("# Database reading error:")
+      print(str(e))
+      return "Erro na base de dados", 409
+    dbCommit()
+
+  try:
+    queryRes = dbGetAll(
+      " SELECT year, get_by, holiday_name, holiday_date FROM config_year_holiday WHERE year = %s; ",
+      [(actualYear)])
+  except Exception as e:
+    print("# Database reading error:")
+    print(str(e))
+    return "Erro na base de dados", 409
+
+  holidayData = []
+  for holiday in queryRes:
+
+    holidayData.append({
+      "year": holiday[0],
+      "get_from": holiday[1],
+      "holiday_name": holiday[2],
+      "holiday_date": str(holiday[3])
+    })
+    
 def getCoordinatorEmail():
   global coordinatorEmail
   return coordinatorEmail
@@ -120,3 +201,7 @@ def getKeysFilePath(keyFileName):
 def getUserFilesPath(userFileHash):
   global userFilesPath
   return userFilesPath / userFileHash
+
+def getHolidayData():
+  global holidayData
+  return holidayData
