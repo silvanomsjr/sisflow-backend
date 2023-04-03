@@ -11,7 +11,7 @@ from utils.cryptoFunctions import loadGenerateKeys
 
 from services.authentication import Login, Sign
 from services.fileTransmission import FileTransmission
-from services.solicitations import CoordinatorSolicitations, ProfessorSolicitations, StudentSolicitations
+from services.solicitations import CoordinatorSolicitations, AdvisorSolicitations, StudentSolicitations
 from services.solicitation import Solicitation
 
 app = Flask(__name__)
@@ -26,7 +26,7 @@ api.add_resource(Login, "/login")
 api.add_resource(Sign, "/sign")
 api.add_resource(FileTransmission, "/file")
 api.add_resource(CoordinatorSolicitations, "/coordinator/solicitations")
-api.add_resource(ProfessorSolicitations, "/professor/solicitations")
+api.add_resource(AdvisorSolicitations, "/advisor/solicitations")
 api.add_resource(StudentSolicitations, "/student/solicitations")
 api.add_resource(Solicitation, "/solicitation")
 

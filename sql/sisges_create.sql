@@ -649,12 +649,13 @@ CREATE TABLE user_has_solicitation(
     user_id INT NOT NULL,
     advisor_siape VARCHAR(15),
     solicitation_id INT NOT NULL,
-    actual_solicitation_state INT NOT NULL,
+    actual_solicitation_state_id INT NOT NULL,
     solicitation_user_data JSON,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES user_account(id),
     FOREIGN KEY (advisor_siape) REFERENCES user_has_profile_advisor_data(siape),
-    FOREIGN KEY (solicitation_id) REFERENCES solicitation(id)
+    FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
+    FOREIGN KEY (actual_solicitation_state_id) REFERENCES solicitation_state(id)
 );
 
 CREATE TABLE user_has_solicitation_state(

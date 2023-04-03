@@ -26,46 +26,45 @@ class CoordinatorSolicitations(Resource):
     try:
       queryRes = dbGetAll(
         " SELECT uc_stu.id AS student_id, uc_stu.user_name AS student_name, "
-        " uc_pro.id AS professor_id, uc_pro.user_name AS professor_name, "
+        " uc_adv.id AS advisor_id, uc_adv.user_name AS advisor_name, "
         " s.id AS solicitation_id, s.solicitation_name, "
-        " ss.id AS solicitation_step_id, ss.step_order_in_solicitation, ss.step_description, ss.step_max_duration_days, "
+        " ss.id AS solicitation_state_id, ss.state_description, ss.state_max_duration_days, "
         " ssp.profile_acronym, "
         " uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
-        " uhs.actual_solicitation_step_order, uhs.solicitation_user_data, uhss.id "
+        " uhs.actual_solicitation_state, uhs.solicitation_user_data, uhss.id "
         "   FROM user_account AS uc_stu "
         "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
         "     JOIN user_has_profile_student_data AS uhpsd ON uhp_stu.id = uhpsd.user_has_profile_id "
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
-        "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
+        "     JOIN user_has_solicitation_state AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
-        "     JOIN solicitation_step AS ss ON ss.id = uhss.solicitation_step_id "
-        "     LEFT JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
-        "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
-        "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
-        "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
-        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order "
+        "     JOIN solicitation_state AS ss ON ss.id = uhss.solicitation_state_id "
+        "     LEFT JOIN profile AS ssp ON ss.state_profile_editor = ssp.id "
+        "     LEFT JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
+        "     LEFT JOIN user_has_profile AS uhp_adv ON uhpad.user_has_profile_id = uhp_adv.id "
+        "     LEFT JOIN user_account AS uc_adv ON uhp_adv.user_id = uc_adv.id "
         "     ORDER BY start_datetime DESC; ")
     
       for solic in queryRes:
         returnData.append({
           "student_id": solic[0],
           "student_name": solic[1],
-          "professor_id": solic[2],
-          "professor_name": solic[3] if solic[3] else "---",
+          "advisor_id": solic[2],
+          "advisor_name": solic[3] if solic[3] else "---",
           "solicitation_id": solic[4],
           "solicitation_name": solic[5],
-          "step_id": solic[6],
-          "step_active": solic[15] == solic[7],
-          "step_order_in_solicitation": solic[7],
-          "step_description": solic[8],
-          "step_max_duration_days": solic[9],
-          "step_profile_editor_acronym": solic[10],
-          "step_decision": solic[11],
-          "step_reason": solic[12],
-          "step_start_datetime": str(solic[13]),
-          "step_end_datetime": str(solic[14]),
-          "solicitation_user_data": getFormatedMySQLJSON(solic[16]),
-          "user_has_step_id": solic[17]
+          "state_id": solic[6],
+          "state_description": solic[7],
+          "state_max_duration_days": solic[8],
+          "state_profile_editor_acronym": solic[9],
+          "state_decision": solic[10],
+          "state_reason": solic[11],
+          "state_start_datetime": str(solic[12]),
+          "state_end_datetime": str(solic[13]),
+          "state_active": solic[14] == solic[6],
+          "actual_solicitation_state_id": solic[14],
+          "solicitation_user_data": getFormatedMySQLJSON(solic[15]),
+          "user_has_state_id": solic[16]
         })
 
     except Exception as e:
@@ -76,8 +75,8 @@ class CoordinatorSolicitations(Resource):
     print("# Operation done!")
     return returnData, 200
 
-# Data from multiple solicitations - professor
-class ProfessorSolicitations(Resource):
+# Data from multiple solicitations - advisor
+class AdvisorSolicitations(Resource):
 
   def get(self):
 
@@ -85,35 +84,36 @@ class ProfessorSolicitations(Resource):
     solicitationsArgs.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
     solicitationsArgs = solicitationsArgs.parse_args()
 
-    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs, ["PRO"])
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs, ["ADV"])
     if not isTokenValid:
       abort(401, errorMsg)
     
-    print("\n# Starting get Professor Solicitations for " + tokenData["institutional_email"] + "\n# Reading data from DB")
+    print("\n# Starting get Advisor Solicitations for " + tokenData["institutional_email"] + "\n# Reading data from DB")
 
     queryRes = None
     returnData = []
     try:
+
       queryRes = dbGetAll(
         " SELECT uc_stu.id AS student_id, uc_stu.user_name AS student_name, "
-        " uc_pro.id AS professor_id, uc_pro.user_name AS professor_name, "
+        " uc_adv.id AS advisor_id, uc_adv.user_name AS advisor_name, "
         " s.id AS solicitation_id, s.solicitation_name, "
-        " ss.id AS solicitation_step_id, ss.step_order_in_solicitation, ss.step_description, ss.step_max_duration_days, "
+        " ss.id AS solicitation_state_id, ss.state_description, ss.state_max_duration_days, "
         " ssp.profile_acronym, "
         " uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
-        " uhs.actual_solicitation_step_order, uhs.solicitation_user_data, uhss.id "
+        " uhs.actual_solicitation_state, uhs.solicitation_user_data, uhss.id "
         "   FROM user_account AS uc_stu "
         "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
         "     JOIN user_has_profile_student_data AS uhpsd ON uhp_stu.id = uhpsd.user_has_profile_id "
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
-        "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
+        "     JOIN user_has_solicitation_state AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
-        "     JOIN solicitation_step AS ss ON ss.id = uhss.solicitation_step_id "
-        "     JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
-        "     JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
-        "     JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
-        "     LEFT JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
-        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order AND uc_pro.id = %s AND (profile_acronym = \"PRO\" OR profile_acronym  IS NULL) "
+        "     JOIN solicitation_state AS ss ON ss.id = uhss.solicitation_state_id "
+        "     JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
+        "     JOIN user_has_profile AS uhp_adv ON uhpad.user_has_profile_id = uhp_adv.id "
+        "     JOIN user_account AS uc_adv ON uhp_adv.user_id = uc_adv.id "
+        "     LEFT JOIN profile AS ssp ON ss.state_profile_editor = ssp.id "
+        "     WHERE  uc_adv.id = %s AND (profile_acronym = \"ADV\" OR profile_acronym IS NULL) "
         "     ORDER BY start_datetime DESC; ",
         [(tokenData["user_id"])])
     
@@ -121,22 +121,22 @@ class ProfessorSolicitations(Resource):
         returnData.append({
           "student_id": solic[0],
           "student_name": solic[1],
-          "professor_id": solic[2],
-          "professor_name": solic[3] if solic[3] else "---",
+          "advisor_id": solic[2],
+          "advisor_name": solic[3] if solic[3] else "---",
           "solicitation_id": solic[4],
           "solicitation_name": solic[5],
-          "step_id": solic[6],
-          "step_active": solic[15] == solic[7],
-          "step_order_in_solicitation": solic[7],
-          "step_description": solic[8],
-          "step_max_duration_days": solic[9],
-          "step_profile_editor_acronym": solic[10],
-          "step_decision": solic[11],
-          "step_reason": solic[12],
-          "step_start_datetime": str(solic[13]),
-          "step_end_datetime": str(solic[14]),
-          "solicitation_user_data": getFormatedMySQLJSON(solic[16]),
-          "user_has_step_id": solic[17]
+          "state_id": solic[6],
+          "state_description": solic[7],
+          "state_max_duration_days": solic[8],
+          "state_profile_editor_acronym": solic[9],
+          "state_decision": solic[10],
+          "state_reason": solic[11],
+          "state_start_datetime": str(solic[12]),
+          "state_end_datetime": str(solic[13]),
+          "state_active": solic[14] == solic[6],
+          "actual_solicitation_state_id": solic[14],
+          "solicitation_user_data": getFormatedMySQLJSON(solic[15]),
+          "user_has_state_id": solic[16]
         })
 
     except Exception as e:
@@ -168,24 +168,24 @@ class StudentSolicitations(Resource):
     try:
       queryRes = dbGetAll(
         " SELECT uc_stu.id AS student_id, uc_stu.user_name AS student_name, "
-        " uc_pro.id AS professor_id, uc_pro.user_name AS professor_name, "
+        " uc_adv.id AS advisor_id, uc_adv.user_name AS advisor_name, "
         " s.id AS solicitation_id, s.solicitation_name, "
-        " ss.id AS solicitation_step_id, ss.step_order_in_solicitation, ss.step_description, ss.step_max_duration_days, "
+        " ss.id AS solicitation_state_id, ss.state_description, ss.state_max_duration_days, "
         " ssp.profile_acronym, "
         " uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
-        " uhs.actual_solicitation_step_order, uhs.solicitation_user_data, uhss.id "
+        " uhs.actual_solicitation_state, uhs.solicitation_user_data, uhss.id "
         "   FROM user_account AS uc_stu "
         "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
         "     JOIN user_has_profile_student_data AS uhpsd ON uhp_stu.id = uhpsd.user_has_profile_id "
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
-        "     JOIN user_has_solicitation_step AS uhss ON uhs.id = uhss.user_has_solicitation_id "
+        "     JOIN user_has_solicitation_state AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
-        "     JOIN solicitation_step AS ss ON ss.id = uhss.solicitation_step_id "
-        "     LEFT JOIN profile AS ssp ON ss.step_profile_editor = ssp.id "
-        "     LEFT JOIN user_has_profile_professor_data AS uhppd ON uhs.professor_siape = uhppd.siape "
-        "     LEFT JOIN user_has_profile AS uhp_pro ON uhppd.user_has_profile_id = uhp_pro.id "
-        "     LEFT JOIN user_account AS uc_pro ON uhp_pro.user_id = uc_pro.id "
-        "     WHERE ss.step_order_in_solicitation <= uhs.actual_solicitation_step_order AND uc_stu.id = %s AND (profile_acronym = \"STU\" OR profile_acronym  IS NULL) "
+        "     JOIN solicitation_state AS ss ON ss.id = uhss.solicitation_state_id "
+        "     LEFT JOIN profile AS ssp ON ss.state_profile_editor = ssp.id "
+        "     LEFT JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
+        "     LEFT JOIN user_has_profile AS uhp_adv ON uhpad.user_has_profile_id = uhp_adv.id "
+        "     LEFT JOIN user_account AS uc_adv ON uhp_adv.user_id = uc_adv.id "
+        "     WHERE uc_stu.id = %s AND (profile_acronym = \"STU\" OR profile_acronym IS NULL) "
         "     ORDER BY start_datetime DESC; ",
         [(tokenData["user_id"])])
     
@@ -193,22 +193,22 @@ class StudentSolicitations(Resource):
         returnData.append({
           "student_id": solic[0],
           "student_name": solic[1],
-          "professor_id": solic[2],
-          "professor_name": solic[3] if solic[3] else "---",
+          "advisor_id": solic[2],
+          "advisor_name": solic[3] if solic[3] else "---",
           "solicitation_id": solic[4],
           "solicitation_name": solic[5],
-          "step_id": solic[6],
-          "step_active": solic[15] == solic[7],
-          "step_order_in_solicitation": solic[7],
-          "step_description": solic[8],
-          "step_max_duration_days": solic[9],
-          "step_profile_editor_acronym": solic[10],
-          "step_decision": solic[11],
-          "step_reason": solic[12],
-          "step_start_datetime": str(solic[13]),
-          "step_end_datetime": str(solic[14]),
-          "solicitation_user_data": getFormatedMySQLJSON(solic[16]),
-          "user_has_step_id": solic[17]
+          "state_id": solic[6],
+          "state_description": solic[7],
+          "state_max_duration_days": solic[8],
+          "state_profile_editor_acronym": solic[9],
+          "state_decision": solic[10],
+          "state_reason": solic[11],
+          "state_start_datetime": str(solic[12]),
+          "state_end_datetime": str(solic[13]),
+          "state_active": solic[14] == solic[6],
+          "actual_solicitation_state_id": solic[14],
+          "solicitation_user_data": getFormatedMySQLJSON(solic[15]),
+          "user_has_state_id": solic[16]
         })
 
     except Exception as e:
