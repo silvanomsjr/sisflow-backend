@@ -290,7 +290,7 @@ CREATE TABLE dynamic_component_select_option(
 	id INT NOT NULL AUTO_INCREMENT,
     dynamic_component_select_id INT NOT NULL,
     select_option_label VARCHAR(30) DEFAULT 'Selecione: ' NOT NULL,
-    select_opttion_value VARCHAR(30),
+    select_option_value VARCHAR(30),
     PRIMARY KEY (id),
     FOREIGN KEY (dynamic_component_select_id) REFERENCES dynamic_component_select(dynamic_component_id)
 );
@@ -493,9 +493,9 @@ INSERT INTO dynamic_component_upload (dynamic_component_id, dynamic_component_ty
     (30, 'upload', 'Envie o Relatório Final com sua assinatura', 'RelFinalCoordenador', TRUE, 'O envio do Relatório Final é obrigatório!');
     
 INSERT INTO dynamic_component_select (dynamic_component_id, dynamic_component_type, select_name, select_label, select_initial_text, is_select_required, select_missing_message) VALUES 
-	(31, 'select', 'Vinculo', 'Escolha o tipo de vínculo', DEFAULT, TRUE, 'A escolha do vínculo é obrigatória');
+	(31, 'select', 'Vinculo', 'Escolha o tipo de vínculo', DEFAULT, TRUE, 'O envio do vínculo empregatício é obrigatório');
     
-INSERT INTO dynamic_component_select_option (dynamic_component_select_id, select_option_label, select_opttion_value) VALUES 
+INSERT INTO dynamic_component_select_option (dynamic_component_select_id, select_option_label, select_option_value) VALUES 
 	(31, DEFAULT, NULL),
     (31, 'Carteira Digital de Trabalho', 'CTPS'),
     (31, 'Contrato de pessoa jurídica', 'PJ'),
@@ -615,6 +615,7 @@ CREATE TABLE solicitation_state(
     state_description VARCHAR(256),
     state_max_duration_days INT,
     state_dynamic_page_id INT NOT NULL,
+    is_initial_state BOOL NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
     FOREIGN KEY (state_profile_editor) REFERENCES profile(id),
@@ -625,14 +626,16 @@ CREATE TABLE solicitation_state_transition(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_state_id_from INT NOT NULL,
     solicitation_state_id_to INT,
-    dynamic_page_has_component_id INT NOT NULL,
+    dynamic_page_has_component_id INT NOT NULL UNIQUE,
 	dynamic_page_has_component_button_id INT NOT NULL,
-    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação'),
+    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+	transition_reason VARCHAR(100),
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_state_id_from) REFERENCES solicitation_state(id),
     FOREIGN KEY (solicitation_state_id_to) REFERENCES solicitation_state(id),
     FOREIGN KEY (dynamic_page_has_component_id, dynamic_page_has_component_button_id) REFERENCES dynamic_page_has_component(id, dynamic_component_id),
-    FOREIGN KEY (dynamic_page_has_component_button_id) REFERENCES dynamic_component_button(dynamic_component_id)
+    FOREIGN KEY (dynamic_page_has_component_button_id) REFERENCES dynamic_component_button(dynamic_component_id),
+    UNIQUE (dynamic_page_has_component_id, dynamic_page_has_component_button_id)
 );
 
 CREATE TABLE solicitation_state_dynamic_mail(
@@ -662,7 +665,7 @@ CREATE TABLE user_has_solicitation_state(
 	id INT NOT NULL AUTO_INCREMENT,
     user_has_solicitation_id INT NOT NULL,
     solicitation_state_id INT NOT NULL,
-    decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') NOT NULL,
+    decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
     reason VARCHAR(100),
     start_datetime DATETIME NOT NULL,
     end_datetime DATETIME,
@@ -679,42 +682,42 @@ INSERT INTO solicitation (solicitation_name) VALUES
     ('Envio de relatório parcial'),
     ('Envio de relatório final');
     
-INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id) VALUES
-	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1),
-    (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5),
-	(1, 4, 'Solicitação de assinaturas do PA pelo aluno', 4, 7),
-    (1, 3, 'Requerimento de assinatura do PA ao orientador', 4, 8),
-    (1, 2, 'Requerimento de assinatura do PA ao coordenador', 10, 9),
-    (1, NULL, 'Estágio iniciado', NULL, 10),
+INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, is_initial_state) VALUES
+	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, TRUE),
+    (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, False),
+	(1, 4, 'Solicitação de assinaturas do PA pelo aluno', 4, 7, False),
+    (1, 3, 'Requerimento de assinatura do PA ao orientador', 4, 8, False),
+    (1, 2, 'Requerimento de assinatura do PA ao coordenador', 10, 9, False),
+    (1, NULL, 'Estágio iniciado', NULL, 10, False),
     
-    (2, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 2),
-    (2, 2, 'Avaliação dos históricos pelo coordenador', 4, 6),
-	(2, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11),
-    (2, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12),
-    (2, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13),
-    (2, NULL, 'Estágio iniciado', NULL, 14),
+    (2, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 2, TRUE),
+    (2, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, False),
+	(2, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, False),
+    (2, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, False),
+    (2, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, False),
+    (2, NULL, 'Estágio iniciado', NULL, 14, False),
     
-    (3, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 3),
-    (3, 2, 'Avaliação dos históricos pelo coordenador', 4, 6),
-	(3, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11),
-    (3, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12),
-    (3, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13),
-    (3, NULL, 'Estágio iniciado', NULL, 14),
+    (3, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 3, TRUE),
+    (3, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, False),
+	(3, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, False),
+    (3, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, False),
+    (3, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, False),
+    (3, NULL, 'Estágio iniciado', NULL, 14, False),
     
-    (4, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 4),
-    (4, 2, 'Avaliação dos históricos pelo coordenador', 4, 6),
-	(4, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11),
-    (4, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12),
-    (4, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13),
-    (4, NULL, 'Estágio iniciado', NULL, 14),
+    (4, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 4, TRUE),
+    (4, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, False),
+	(4, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, False),
+    (4, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, False),
+    (4, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, False),
+    (4, NULL, 'Estágio iniciado', NULL, 14, False),
     
-    (5, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório parcial pelo aluno', 4, 15),
-    (5, 2, 'Avaliação e assinatura do relatório parcial pelo coordenador', 4, 16),
-    (5, NULL,  'Relatório parcial completo', NULL, 17),
+    (5, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório parcial pelo aluno', 4, 15, TRUE),
+    (5, 2, 'Avaliação e assinatura do relatório parcial pelo coordenador', 4, 16, False),
+    (5, NULL,  'Relatório parcial completo', NULL, 17, False),
     
-    (6, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório final pelo aluno', 4, 18),
-    (6, 2, 'Avaliação e assinatura do relatório final pelo coordenador', 4, 19),
-    (6, NULL,  'Relatório final completo', NULL, 20);
+    (6, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório final pelo aluno', 4, 18, TRUE),
+    (6, 2, 'Avaliação e assinatura do relatório final pelo coordenador', 4, 19, False),
+    (6, NULL,  'Relatório final completo', NULL, 20, False);
 
 INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail_id) VALUES
 	(1, 1),
@@ -737,7 +740,7 @@ INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail
     (21, 3),
     (23, 4);
 
-/*
+
 select s.id, ss.id as state_id, ss.state_description, dphc.id as dynamic_page_has_component_id, dphc.dynamic_component_id as  dynamic_page_has_component_button_id, dcb.button_label as btn_label
 	from solicitation as s 
     join solicitation_state as ss on s.id = ss.solicitation_id 
@@ -745,35 +748,34 @@ select s.id, ss.id as state_id, ss.state_description, dphc.id as dynamic_page_ha
     join dynamic_page_has_component as dphc on dp.id = dphc.dynamic_page_id
     join dynamic_component_button as dcb on dphc.dynamic_component_id = dcb.dynamic_component_id
     order by s.id, ss.id, dphc.id;
-*/
 
-INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, dynamic_page_has_component_id, dynamic_page_has_component_button_id, transition_decision) VALUES
-	(1, 2, 5, 46, 'Solicitado'), (1, NULL, 6, 47, 'Cancelado pelo aluno'),
-    (2, 3, 26, 50, 'Deferido'), (2, NULL, 27, 51, 'Indeferido'),  (2, NULL, 28, 47, 'Cancelado pela coordenação'),
-    (3, 4, 38, 46, 'Solicitado'), (3, NULL, 39, 47, 'Cancelado pelo aluno'),
-    (4, 5, 43, 48, 'Enviado'), (4, NULL, 44, 47, 'Cancelado pelo orientador'),
-    (5, 6, 49, 49, 'Deferido'), (5, NULL, 50, 51, 'Indeferido'), (5, NULL, 51, 47, 'Cancelado pela coordenação'),
+INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, dynamic_page_has_component_id, dynamic_page_has_component_button_id, transition_decision, transition_reason) VALUES
+	(1, 2, 5, 46, 'Solicitado', NULL), (1, NULL, 6, 47, 'Cancelado pelo aluno', NULL),
+    (2, 3, 26, 50, 'Deferido', NULL), (2, NULL, 27, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (2, NULL, 28, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
+    (3, 4, 38, 46, 'Solicitado', NULL), (3, NULL, 39, 47, 'Cancelado pelo aluno', NULL),
+    (4, 5, 43, 48, 'Enviado', NULL), (4, NULL, 44, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
+    (5, 6, 49, 49, 'Deferido', NULL), (5, NULL, 50, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (5, NULL, 51, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
     
-    (7, 8, 10, 46, 'Solicitado'), (7, NULL, 11, 47, 'Cancelado pelo aluno'),
-    (8, 9, 32, 50, 'Deferido'), (8, NULL, 33, 51, 'Indeferido'),  (8, NULL, 34, 47, 'Cancelado pela coordenação'),
-    (9, 10, 58, 46, 'Solicitado'), (9, NULL, 59, 47, 'Cancelado pelo aluno'),
-    (10, 11, 65, 48, 'Enviado'), (10, NULL, 66, 47, 'Cancelado pelo orientador'),
-    (11, 12, 74, 49, 'Deferido'), (11, NULL, 75, 51, 'Indeferido'), (11, NULL, 76, 47, 'Cancelado pela coordenação'),
+    (7, 8, 10, 46, 'Solicitado', NULL), (7, NULL, 11, 47, 'Cancelado pelo aluno', NULL),
+    (8, 9, 32, 50, 'Deferido', NULL), (8, NULL, 33, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (8, NULL, 34, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
+    (9, 10, 58, 46, 'Solicitado', NULL), (9, NULL, 59, 47, 'Cancelado pelo aluno', NULL),
+    (10, 11, 65, 48, 'Enviado', NULL), (10, NULL, 66, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
+    (11, 12, 74, 49, 'Deferido', NULL), (11, NULL, 75, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (11, NULL, 76, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
     
-    (13, 14, 15, 46, 'Solicitado'), (13, NULL, 16, 47, 'Cancelado pelo aluno'),
-    (14, 15, 32, 50, 'Deferido'), (14, NULL, 33, 51, 'Indeferido'),  (14, NULL, 34, 47, 'Cancelado pela coordenação'),
-    (15, 16, 58, 46, 'Solicitado'), (15, NULL, 59, 47, 'Cancelado pelo aluno'),
-    (16, 17, 65, 48, 'Enviado'), (16, NULL, 66, 47, 'Cancelado pelo orientador'),
-    (17, 18, 74, 49, 'Deferido'), (17, NULL, 75, 51, 'Indeferido'), (17, NULL, 76, 47, 'Cancelado pela coordenação'),
+    (13, 14, 15, 46, 'Solicitado', NULL), (13, NULL, 16, 47, 'Cancelado pelo aluno', NULL),
+    (14, 15, 32, 50, 'Deferido', NULL), (14, NULL, 33, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (14, NULL, 34, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
+    (15, 16, 58, 46, 'Solicitado', NULL), (15, NULL, 59, 47, 'Cancelado pelo aluno', NULL),
+    (16, 17, 65, 48, 'Enviado', NULL), (16, NULL, 66, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
+    (17, 18, 74, 49, 'Deferido', NULL), (17, NULL, 75, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (17, NULL, 76, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
     
-    (19, 20, 20, 46, 'Solicitado'), (19, NULL, 21, 47, 'Cancelado pelo aluno'),
-    (20, 21, 32, 50, 'Deferido'), (20, NULL, 33, 51, 'Indeferido'),  (20, NULL, 34, 47, 'Cancelado pela coordenação'),
-    (21, 22, 58, 46, 'Solicitado'), (21, NULL, 59, 47, 'Cancelado pelo aluno'),
-    (22, 23, 65, 48, 'Enviado'), (22, NULL, 66, 47, 'Cancelado pelo orientador'),
-    (23, 24, 74, 49, 'Deferido'), (23, NULL, 75, 51, 'Indeferido'), (23, NULL, 76, 47, 'Cancelado pela coordenação'),
+    (19, 20, 20, 46, 'Solicitado', NULL), (19, NULL, 21, 47, 'Cancelado pelo aluno', NULL),
+    (20, 21, 32, 50, 'Deferido', NULL), (20, NULL, 33, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (20, NULL, 34, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
+    (21, 22, 58, 46, 'Solicitado', NULL), (21, NULL, 59, 47, 'Cancelado pelo aluno', NULL),
+    (22, 23, 65, 48, 'Enviado', NULL), (22, NULL, 66, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
+    (23, 24, 74, 49, 'Deferido', NULL), (23, NULL, 75, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (23, NULL, 76, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
     
-    (25, 26, 82, 46, 'Solicitado'), (25, NULL, 83, 47, 'Cancelado pelo aluno'),
-    (26, 27, 87, 49, 'Deferido'), (26, NULL, 88, 51, 'Indeferido'),  (26, NULL, 89, 47, 'Cancelado pela coordenação'),
+    (25, 26, 82, 46, 'Solicitado', NULL), (25, NULL, 83, 47, 'Cancelado pelo aluno', NULL),
+    (26, 27, 87, 49, 'Deferido', NULL), (26, NULL, 88, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (26, NULL, 89, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
     
-    (28, 29, 94, 46, 'Solicitado'), (28, NULL, 95, 47, 'Cancelado pelo aluno'),
-    (29, 30, 99, 49, 'Deferido'), (29, NULL, 100, 51, 'Indeferido'),  (29, NULL, 101, 47, 'Cancelado pela coordenação');
+    (28, 29, 94, 46, 'Solicitado', NULL), (28, NULL, 95, 47, 'Cancelado pelo aluno', NULL),
+    (29, 30, 99, 49, 'Deferido', NULL), (29, NULL, 100, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (29, NULL, 101, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação');

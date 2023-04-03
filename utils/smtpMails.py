@@ -43,6 +43,8 @@ def smtpSend(mailTo, mailSubject, mailInnerHtml):
 def smtpSendTask(mailTo, mailSubject, mailInnerHtml):
 
   global smtpServer
+  
+  print(mailTo, mailSubject, mailInnerHtml)
 
   if not smtpServer:
     print("# Smtp not started")
@@ -82,3 +84,5 @@ def smtpSendTask(mailTo, mailSubject, mailInnerHtml):
     os.getenv("SMTP_LOGIN"),
     mailToTmp,
     mail.as_string())
+
+  return
