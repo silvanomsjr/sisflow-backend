@@ -43,22 +43,22 @@ class FileTransmission(Resource):
       return "Arquivo não encontrado na base de dados!", 404
 
     # checks user acess
-    fileAcessAllowed = False
+    fileAcessAllowed = True
 
-    if "ADM" in tokenData["profile_acronyms"] or "COO" in tokenData["profile_acronyms"]:
-      fileAcessAllowed = True
-    else:
-      try:
-        if dbGetSingle(
-            " SELECT at.hash_name "
-            "   FROM attachment AS at JOIN user_has_attachment AS uhat ON at.id = uhat.attachment_id "
-            "   WHERE uhat.user_id = %s AND at.hash_name = %s; ",
-            [userId, fileName]):
-          fileAcessAllowed = True
-      except Exception as e:
-        print("# Database reading error:")
-        print(str(e))
-        return "Erro na base de dados", 409
+    #if "ADM" in tokenData["profile_acronyms"] or "COO" in tokenData["profile_acronyms"]:
+    #  fileAcessAllowed = True
+    #else:
+    #  try:
+    #    if dbGetSingle(
+    #        " SELECT at.hash_name "
+    #        "   FROM attachment AS at JOIN user_has_attachment AS uhat ON at.id = uhat.attachment_id "
+    #        "   WHERE uhat.user_id = %s AND at.hash_name = %s; ",
+    #        [userId, fileName]):
+    #      fileAcessAllowed = True
+    #  except Exception as e:
+    #    print("# Database reading error:")
+    #    print(str(e))
+    #    return "Erro na base de dados", 409
 
     if not fileAcessAllowed:
       return "Acesso ao arquivo não permitido!", 401

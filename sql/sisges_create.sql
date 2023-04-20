@@ -476,7 +476,7 @@ INSERT INTO dynamic_component_input (dynamic_component_id, dynamic_component_typ
 
 INSERT INTO dynamic_component_input_date_rule (dynamic_component_input_id, dynamic_component_input_type, rule_type, rule_message_type, rule_start_days, rule_end_days, rule_missing_message) VALUES
 	(18, 'date', 'must-not-be-from-today', 'warn', 5, 10, 'Atenção o prazo recomendável para verificar a documentação e assinar pelo grupo docente e SESTA é de 10 dias, clique em ok se deseja continuar mesmo assim'),
-    (18, 'date', 'must-not-be-from-today', 'error', 0, 5, 'Atenção o prazo mínimo para verificar a documentação e assinar pelo SESTA é de 5 dias úteis');
+    (18, 'date', 'must-not-be-from-today', 'error', NULL, 5, 'Atenção o prazo mínimo para verificar a documentação e assinar pelo SESTA é de 5 dias úteis');
 
 INSERT INTO dynamic_component_upload (dynamic_component_id, dynamic_component_type, upload_label, upload_name, upload_required, upload_missing_message) VALUES
 	(19, 'upload', 'Envie seu histórico textual', 'HistTextual', TRUE, 'O envio do histórico textual é obrigatório!'),
@@ -626,7 +626,7 @@ CREATE TABLE solicitation_state_transition(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_state_id_from INT NOT NULL,
     solicitation_state_id_to INT,
-    dynamic_page_has_component_id INT NOT NULL UNIQUE,
+    dynamic_page_has_component_id INT NOT NULL,
 	dynamic_page_has_component_button_id INT NOT NULL,
     transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
 	transition_reason VARCHAR(100),
@@ -634,8 +634,7 @@ CREATE TABLE solicitation_state_transition(
     FOREIGN KEY (solicitation_state_id_from) REFERENCES solicitation_state(id),
     FOREIGN KEY (solicitation_state_id_to) REFERENCES solicitation_state(id),
     FOREIGN KEY (dynamic_page_has_component_id, dynamic_page_has_component_button_id) REFERENCES dynamic_page_has_component(id, dynamic_component_id),
-    FOREIGN KEY (dynamic_page_has_component_button_id) REFERENCES dynamic_component_button(dynamic_component_id),
-    UNIQUE (dynamic_page_has_component_id, dynamic_page_has_component_button_id)
+    FOREIGN KEY (dynamic_page_has_component_button_id) REFERENCES dynamic_component_button(dynamic_component_id)
 );
 
 CREATE TABLE solicitation_state_dynamic_mail(
@@ -739,15 +738,6 @@ INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail
     (20, 2),
     (21, 3),
     (23, 4);
-
-
-select s.id, ss.id as state_id, ss.state_description, dphc.id as dynamic_page_has_component_id, dphc.dynamic_component_id as  dynamic_page_has_component_button_id, dcb.button_label as btn_label
-	from solicitation as s 
-    join solicitation_state as ss on s.id = ss.solicitation_id 
-    join dynamic_page as dp on ss.state_dynamic_page_id = dp.id
-    join dynamic_page_has_component as dphc on dp.id = dphc.dynamic_page_id
-    join dynamic_component_button as dcb on dphc.dynamic_component_id = dcb.dynamic_component_id
-    order by s.id, ss.id, dphc.id;
 
 INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, dynamic_page_has_component_id, dynamic_page_has_component_button_id, transition_decision, transition_reason) VALUES
 	(1, 2, 5, 46, 'Solicitado', NULL), (1, NULL, 6, 47, 'Cancelado pelo aluno', NULL),

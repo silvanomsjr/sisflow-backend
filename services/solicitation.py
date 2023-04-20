@@ -2,6 +2,7 @@ from flask import Flask, abort, request
 from flask_restful import Resource, Api, reqparse
 import json
 import datetime
+import traceback
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
@@ -9,7 +10,7 @@ from utils.smtpMails import smtpSend
 from utils.sistemConfig import getCoordinatorEmail
 from utils.utils import getFormatedMySQLJSON, sistemStrParser
 
-def loadPageComponents(stateId, pageId, studentParserToken=None):
+def loadPageComponents(pageId, studentParserToken=None):
 
   useParser = studentParserToken!=None
 
@@ -152,20 +153,18 @@ def loadPageComponents(stateId, pageId, studentParserToken=None):
       component['button_label'] = componentQ[28]
       component['button_color'] = componentQ[29]
 
-      #rawButtonTransiction = dbGetSingle(
-      #  " SELECT sst.id, solicitation_state_id_from, solicitation_state_id_to "
-      #  "   FROM dynamic_page AS dp "
-      #  "     JOIN dynamic_page_has_component AS dphc ON dp.id = dphc.dynamic_page_id "
-      #
-      #  "     JOIN solicitation_state_transition AS sst ON dphc.id = sst.dynamic_page_has_component_id "
-      #  "       AND dphc.dynamic_component_id = sst.dynamic_page_has_component_button_id "
-      #  
-      #  "     WHERE dp.id = %s AND sst.dynamic_page_has_component_button_id = %s; ",
-      #  [pageId, component['component_id']])
-      #
-      #print(rawButtonTransiction)
-      #  
-      #component['transition_id'] = rawButtonTransiction[0]
+      rawButtonTransiction = dbGetSingle(
+        " SELECT sst.id, solicitation_state_id_from, solicitation_state_id_to "
+        "   FROM dynamic_page AS dp "
+        "     JOIN dynamic_page_has_component AS dphc ON dp.id = dphc.dynamic_page_id "
+      
+        "     JOIN solicitation_state_transition AS sst ON dphc.id = sst.dynamic_page_has_component_id "
+        "       AND dphc.dynamic_component_id = sst.dynamic_page_has_component_button_id "
+        
+        "     WHERE dp.id = %s AND sst.dynamic_page_has_component_button_id = %s; ",
+        [pageId, component['component_id']])
+        
+      component['transition_id'] = rawButtonTransiction[0]
     
     # index by component order
     pageComponents.append(component)
@@ -270,8 +269,7 @@ class Solicitation(Resource):
     }
     
     pageId = solicitationQuery[27]
-    stateId = solicitationQuery[17]
-    pageComponents = loadPageComponents(stateId, pageId, studentParserToken)
+    pageComponents = loadPageComponents(pageId, studentParserToken)
 
     print("# Operation Done!")
 
@@ -493,7 +491,7 @@ class Solicitation(Resource):
 
     pageComponents = None
     try:
-      pageComponents = loadPageComponents(stateId, pageId, None)
+      pageComponents = loadPageComponents(pageId, None)
     except Exception as e:
       print("# Database reading error:")
       print(str(e))
@@ -522,8 +520,6 @@ class Solicitation(Resource):
     
     if stateDecision != "Em analise":
       abort(401, "Esta solicitação já foi realizada!")
-
-    #return {}, 200
   
     for component in pageComponents:
 
@@ -576,8 +572,8 @@ class Solicitation(Resource):
         "   FROM solicitation_state_transition AS sst "
         "     LEFT JOIN solicitation_state AS ss ON sst.solicitation_state_id_to = ss.id "
         "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
-        "     WHERE sst.id = %s AND ss.solicitation_id = %s AND sst.solicitation_state_id_from = %s; ",
-        [transitionId, solicitationId, stateId])
+        "     WHERE sst.id = %s; ",
+        [transitionId])
       
       if not queryRes:
         raise Exception("No return for solicitation_state_transition ")
@@ -592,6 +588,27 @@ class Solicitation(Resource):
     nextStateId = queryRes[2]
     nextStateMaxDays = queryRes[3]
     nextStateProfileEditorAcronym = queryRes[4]
+
+    # parse solicitation data
+    newSolicitationUserData = None
+    if oldSolicitationUserData:
+      newSolicitationUserData = oldSolicitationUserData
+    else:
+      newSolicitationUserData = {
+        'inputs': {},
+        'uploads': {},
+        'select_uploads': {}
+      }
+
+    if solicitationUserData:
+      for input in solicitationUserData['inputs']:
+        newSolicitationUserData['inputs'][input['input_name']] = input
+      for upload in solicitationUserData['uploads']:
+        newSolicitationUserData['uploads'][upload['upload_name']] = upload
+      for selectUpload in solicitationUserData['select_uploads']:
+        newSolicitationUserData['select_uploads'][selectUpload['select_upload_name']] = selectUpload
+    
+    newSolicitationUserData = json.dumps(newSolicitationUserData)
     
     print("# Updating and Inserting data in db")
     try:
@@ -607,6 +624,14 @@ class Solicitation(Resource):
         nextStateCreatedDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nextStateFinishDate = None if not nextStateMaxDays else (datetime.datetime.now() + datetime.timedelta(days=nextStateMaxDays)).strftime("%Y-%m-%d %H:%M:%S")
 
+        sendProfileName = None
+        if nextStateProfileEditorAcronym == "STU":
+          sendProfileName = "aluno"
+        elif nextStateProfileEditorAcronym == "ADV":
+          sendProfileName = "orientador"
+        elif nextStateProfileEditorAcronym == "COO":
+          sendProfileName = "coordenador"
+
         # inserts new user state
         dbExecute(
           " INSERT INTO user_has_solicitation_state "
@@ -615,7 +640,7 @@ class Solicitation(Resource):
           [
             userHasSolId,
             nextStateId,
-            "Aguardando o envio de dados pelo " + ("aluno" if nextStateProfileEditorAcronym == "STU" else ("orientador" if nextStateProfileEditorAcronym == "ADV" else "coordenador")),
+            "Aguardando o envio de dados pelo " + sendProfileName if sendProfileName else None,
             nextStateCreatedDate,
             nextStateFinishDate],
           False)
@@ -623,18 +648,23 @@ class Solicitation(Resource):
         # updates user solicitation data and changes its actual state
         dbExecute(
           " UPDATE user_has_solicitation "
-          "   SET actual_solicitation_state_id = %s "
+          "   SET actual_solicitation_state_id = %s, solicitation_user_data = %s "
           "   WHERE id = %s; ",
-          [nextStateId, userHasSolId], False)
-        
+          [nextStateId, newSolicitationUserData, userHasSolId], False)
+
       # if next state not exists
       else:
         # updates only user solicitation data
-        pass
+        dbExecute(
+          " UPDATE user_has_solicitation "
+          "   SET solicitation_user_data = %s "
+          "   WHERE id = %s; ",
+          [newSolicitationUserData, userHasSolId], False)
         
     except Exception as e:
       dbRollback()
       print("# Database reading error:")
+      traceback.print_exc()
       print(str(e))
       return "Erro na base de dados", 409
 

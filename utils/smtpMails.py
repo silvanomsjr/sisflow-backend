@@ -38,13 +38,8 @@ def smtp_working():
   return False
 
 def smtpSend(mailTo, mailSubject, mailInnerHtml):
-  Thread(target=smtpSendTask, args=(mailTo, mailSubject, mailInnerHtml)).start()
-
-def smtpSendTask(mailTo, mailSubject, mailInnerHtml):
 
   global smtpServer
-  
-  print(mailTo, mailSubject, mailInnerHtml)
 
   if not smtpServer:
     print("# Smtp not started")
