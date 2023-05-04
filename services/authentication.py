@@ -1,10 +1,11 @@
-from flask import Flask, abort, request
-from flask_restful import Resource, Api, reqparse
-from base64 import b64decode
+import os
 import random
 import string
-import os
 import time
+from base64 import b64decode
+
+from flask import Flask, abort, request
+from flask_restful import Resource, Api, reqparse
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import jwtEncode, jwtDecode, getHashPassword
@@ -21,10 +22,10 @@ class Login(Resource):
     insEmail, plainPassword = b64decode( loginArgs["Authorization"].replace("Basic ", "") ).decode("utf-8").split(':', 1)
     print("\n# Starting Login authentication for " + str(insEmail))
 
-    userRawData = None
+    userData = None
     try:
-      userRawData = dbGetSingle(
-        " SELECT id, institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime "
+      userData = dbGetSingle(
+        " SELECT id AS user_id, institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime "
         "   FROM user_account WHERE institutional_email = %s; ",
         [(insEmail)])
     except Exception as e:
@@ -32,34 +33,31 @@ class Login(Resource):
       print(str(e))
       return "Erro na base de dados", 409
 
-    if userRawData == None or len(userRawData) != 9 or userRawData[6] == None:
+    if userData == None:
+      abort(401, "Usuário não encontrado no sistema!")
+
+    if userData["password_hash"] == None:
       abort(401, "Usuário não cadastrado!")
     print("# User found")
     
-    hashP, _ = getHashPassword(plainPassword, userRawData[7])
+    hashP, _ = getHashPassword(plainPassword, userData["password_salt"])
 
-    if hashP != userRawData[6]:
+    if hashP != userData["password_hash"]:
       abort(401, "Senha incorreta!")
     print("# Password verifyed")
 
-    # initial user data token creation
-    userData = {
-      "user_id": userRawData[0],
-      "institutional_email": userRawData[1],
-      "secondary_email": userRawData[2],
-      "user_name": userRawData[3],
-      "gender": userRawData[4],
-      "phone": userRawData[5],
-      "creation_datetime": str(userRawData[8])
-    }
-
+    # cast creation_datetime to str and removes password info and  to use in request return
+    userData["creation_datetime"] = str(userData["creation_datetime"])
+    del userData["password_hash"]
+    del userData["password_salt"]
+    
     userRawProfiles = []
     try:
       userRawProfiles = dbGetAll(
         " SELECT p.profile_name, p.profile_acronym, p.profile_dynamic_fields_metadata, "
         " uhp.user_dinamyc_profile_fields_data, uhp.start_datetime, uhp.end_datetime, "
-        " uhpcoordinator.siape, "
-        " uhpadvisor.siape, "
+        " uhpcoordinator.siape AS coordinator_siape, "
+        " uhpadvisor.siape AS advisor_siape, "
         " uhpstudent.matricula, uhpstudent.course "
         "   FROM user_account AS us "
         "   INNER JOIN user_has_profile AS uhp ON us.id = uhp.user_id "
@@ -77,32 +75,33 @@ class Login(Resource):
     if userRawProfiles == None:
       abort(401, "Usuário desativado, consulte o coordenador para reativar!")
     
+    # copy needed to avoid empty fields
     userProfilesAcronyms = []
     userProfiles = []
     for profile in userRawProfiles:
 
       userProfile = {}
-      userProfile["profile_name"] = profile[0]
-      userProfile["profile_acronym"] = profile[1]
-      userProfile["profile_dynamic_fields_metadata"] = profile[2]
-      userProfile["user_dinamyc_profile_fields_data"] = profile[3]
-      userProfile["start_datetime"] = str(profile[4])
-      userProfile["end_datetime"] = str(profile[5])
+      userProfile["profile_name"] = profile["profile_name"]
+      userProfile["profile_acronym"] = profile["profile_acronym"]
+      userProfile["profile_dynamic_fields_metadata"] = profile["profile_dynamic_fields_metadata"]
+      userProfile["user_dinamyc_profile_fields_data"] = profile["user_dinamyc_profile_fields_data"]
+      userProfile["start_datetime"] = str(profile["start_datetime"])
+      userProfile["end_datetime"] = str(profile["end_datetime"])
 
       userProfilesAcronyms.append(userProfile["profile_acronym"])
 
       # coordinator
-      if profile[6]:
-        userProfile["siape"] = profile[6]
+      if profile["coordinator_siape"]:
+        userProfile["siape"] = profile["coordinator_siape"]
 
       # advisor
-      elif profile[7]:
-        userProfile["siape"] = profile[7]
+      elif profile["advisor_siape"]:
+        userProfile["siape"] = profile["advisor_siape"]
 
       # student
-      elif profile[8]:
-        userProfile["matricula"] = profile[8]
-        userProfile["course"] = profile[9]
+      elif profile["matricula"]:
+        userProfile["matricula"] = profile["matricula"]
+        userProfile["course"] = profile["course"]
       
       userProfiles.append(userProfile)
 
@@ -140,7 +139,7 @@ class Sign(Resource):
     if queryRes == None:
       abort(404, "Email institucional não encontrado no sistema!")
 
-    if queryRes[1] != None:
+    if queryRes["password_hash"] != None:
       abort(401, "Email já utilizado!")
 
     try:
@@ -159,7 +158,7 @@ class Sign(Resource):
       for _ in range(10))
 
     sqlScrypt = ""
-    if queryRes != None and len(queryRes) != 0:
+    if queryRes != None:
       sqlScrypt = " UPDATE mail_validation SET validation_code = %s WHERE institutional_email = %s; "
     else:
       sqlScrypt = " INSERT INTO mail_validation (validation_code, institutional_email) VALUES (%s,%s); "
@@ -236,7 +235,7 @@ class Sign(Resource):
       print(str(e))
       return "Erro na base de dados", 409
 
-    if queryRes and len(queryRes) == 2:
+    if queryRes:
       print("# Verification ok")
       return { "institutional_email": insEmail , "validation_code" : valCode}, 200
 
@@ -277,7 +276,7 @@ class Sign(Resource):
     if queryRes == None:
       abort(404, "Email institucional não encontrado no sistema!")
 
-    if queryRes[2] != None:
+    if queryRes["password_hash"] != None:
       abort(401, "Email já utilizado!")
 
     try:
@@ -290,7 +289,7 @@ class Sign(Resource):
       print(str(e))
       return "Erro na base de dados", 409
 
-    if queryRes == None or len(queryRes) != 2:
+    if queryRes == None:
       abort(401, "Chave de cadastro inválida para este email!")
       
     print("# Registering user")

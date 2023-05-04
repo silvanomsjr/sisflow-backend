@@ -1,7 +1,6 @@
 import datetime
-from pathlib import Path
 import requests
-
+from pathlib import Path
 from utils.dbUtils import *
 
 # pathlib paths works both for windows and unix OSs
@@ -67,8 +66,8 @@ def loadMails():
       print("# Database config reading error:")
       print(str(e))
     
-    coordinatorEmail = queryRes[0]
-    coordinatorName = queryRes[1]
+    coordinatorEmail = queryRes["mail"]
+    coordinatorName = queryRes["mail_name"]
 
     print("# Coordinator " + str(coordinatorName) + " email: " + str(coordinatorEmail))
 
@@ -92,10 +91,10 @@ def loadPaths():
 
       # Set root path for both OSs
       for cpath in queryRes:
-        if cpath[0] == "root path key files":
-          keyFilesPath = Path(cpath[1])
-        elif cpath[0] == "root path user files":
-          userFilesPath = Path(cpath[1])
+        if cpath["config_name"] == "root path key files":
+          keyFilesPath = Path(cpath["system_path"])
+        elif cpath["config_name"] == "root path user files":
+          userFilesPath = Path(cpath["system_path"])
       
       if not keyFilesPath or not userFilesPath:
         raise Exception("Missing config paths")
@@ -136,54 +135,47 @@ def loadHolidays():
     except Exception as e:
       print("# Error trying to load holidays from external API")
       print(str(e))
-      return " Error reading brasilapi, consider using another holiday api if this error continues"
+      return "Error reading brasilapi, consider using another holiday api if this error continues"
 
+    # start transaction
+    dbObjectIns = dbStartTransactionObj()
     try:
       dbExecute(
         " INSERT INTO config (config_name) VALUES (%s); ",
-        [(str("year " + actualYear))], False)
+        [(str("year " + actualYear))], True, dbObjectIns)
 
-      configId = dbGetSingle(
+      configQuery = dbGetSingle(
         " SELECT id FROM config WHERE config_name = %s; ",
-        [(str("year " + actualYear))], False)
+        [(str("year " + actualYear))], True, dbObjectIns)
 
-      if not configId:
+      if not configQuery:
         raise Exception(" No configId return for inserted actual year")
-      configId = configId[0]
 
       dbExecute(
         " INSERT INTO config_year (config_id, year) VALUES (%s, %s); ",
-        [configId, actualYear], False)
+        [configQuery["id"], actualYear], True, dbObjectIns)
       
       for holiday in holidaysRes:
         dbExecute(
           " INSERT INTO config_year_holiday (year, get_by, holiday_name, holiday_date) VALUES "
-          "   (%s, \'API\', %s, %s); ",
-          [actualYear, holiday["name"], holiday["date"]], False)
+          "   (%s, 'API', %s, %s); ",
+          [actualYear, holiday["name"], holiday["date"]], True, dbObjectIns)
     except Exception as e:
-      dbRollback()
+      dbRollback(dbObjectIns)
       print("# Database reading error:")
       print(str(e))
       return "Erro na base de dados", 409
-    dbCommit()
+    # ends transaction
+    dbCommit(dbObjectIns)
 
   try:
-    queryRes = dbGetAll(
+    holidayData = dbGetAll(
       " SELECT year, get_by, holiday_name, holiday_date FROM config_year_holiday WHERE year = %s; ",
       [(actualYear)])
   except Exception as e:
     print("# Database reading error:")
     print(str(e))
     return "Erro na base de dados", 409
-
-  holidayData = []
-  for holiday in queryRes:
-    holidayData.append({
-      "year": holiday[0],
-      "get_from": holiday[1],
-      "holiday_name": holiday[2],
-      "holiday_date": str(holiday[3])
-    })
   
   print("# Holidays configurated")
     

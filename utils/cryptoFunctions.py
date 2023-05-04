@@ -1,10 +1,9 @@
 import hashlib
 import jwt
-from Crypto.PublicKey import RSA
-
-from utils.sistemConfig import getKeysFilePath
 import random
 import string
+from Crypto.PublicKey import RSA
+from utils.sistemConfig import getKeysFilePath
 
 privateKey = None
 publicKey = None

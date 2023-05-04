@@ -1,5 +1,4 @@
 import json
-
 from utils.sistemConfig import getCoordinatorName
 
 # Formats a json string received from mysql db. Works with empty values

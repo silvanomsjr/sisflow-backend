@@ -125,7 +125,7 @@ class FileTransmission(Resource):
     
     if queryRes == None:
       abort(404, "Email institucional não encontrado no sistema!")
-    userId = queryRes[0]
+    userId = queryRes["id"]
 
     # calculates file path hash
     print("# Generating file hash name")
@@ -143,26 +143,28 @@ class FileTransmission(Resource):
       filePath = getUserFilesPath(fileName)
       pathIsFile = filePath.is_file()
 
+    # start transaction
+    dbObjectIns = dbStartTransactionObj()
     try:
       dbExecute(
         " INSERT INTO attachment (hash_name) VALUES (%s); ",
-        [fileName], False)
+        [fileName], True, dbObjectIns)
 
       queryRes = dbGetSingle(
         " SELECT id FROM attachment WHERE hash_name = %s; ",
-        [(fileName)], False)
+        [(fileName)], True, dbObjectIns)
       
-      if not queryRes or len(queryRes) != 1:
+      if not queryRes:
         raise Exception()
       
-      fileId = queryRes[0]
+      fileId = queryRes["id"]
 
       dbExecute(
         " INSERT INTO user_has_attachment (user_id, attachment_id) VALUES (%s, %s); ",
-        [userId, fileId], False)
+        [userId, fileId], True, dbObjectIns)
       
     except Exception as e:
-      dbRollback()
+      dbRollback(dbObjectIns)
       print("# Database error:")
       print(str(e))
       return "Erro na base de dados", 409
@@ -172,13 +174,13 @@ class FileTransmission(Resource):
     try:
       file.save(filePath)
     except Exception as e:
-      dbRollback()
+      dbRollback(dbObjectIns)
       print("# Sistem directory insertion error:")
       print(str(e))
       return "Erro no servidor", 409
     
     # only commits after saving in db and in server
-    dbCommit()
+    dbCommit(dbObjectIns)
 
     print("# File saved")
     return { "user_file_name" : fileName }, 200

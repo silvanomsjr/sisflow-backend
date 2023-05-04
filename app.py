@@ -1,13 +1,14 @@
-from flask import Flask, abort
-from flask_restful import Resource, Api, reqparse
-from flask_cors import CORS
 import os
 from dotenv import load_dotenv, find_dotenv
 
-from utils.dbUtils import dbStart
+from flask import Flask, abort
+from flask_restful import Resource, Api, reqparse
+from flask_cors import CORS
+
+from utils.dbUtils import dbCheckCreate
+from utils.cryptoFunctions import loadGenerateKeys
 from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
 from utils.smtpMails import smtpStart
-from utils.cryptoFunctions import loadGenerateKeys
 
 from services.authentication import Login, Sign
 from services.fileTransmission import FileTransmission
@@ -41,7 +42,7 @@ if getMissingEnvironmentVar():
     exit()
   
 # Start MySQL
-dbStart()
+dbCheckCreate()
 # Start SMTP Server
 smtpStart()
 # Load Sistem Configutations
