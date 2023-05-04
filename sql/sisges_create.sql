@@ -475,8 +475,8 @@ INSERT INTO dynamic_component_input (dynamic_component_id, dynamic_component_typ
 	(18, 'input', 'startInternship', 'date', TRUE, 'A data de início é obrigatória!');
 
 INSERT INTO dynamic_component_input_date_rule (dynamic_component_input_id, dynamic_component_input_type, rule_type, rule_message_type, rule_start_days, rule_end_days, rule_missing_message) VALUES
-	(18, 'date', 'must-not-be-from-today', 'warn', 5, 10, 'Atenção o prazo recomendável para verificar a documentação e assinar pelo grupo docente e SESTA é de 10 dias, clique em ok se deseja continuar mesmo assim'),
-    (18, 'date', 'must-not-be-from-today', 'error', NULL, 5, 'Atenção o prazo mínimo para verificar a documentação e assinar pelo SESTA é de 5 dias úteis');
+	(18, 'date', 'must-not-be-from-today', 'warn', 4, 10, 'Atenção o prazo recomendável para verificar a documentação e assinar pelo grupo docente e SESTA é de 10 dias, clique em ok se deseja continuar mesmo assim'),
+    (18, 'date', 'must-not-be-from-today', 'error', NULL, 4, 'Atenção o prazo mínimo para verificar a documentação e assinar pelo SESTA é de 5 dias úteis');
 
 INSERT INTO dynamic_component_upload (dynamic_component_id, dynamic_component_type, upload_label, upload_name, upload_required, upload_missing_message) VALUES
 	(19, 'upload', 'Envie seu histórico textual', 'HistTextual', TRUE, 'O envio do histórico textual é obrigatório!'),
