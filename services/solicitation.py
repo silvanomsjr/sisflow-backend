@@ -11,147 +11,8 @@ from utils.sistemConfig import getCoordinatorEmail
 from utils.smtpMails import smtpSend
 from utils.utils import getFormatedMySQLJSON, sistemStrParser
 
-def loadPageComponents(pageId, studentParserToken=None):
-
-  useParser = studentParserToken!=None
-
-  pageComponentsQuery = dbGetAll(
-    " SELECT dphc.dynamic_component_order AS component_order, "
-    " dc.id AS component_id, dc.type AS component_type, "
-    " dc_inner_html.inner_html, "
-    " dc_input.input_name, dc_input.input_type, dc_input.input_required, dc_input.input_missing_message, "
-    " dc_upload.upload_label, dc_upload.upload_name, dc_upload.upload_required, dc_upload.upload_missing_message, "
-    " dc_select.select_name, dc_select.select_label, dc_select.select_initial_text, dc_select.is_select_required, dc_select.select_missing_message, "
-    
-    " dcsupload_select.dynamic_component_id AS select_upload_select_id, dcsupload_select.select_name AS select_upload_select_name, "
-    " dcsupload_select.select_label AS select_upload_select_label, dcsupload_select.select_initial_text AS select_upload_select_initial_text, "
-    " dcsupload_select.is_select_required AS select_upload_is_select_required, dcsupload_select.select_missing_message AS select_upload_select_missing_message, "
-    
-    " dc_download.download_label, dc_download.download_from, dc_download.internal_upload_name, dc_download.internal_select_upload_name, dc_download.external_download_link, "
-    " dc_button.button_label, dc_button.button_color "
-    "   FROM dynamic_page AS dp "
-    "     JOIN dynamic_page_has_component AS dphc ON dp.id = dphc.dynamic_page_id "
-    "     JOIN dynamic_component AS dc ON dphc.dynamic_component_id = dc.id "
-
-    "     LEFT JOIN dynamic_component_inner_html AS dc_inner_html ON dc.id = dc_inner_html.dynamic_component_id "
-
-    "     LEFT JOIN dynamic_component_input AS dc_input ON dc.id = dc_input.dynamic_component_id "
-
-    "     LEFT JOIN dynamic_component_upload AS dc_upload ON dc.id = dc_upload.dynamic_component_id "
-
-    "     LEFT JOIN dynamic_component_select AS dc_select ON dc.id = dc_select.dynamic_component_id "
-
-    "     LEFT JOIN dynamic_component_select_upload AS dc_select_upload ON dc.id = dc_select_upload.dynamic_component_id "
-    "     LEFT JOIN dynamic_component_select AS dcsupload_select ON dc_select_upload.dynamic_component_select_name = dcsupload_select.select_name "
-    
-    "     LEFT JOIN dynamic_component_download AS dc_download ON dc.id = dc_download.dynamic_component_id "
-
-    "     LEFT JOIN dynamic_component_button AS dc_button ON dc.id = dc_button.dynamic_component_id "
-    
-    "   WHERE dp.id = %s "
-    "   ORDER BY dphc.dynamic_component_order; ",
-    [(pageId)])
-  
-  if not pageComponentsQuery:
-    raise Exception("No return for dynamic_page in get single solicitation ")
-  
-  # copy from query result to avoid empty fields
-  pageComponents = []
-  for componentQ in pageComponentsQuery:
-
-    component = {}
-    component["component_order"] = componentQ["component_order"]
-    component["component_id"] = componentQ["component_id"]
-    component["component_type"] = componentQ["component_type"]
-
-    if component["component_type"] == "inner_html":
-      component["inner_html"] = sistemStrParser(componentQ["inner_html"], studentParserToken) if useParser else componentQ["inner_html"]
-
-    if component["component_type"] == "input":
-      component["input_name"] = componentQ["input_name"]
-      component["input_type"] = componentQ["input_type"]
-      component["input_required"] = componentQ["input_required"]
-      component["input_missing_message"] = componentQ["input_missing_message"]
-
-      if component["input_type"] == "date":
-
-        rawInputDateRules = dbGetAll(
-          " SELECT rule_type, rule_message_type, rule_start_days, rule_end_days, rule_missing_message "
-          "   FROM dynamic_component_input AS dc_input "
-          "     JOIN dynamic_component_input_date_rule AS dc_input_date_rules ON dc_input.dynamic_component_id = dc_input_date_rules.dynamic_component_input_id "
-          "   WHERE dc_input.dynamic_component_id = %s; ",
-          [(component["component_id"])])
-
-        if rawInputDateRules:
-          component["input_date_rules"] = rawInputDateRules
-
-    if component["component_type"] == "upload":
-      component["upload_label"] = componentQ["upload_label"]
-      component["upload_name"] = componentQ["upload_name"]
-      component["upload_required"] = componentQ["upload_required"]
-      component["upload_missing_message"] = componentQ["upload_missing_message"]
-    
-    if component["component_type"] == "select":
-      component["select_name"] = componentQ["select_name"]
-      component["select_label"] = componentQ["select_label"]
-      component["select_initial_text"] = componentQ["select_initial_text"]
-      component["is_select_required"] = componentQ["is_select_required"]
-      component["select_missing_message"] = componentQ["select_missing_message"]
-
-      rawSelectOpts = dbGetAll(
-        " SELECT select_option_label AS option_label, select_option_value AS option_value "
-        "   FROM dynamic_component_select AS dc_select "
-        "     JOIN dynamic_component_select_option AS dc_select_option ON dc_select.dynamic_component_id = dc_select_option.dynamic_component_select_id "
-        "   WHERE dc_select.dynamic_component_id = %s; ",
-        [(component["component_id"])])
-
-      component["select_options"] = rawSelectOpts
-
-    if component["component_type"] == "select_upload":
-      component["select_id"] = componentQ["select_upload_select_id"]
-      component["select_upload_name"] = componentQ["select_upload_select_name"]
-      component["select_upload_label"] = componentQ["select_upload_select_label"]
-      component["select_upload_initial_text"] = componentQ["select_upload_select_initial_text"]
-      component["select_upload_required"] = componentQ["select_upload_is_select_required"]
-      component["select_upload_missing_message"] = componentQ["select_upload_select_missing_message"]
-
-      rawSelectUploadOptions = dbGetAll(
-        " SELECT select_option_label AS label, select_option_value AS value "
-        "   FROM dynamic_component_select AS dc_select "
-        "     JOIN dynamic_component_select_option AS dc_select_option ON dc_select.dynamic_component_id = dc_select_option.dynamic_component_select_id "
-        "   WHERE dc_select.dynamic_component_id = %s; ",
-        [(component["select_id"])])
-
-      component['select_upload_options'] = rawSelectUploadOptions
-
-    if component["component_type"] == "download":
-      component["download_label"] = componentQ["download_label"]
-      component["download_from"] = componentQ["download_from"]
-      component["internal_upload_name"] = componentQ["internal_upload_name"]
-      component["internal_select_upload_name"] = componentQ["internal_select_upload_name"]
-      component["external_download_link"] = componentQ["external_download_link"]
-      
-    if component["component_type"] == "button":
-      component["button_label"] = componentQ["button_label"]
-      component["button_color"] = componentQ["button_color"]
-
-      rawButtonTransiction = dbGetSingle(
-        " SELECT sst.id, solicitation_state_id_from, solicitation_state_id_to "
-        "   FROM dynamic_page AS dp "
-        "     JOIN dynamic_page_has_component AS dphc ON dp.id = dphc.dynamic_page_id "
-      
-        "     JOIN solicitation_state_transition AS sst ON dphc.id = sst.dynamic_page_has_component_id "
-        "       AND dphc.dynamic_component_id = sst.dynamic_page_has_component_button_id "
-        
-        "     WHERE dp.id = %s AND sst.dynamic_page_has_component_button_id = %s; ",
-        [pageId, component["component_id"]])
-        
-      component["transition_id"] = rawButtonTransiction["id"]
-    
-    # index by component order
-    pageComponents.append(component)
-  
-  return pageComponents
+from services.dynamicPage import getDynamicPage
+from services.solicitationTransitions import getTransitions
 
 # Data from single solicitation
 class Solicitation(Resource):
@@ -159,17 +20,17 @@ class Solicitation(Resource):
   # get single solicitation and associated dynamic page data
   def get(self):
 
-    solicitationsArgs = reqparse.RequestParser()
-    solicitationsArgs.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
-    solicitationsArgs.add_argument("user_has_state_id", location="args", type=int, required=True)
-    solicitationsArgs = solicitationsArgs.parse_args()
+    args = reqparse.RequestParser()
+    args.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
+    args.add_argument("user_has_state_id", location="args", type=int, required=True)
+    args = args.parse_args()
 
     # verify jwt and its signature correctness
-    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs)
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(args)
     if not isTokenValid:
       abort(401, errorMsg)
 
-    userHasStateId = solicitationsArgs["user_has_state_id"]
+    userHasStateId = args["user_has_state_id"]
 
     print("\n# Starting get single solicitation for " + tokenData["institutional_email"] + "\n# Reading data from DB")
 
@@ -215,7 +76,7 @@ class Solicitation(Resource):
         " ssprof.profile_acronym AS state_profile_editor_acronym, ss.id, ss.state_description, ss.state_max_duration_days, "
         " uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
         " uhss.id AS user_has_state_id, uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
-        " dp.id AS page_id, dp.title AS page_title "
+        " ss.state_dynamic_page_id AS page_id "
         
         "   FROM user_account AS uc_stu "
         "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
@@ -225,7 +86,6 @@ class Solicitation(Resource):
         "     JOIN user_has_solicitation_state AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
         "     JOIN solicitation_state AS ss ON uhss.solicitation_state_id = ss.id "
-        "     JOIN dynamic_page AS dp ON ss.state_dynamic_page_id = dp.id "
 
         "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
         "     LEFT JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
@@ -252,9 +112,14 @@ class Solicitation(Resource):
         "course": solicitationQuery["student_course"]
       }]
     }
+
+    professorParserToken={}
     
-    pageId = solicitationQuery["page_id"]
-    pageComponents = loadPageComponents(pageId, studentParserToken)
+    dynamicPage = None
+    if solicitationQuery["page_id"]:
+      dynamicPage = getDynamicPage(solicitationQuery["page_id"], studentParserToken, professorParserToken)
+    
+    transitions = getTransitions(solicitationQuery["actual_solicitation_state_id"])
 
     print("# Operation Done!")
     
@@ -290,27 +155,25 @@ class Solicitation(Resource):
         "reason": solicitationQuery["reason"],
         "start_datetime": str(solicitationQuery["start_datetime"]),
         "end_datetime": str(solicitationQuery["end_datetime"]),
-        "page": {
-          "title": sistemStrParser(solicitationQuery["page_title"], studentParserToken),
-          "components" : pageComponents
-        }
+        "transitions": transitions,
+        "page": dynamicPage
       },
     }, 200
   
   # put to create solicitations - only for students
   def put(self):
 
-    solicitationsArgs = reqparse.RequestParser()
-    solicitationsArgs.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
-    solicitationsArgs.add_argument("solicitation_id", location="json", type=int, required=True)
-    solicitationsArgs = solicitationsArgs.parse_args()
+    args = reqparse.RequestParser()
+    args.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
+    args.add_argument("solicitation_id", location="json", type=int, required=True)
+    args = args.parse_args()
 
     # verify jwt and its signature correctness
-    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs, ["STU"])
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(args, ["STU"])
     if not isTokenValid:
       abort(401, errorMsg)
 
-    solicitationId = solicitationsArgs["solicitation_id"]
+    solicitationId = args["solicitation_id"]
     userId = tokenData["user_id"]
 
     print("\n# Starting put Single Solicitation for " + tokenData["institutional_email"] + "\n# Reading data from DB")
@@ -408,21 +271,20 @@ class Solicitation(Resource):
   # post to resolve solicitations
   def post(self):
 
-    solicitationsArgs = reqparse.RequestParser()
-    solicitationsArgs.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
-    solicitationsArgs.add_argument("user_has_state_id", location="json", type=int, required=True)
-    solicitationsArgs.add_argument("transition_id", location="json", type=str, required=True)
-    solicitationsArgs.add_argument("solicitation_user_data", location="json", required=True)
-    solicitationsArgs = solicitationsArgs.parse_args()
+    args = reqparse.RequestParser()
+    args.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
+    args.add_argument("user_has_state_id", location="json", type=int, required=True)
+    args.add_argument("transition_id", location="json", type=int, required=True)
+    args.add_argument("solicitation_user_data", location="json", required=True)
+    args = args.parse_args()
 
     # verify jwt and its signature correctness
-    isTokenValid, errorMsg, tokenData = isAuthTokenValid(solicitationsArgs)
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(args)
     if not isTokenValid:
       abort(401, errorMsg)
 
-    userHasStateId = solicitationsArgs["user_has_state_id"]
-    transitionId = solicitationsArgs["transition_id"]
-    solicitationUserData = solicitationsArgs["solicitation_user_data"]
+    userHasStateId = args["user_has_state_id"]
+    solicitationUserData = args["solicitation_user_data"]
 
     if solicitationUserData:
       solicitationUserData = json.loads(
@@ -445,7 +307,7 @@ class Solicitation(Resource):
         "     JOIN user_has_solicitation AS uhs ON uc_stu.id = uhs.user_id "
         "     JOIN user_has_solicitation_state AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation_state AS ss ON uhss.solicitation_state_id = ss.id "
-        "     JOIN dynamic_page AS dp ON ss.state_dynamic_page_id = dp.id "
+        "     LEFT JOIN dynamic_page AS dp ON ss.state_dynamic_page_id = dp.id "
         "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
         "     LEFT JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
         "     LEFT JOIN user_has_profile AS uhp_adv ON uhpad.user_has_profile_id = uhp_adv.id "
@@ -478,14 +340,6 @@ class Solicitation(Resource):
     stateProfileAcronymEditor = queryRes["profile_acronym"]
     pageId = queryRes["page_id"]
 
-    pageComponents = None
-    try:
-      pageComponents = loadPageComponents(pageId, None)
-    except Exception as e:
-      print("# Database reading error:")
-      print(str(e))
-      return "Erro na base de dados", 409
-    
     # Verify solicitation args correcteness
     print("# Validating data")
 
@@ -509,69 +363,88 @@ class Solicitation(Resource):
     
     if stateDecision != "Em analise":
       abort(401, "Esta solicitação já foi realizada!")
-  
-    for component in pageComponents:
 
-      # Checks if all required inputs are valid
-      if component["component_type"] == "input" and component["input_required"]:
-        found = False
-        
-        for userInput in solicitationUserData['inputs']:
-          if userInput["input_name"] == component["input_name"]:
-            found = True
+    # verify transitions
+    transitions = getTransitions(actualSolStateId)
+    transition = None
+    for ts in transitions:
+      if ts["id"] == args["transition_id"]:
+        transition = ts
+    
+    if transition == None:
+      return "Transição não encontrada para este estado", 404
+
+    if transition["type"] == "from_dynamic_page":
+
+      dynamicPage = None
+      try:
+        dynamicPage = getDynamicPage(pageId)
+      except Exception as e:
+        print("# Database reading error:")
+        print(str(e))
+        return "Erro na base de dados", 409
+
+      for component in dynamicPage["components"]:
+
+        # Checks if all required inputs are valid
+        if component["component_type"] == "input" and component["input_required"]:
+          found = False
           
-        if not found:
-          abort(401, "Input da solicitação está faltando!")
+          for userInput in solicitationUserData['inputs']:
+            if userInput["input_name"] == component["input_name"]:
+              found = True
+            
+          if not found:
+            abort(401, "Input da solicitação está faltando!")
 
-      # Checks if all required uploads are valid
-      if component["component_type"] == "upload" and component["upload_required"]:
-        found = False
+        # Checks if all required uploads are valid
+        if component["component_type"] == "upload" and component["upload_required"]:
+          found = False
 
-        for userUpload in solicitationUserData["uploads"]:
+          for userUpload in solicitationUserData["uploads"]:
 
-          if userUpload["upload_name"] == component["upload_name"]:
-            try:
-              if dbGetSingle(
-                  " SELECT att.hash_name "
-                  "   FROM attachment AS att JOIN user_has_attachment AS uhatt ON att.id = uhatt.attachment_id "
-                  "   WHERE uhatt.user_id = %s AND att.hash_name = %s; ",
-                  [tokenData["user_id"], userUpload["upload_hash_name"]]):
-                found = True
-                break
-            except Exception as e:
-              print("# Database reading error:")
-              print(str(e))
-              return "Erro na base de dados", 409
+            if userUpload["upload_name"] == component["upload_name"]:
+              try:
+                if dbGetSingle(
+                    " SELECT att.hash_name "
+                    "   FROM attachment AS att JOIN user_has_attachment AS uhatt ON att.id = uhatt.attachment_id "
+                    "   WHERE uhatt.user_id = %s AND att.hash_name = %s; ",
+                    [tokenData["user_id"], userUpload["upload_hash_name"]]):
+                  found = True
+                  break
+              except Exception as e:
+                print("# Database reading error:")
+                print(str(e))
+                return "Erro na base de dados", 409
+                  
+          if not found:
+            abort(401, "Anexo da solicitação está faltando!")
                 
-        if not found:
-          abort(401, "Anexo da solicitação está faltando!")
-              
-      # Checks if all required select uploads are valid - incomplete
-      if component["component_type"] == "select_upload" and component["select_upload_required"]:
-        pass
-
-    # get transiction data
+        # Checks if all required select uploads are valid - incomplete
+        if component["component_type"] == "select_upload" and component["select_upload_required"]:
+          pass
+    
+    # get next state data
     try:
       queryRes = dbGetSingle(
-        " SELECT sst.transition_decision, sst.transition_reason, "
-        "   ss.id AS state_id, ss.state_max_duration_days, ssprof.profile_acronym "
+        " SELECT ss.id AS state_id, ss.state_max_duration_days, ssprof.profile_acronym "
         "   FROM solicitation_state_transition AS sst "
         "     LEFT JOIN solicitation_state AS ss ON sst.solicitation_state_id_to = ss.id "
         "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
         "     WHERE sst.id = %s; ",
-        [transitionId])
+        (args["transition_id"],))
       
       if not queryRes:
-        raise Exception("No return for solicitation_state_transition ")
+        raise Exception("No return for next state data")
 
     except Exception as e:
       print("# Database reading error:")
       print(str(e))
       return "Erro na base de dados", 409
     
-    transitionDecision = queryRes["transition_decision"]
-    transitionReason = queryRes["transition_reason"]
-    nextStateId = queryRes["state_id"]
+    transitionDecision = transition["transition_decision"]
+    transitionReason = transition["transition_reason"]
+    nextStateId = transition["solicitation_state_id_to"]
     nextStateMaxDays = queryRes["state_max_duration_days"]
     nextStateProfileEditorAcronym = queryRes["profile_acronym"]
 

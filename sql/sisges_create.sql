@@ -7,14 +7,12 @@ CREATE TABLE config(
     config_name VARCHAR(50),
     PRIMARY KEY (id)
 );
-
 CREATE TABLE config_system_path(
 	config_id INT NOT NULL,
 	system_path VARCHAR(256),
     PRIMARY KEY (config_id),
     FOREIGN KEY (config_id) REFERENCES config(id)
 );
-
 CREATE TABLE config_mail(
     config_id INT NOT NULL,
     mail VARCHAR(256) NOT NULL UNIQUE,
@@ -22,14 +20,12 @@ CREATE TABLE config_mail(
     PRIMARY KEY (config_id),
     FOREIGN KEY (config_id) REFERENCES config(id)
 );
-
 CREATE TABLE config_year(
     config_id INT NOT NULL,
     year INT NOT NULL UNIQUE,
     PRIMARY KEY (config_id),
     FOREIGN KEY (config_id) REFERENCES config(id)
 );
-
 CREATE TABLE config_year_holiday(
     id INT NOT NULL AUTO_INCREMENT,
     year INT NOT NULL,
@@ -39,20 +35,17 @@ CREATE TABLE config_year_holiday(
     PRIMARY KEY (id),
     FOREIGN KEY (year) REFERENCES config_year(year)
 );
-
 INSERT INTO config(config_name) VALUES
 	("root path key files"),
     ("root path user files"),
     ("coordinator mail");
-    
 INSERT INTO config_system_path(config_id, system_path) VALUES
 	(1, "/sisges/secrets/"),
 	(2, "/sisges/userfiles/");
-    
 INSERT INTO config_mail(config_id, mail, mail_name) VALUES
 	(3, "prof.asoares@ufu.br", "Alexsandro Santos Soares");
 
-/* User data */
+/* User data and Profiles */
 CREATE TABLE user_account(
 	id INT NOT NULL AUTO_INCREMENT,
     institutional_email VARCHAR(256) NOT NULL UNIQUE,
@@ -65,8 +58,6 @@ CREATE TABLE user_account(
     creation_datetime DATETIME,
     PRIMARY KEY (id)
 );
-
-/* Profiles */
 CREATE TABLE profile(
 	id INT NOT NULL AUTO_INCREMENT,
     profile_name VARCHAR(50) UNIQUE,
@@ -74,7 +65,6 @@ CREATE TABLE profile(
     profile_dynamic_fields_metadata JSON,
     PRIMARY KEY (id)
 );
-
 CREATE TABLE user_has_profile(
 	id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -87,21 +77,18 @@ CREATE TABLE user_has_profile(
     FOREIGN KEY (profile_id) REFERENCES profile(id),
     UNIQUE (user_id, profile_id)
 );
-
 CREATE TABLE user_has_profile_coordinator_data(
 	user_has_profile_id INT NOT NULL,
     siape VARCHAR(15) NOT NULL UNIQUE,
     PRIMARY KEY (user_has_profile_id),
     FOREIGN KEY (user_has_profile_id) REFERENCES user_has_profile(id)
 );
-
 CREATE TABLE user_has_profile_advisor_data(
 	user_has_profile_id INT NOT NULL,
     siape VARCHAR(15) NOT NULL UNIQUE,
 	PRIMARY KEY (user_has_profile_id),
     FOREIGN KEY (user_has_profile_id) REFERENCES user_has_profile(id)
 );
-
 CREATE TABLE user_has_profile_student_data(
 	user_has_profile_id INT NOT NULL,
     matricula VARCHAR(15) NOT NULL UNIQUE,
@@ -109,26 +96,32 @@ CREATE TABLE user_has_profile_student_data(
     PRIMARY KEY (user_has_profile_id),
     FOREIGN KEY (user_has_profile_id) REFERENCES user_has_profile(id)
 );
-
-/* States */
-CREATE TABLE state(
-	id INT NOT NULL AUTO_INCREMENT,
-    state_name VARCHAR(50),
-    state_type VARCHAR(50),
-    state_description VARCHAR(100),
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE user_has_state(
-	id INT NOT NULL AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    state_id INT NOT NULL,
-    start_datetime DATETIME NOT NULL,
-    end_datetime DATETIME,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user_account(id),
-    FOREIGN KEY (state_id) REFERENCES state(id)
-);
+INSERT INTO user_account (institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime) VALUES
+	("admin@ufu.br", "admin@gmail.com","Admin", 'M', "34111111111","96c287e89a2edf3e807560fd79d8a064b4248846379ab9fe691e2bc158e8293f","btoUCZer0lROFz0e",now()),
+    ("prof.asoares@ufu.br","prof.asoares@gmail.com", "Alexsandro Santos Soares", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
+	("orientador@ufu.br", "orientador@gmail.com","Orientador Renato", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("aluno@ufu.br", "aluno@gmail.com","Aluno Vitor", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
+INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
+	("admin", "ADM", NULL),
+    ("coordinator", "COO", NULL),
+    ("advisor", "ADV", NULL),
+    ("student", "STU", NULL);
+INSERT INTO user_has_profile (user_id, profile_id, user_dinamyc_profile_fields_data, start_datetime, end_datetime) VALUES 
+	(1, 1, NULL, NOW(), NULL),
+    (2, 2, NULL, NOW(), NULL),
+    (2, 3, NULL, NOW(), NULL),
+    (3, 3, NULL, NOW(), NULL),
+    (4, 4, NULL, NOW(), NULL),
+    (5, 4, NULL, NOW(), NULL);
+INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape)  VALUES
+	(2, 'SIAPEALEX');
+INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
+	(3, 'SIAPEALEX'),
+	(4, 'SIAPERENATO');
+INSERT INTO user_has_profile_student_data (user_has_profile_id, matricula, course) VALUES
+	(5, '11111BSI111', 'BSI'),
+    (6, '11911BCC039', 'BCC');
 
 /* Attachments */
 CREATE TABLE attachment(
@@ -136,7 +129,6 @@ CREATE TABLE attachment(
 	hash_name VARCHAR(150) NOT NULL UNIQUE,
     PRIMARY KEY (id)
 );
-
 CREATE TABLE user_has_attachment(
 	id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -146,48 +138,6 @@ CREATE TABLE user_has_attachment(
     FOREIGN KEY (attachment_id) REFERENCES attachment(id)
 );
 
-INSERT INTO user_account (institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime) VALUES
-	("admin@ufu.br", "admin@gmail.com","Admin", 'M', "34111111111","96c287e89a2edf3e807560fd79d8a064b4248846379ab9fe691e2bc158e8293f","btoUCZer0lROFz0e",now()),
-    ("prof.asoares@ufu.br","prof.asoares@gmail.com", "Alexsandro Santos Soares", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
-	("orientador@ufu.br", "orientador@gmail.com","Orientador Renato", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
-    ("aluno@ufu.br", "aluno@gmail.com","Aluno Vitor", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
-	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
-
-INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
-	("admin", "ADM", NULL),
-    ("coordinator", "COO", NULL),
-    ("advisor", "ADV", NULL),
-    ("student", "STU", NULL);
-
-INSERT INTO user_has_profile (user_id, profile_id, user_dinamyc_profile_fields_data, start_datetime, end_datetime) VALUES 
-	(1, 1, NULL, NOW(), NULL),
-    (2, 2, NULL, NOW(), NULL),
-    (2, 3, NULL, NOW(), NULL),
-    (3, 3, NULL, NOW(), NULL),
-    (4, 4, NULL, NOW(), NULL),
-    (5, 4, NULL, NOW(), NULL);
-    
-INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape)  VALUES
-	(2, 'SIAPEALEX');
-
-INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
-	(3, 'SIAPEALEX'),
-	(4, 'SIAPERENATO');
-
-INSERT INTO user_has_profile_student_data (user_has_profile_id, matricula, course) VALUES
-	(5, '11111BSI111', 'BSI'),
-    (6, '11911BCC039', 'BCC');
-    
-INSERT INTO attachment (hash_name) VALUES 
-	("ViniciusCalixtoRocha_HistTextual_9w0ThBLCyT.pdf");
-    
-INSERT INTO user_has_attachment (user_id, attachment_id) VALUES 
-	(1,1),
-    (2,1),
-    (3,1),
-    (4,1),
-    (5,1);
-
 /* Security sigin code */
 CREATE TABLE mail_validation(
 	institutional_email VARCHAR(256) NOT NULL,
@@ -196,11 +146,9 @@ CREATE TABLE mail_validation(
     PRIMARY KEY (institutional_email),
     FOREIGN KEY (institutional_email) REFERENCES user_account(institutional_email)
 );
-
 CREATE TRIGGER set_mail_validation_code_expires_in BEFORE INSERT ON mail_validation 
     FOR EACH ROW 
     SET NEW.validation_code_expires_in = NOW() + INTERVAL 8 HOUR;
-
 CREATE EVENT mail_validation_code_expiration
 	ON SCHEDULE EVERY 1 HOUR
 	COMMENT 'Remove mail validation codes after it expires'
@@ -326,12 +274,12 @@ CREATE TABLE dynamic_component_button(
 	dynamic_component_id INT NOT NULl,
 	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
     button_label VARCHAR(100) NOT NULL,
-    button_color ENUM('darkblue', 'red', 'black'),
+    button_color ENUM('darkblue', 'red', 'black') NOT NULL,
+    button_transation_type ENUM('Request', 'Cancel', 'Send', 'Send and Defer', 'Defer', 'Reject') NOT NULL,
     PRIMARY KEY (dynamic_component_id),
     FOREIGN KEY (dynamic_component_id, dynamic_component_type) REFERENCES dynamic_component(id, type),
     CHECK (dynamic_component_type = 'button')
 );
-
 INSERT INTO dynamic_page (title) VALUES 
 	('Solicitação de inicio de estágio obrigatório com vínculo - Avaliação de históricos e comprovante de vínculo empregatício'),
     ('Solicitação de inicio de estágio obrigatório sem vínculo - Avaliação de históricos'),
@@ -358,7 +306,6 @@ INSERT INTO dynamic_page (title) VALUES
     ('Envio de relatório final - Assinatura [[[ifMale?do aluno:::da aluna]]]'),
     ('Envio de relatório final - Assinatura da coordenação de estágios'),
     ('Envio de relatório final - Concluída');
-    
 INSERT INTO dynamic_component (type) VALUES 
 	('inner_html'),('inner_html'),('inner_html'),('inner_html'),('inner_html'),
     ('inner_html'),('inner_html'),('inner_html'),('inner_html'),('inner_html'),
@@ -372,7 +319,6 @@ INSERT INTO dynamic_component (type) VALUES
     ('download'),('download'),('download'),('download'),('download'),('download'),
     ('download'),('download'),('download'),('download'),('download'),('download'),('download'),
     ('button'),('button'),('button'),('button'),('button'),('button');
-    
 INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_component_type, inner_html) VALUES 
 	(
 		1, 
@@ -470,14 +416,11 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
         '<p>Com todas as assinaturas a solicitação a solicitação está concluída e o estágio pode ser finalizado!</p>'
 			'<p>Realize o download abaixo da documentação assinada</p>'
 	);
-    
 INSERT INTO dynamic_component_input (dynamic_component_id, dynamic_component_type, input_name, input_type, input_required, input_missing_message) VALUES 
 	(18, 'input', 'startInternship', 'date', TRUE, 'A data de início é obrigatória!');
-
 INSERT INTO dynamic_component_input_date_rule (dynamic_component_input_id, dynamic_component_input_type, rule_type, rule_message_type, rule_start_days, rule_end_days, rule_missing_message) VALUES
 	(18, 'date', 'must-not-be-from-today', 'warn', 4, 10, 'Atenção o prazo recomendável para verificar a documentação e assinar pelo grupo docente e SESTA é de 10 dias, clique em ok se deseja continuar mesmo assim'),
     (18, 'date', 'must-not-be-from-today', 'error', NULL, 4, 'Atenção o prazo mínimo para verificar a documentação e assinar pelo SESTA é de 5 dias úteis');
-
 INSERT INTO dynamic_component_upload (dynamic_component_id, dynamic_component_type, upload_label, upload_name, upload_required, upload_missing_message) VALUES
 	(19, 'upload', 'Envie seu histórico textual', 'HistTextual', TRUE, 'O envio do histórico textual é obrigatório!'),
     (20, 'upload', 'Envie seu histórico visual', 'HistVisual', TRUE, 'O envio do histórico visual é obrigatório!'),
@@ -491,20 +434,16 @@ INSERT INTO dynamic_component_upload (dynamic_component_id, dynamic_component_ty
     (28, 'upload', 'Envie o Relatório Parcial com sua assinatura', 'RelParcialCoordenador', TRUE, 'O envio do Relatório Parcial é obrigatório!'),
 	(29, 'upload', 'Envie o Relatório Final com sua assinatura', 'RelFinalAluno', TRUE, 'O envio do Relatório Final é obrigatório!'),
     (30, 'upload', 'Envie o Relatório Final com sua assinatura', 'RelFinalCoordenador', TRUE, 'O envio do Relatório Final é obrigatório!');
-    
 INSERT INTO dynamic_component_select (dynamic_component_id, dynamic_component_type, select_name, select_label, select_initial_text, is_select_required, select_missing_message) VALUES 
 	(31, 'select', 'Vinculo', 'Escolha o tipo de vínculo', DEFAULT, TRUE, 'O envio do vínculo empregatício é obrigatório');
-    
 INSERT INTO dynamic_component_select_option (dynamic_component_select_id, select_option_label, select_option_value) VALUES 
 	(31, DEFAULT, NULL),
     (31, 'Carteira Digital de Trabalho', 'CTPS'),
     (31, 'Contrato de pessoa jurídica', 'PJ'),
     (31, 'Declaração do Empregador', 'Declaracao'),
     (31, 'Outros', 'Outros');
-    
 INSERT INTO dynamic_component_select_upload (dynamic_component_id, dynamic_component_type, dynamic_component_select_name) VALUES 
 	(32, 'select_upload', 'Vinculo');
-    
 INSERT INTO dynamic_component_download (dynamic_component_id, dynamic_component_type, download_label, download_from, internal_upload_name, internal_select_upload_name, external_download_link) VALUES
 	(33, 'download', 'Faça o download do histórico textual', 'internal_from_upload', 'HistTextual', NULL, NULL),
 	(34, 'download', 'Faça o download do histórico visual', 'internal_from_upload', 'HistVisual', NULL, NULL),
@@ -519,15 +458,13 @@ INSERT INTO dynamic_component_download (dynamic_component_id, dynamic_component_
 	(43, 'download', 'Faça o download do relatório parcial assinado pelo aluno e coordenador', 'internal_from_upload', 'RelParcialCoordenador', NULL, NULL),
 	(44, 'download', 'Faça o download do relatório final assinado pelo aluno', 'internal_from_upload', 'RelFinalAluno', NULL, NULL),
 	(45, 'download', 'Faça o download do relatório parcial assinado pelo aluno e coordenador', 'internal_from_upload', 'RelFinalCoordenador', NULL, NULL);
-
-INSERT INTO dynamic_component_button (dynamic_component_id, dynamic_component_type, button_label, button_color) VALUES 
-	(46, 'button', 'Solicitar', 'darkblue'),
-    (47, 'button', 'Cancelar', 'black'),
-    (48, 'button', 'Enviar', 'darkblue'),
-    (49, 'button', 'Enviar e deferir', 'darkblue'),
-    (50, 'button', 'Deferir', 'darkblue'),
-    (51, 'button', 'Indeferir', 'red');
-
+INSERT INTO dynamic_component_button (dynamic_component_id, dynamic_component_type, button_label, button_color, button_transation_type) VALUES 
+	(46, 'button', 'Solicitar', 'darkblue', 'Request'),
+    (47, 'button', 'Cancelar', 'black', 'Cancel'),
+    (48, 'button', 'Enviar', 'darkblue', 'Send'),
+    (49, 'button', 'Enviar e deferir', 'darkblue', 'Send and Defer'),
+    (50, 'button', 'Deferir', 'darkblue', 'Defer'),
+    (51, 'button', 'Indeferir', 'red', 'Reject');
 INSERT INTO dynamic_page_has_component (dynamic_page_id, dynamic_component_id, dynamic_component_order) VALUES 
 	(1,1,1), (1,19,2), (1,20,3), (1,32,4), (1,46,5), (1,47,6),
     (2,1,1), (2,19,2), (2,20,3), (2,46,4), (2,47,5),
@@ -565,7 +502,6 @@ CREATE TABLE dynamic_mail(
     is_sent_to_coordinator BOOL DEFAULT FALSE,
     PRIMARY KEY (id)
 );
-
 INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_sent_to_advisor, is_sent_to_coordinator) VALUES 
 	(
 		'Sistema de estágios - Solicitação de avaliação dos históricos',
@@ -607,36 +543,40 @@ CREATE TABLE solicitation(
     solicitation_name VARCHAR(256),
     PRIMARY KEY (id)
 );
-
 CREATE TABLE solicitation_state(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_id INT NOT NULL,
     state_profile_editor INT,
     state_description VARCHAR(256),
     state_max_duration_days INT,
-    state_dynamic_page_id INT NOT NULL,
+    state_dynamic_page_id INT,
     is_initial_state BOOL NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
     FOREIGN KEY (state_profile_editor) REFERENCES profile(id),
     FOREIGN KEY (state_dynamic_page_id) REFERENCES dynamic_page(id)
 );
-
 CREATE TABLE solicitation_state_transition(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_state_id_from INT NOT NULL,
     solicitation_state_id_to INT,
-    dynamic_page_has_component_id INT NOT NULL,
-	dynamic_page_has_component_button_id INT NOT NULL,
-    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
-	transition_reason VARCHAR(100),
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_state_id_from) REFERENCES solicitation_state(id),
-    FOREIGN KEY (solicitation_state_id_to) REFERENCES solicitation_state(id),
-    FOREIGN KEY (dynamic_page_has_component_id, dynamic_page_has_component_button_id) REFERENCES dynamic_page_has_component(id, dynamic_component_id),
-    FOREIGN KEY (dynamic_page_has_component_button_id) REFERENCES dynamic_component_button(dynamic_component_id)
+    FOREIGN KEY (solicitation_state_id_to) REFERENCES solicitation_state(id)
 );
-
+CREATE TABLE solicitation_state_transition_manual(
+	solicitation_state_transition_id INT NOT NULL,
+    PRIMARY KEY (solicitation_state_transition_id),
+    FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
+);
+CREATE TABLE solicitation_state_transition_from_dynamic_page(
+	solicitation_state_transition_id INT NOT NULL,
+    dynamic_page_component ENUM('Button-Request', 'Button-Cancel', 'Button-Send', 'Button-Send and Defer', 'Button-Defer', 'Button-Reject', 'Table-Cancel') NOT NULL,
+	transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+    transition_reason VARCHAR(100) NOT NULL,
+    PRIMARY KEY (solicitation_state_transition_id),
+    FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
+);
 CREATE TABLE solicitation_state_dynamic_mail(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_state_id INT NOT NULL,
@@ -645,7 +585,6 @@ CREATE TABLE solicitation_state_dynamic_mail(
     FOREIGN KEY (solicitation_state_id) REFERENCES solicitation_state(id),
     FOREIGN KEY (dynamic_mail_id) REFERENCES dynamic_mail(id)
 );
-
 CREATE TABLE user_has_solicitation(
 	id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -659,7 +598,6 @@ CREATE TABLE user_has_solicitation(
     FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
     FOREIGN KEY (actual_solicitation_state_id) REFERENCES solicitation_state(id)
 );
-
 CREATE TABLE user_has_solicitation_state(
 	id INT NOT NULL AUTO_INCREMENT,
     user_has_solicitation_id INT NOT NULL,
@@ -672,7 +610,6 @@ CREATE TABLE user_has_solicitation_state(
     FOREIGN KEY (user_has_solicitation_id) REFERENCES user_has_solicitation(id),
     FOREIGN KEY (solicitation_state_id) REFERENCES solicitation_state(id)
 );
-
 INSERT INTO solicitation (solicitation_name) VALUES 
 	('Inicio de estágio obrigatório externo com vinculo empregatício'),
     ('Inicio de estágio obrigatório externo sem vinculo empregatício'),
@@ -680,7 +617,6 @@ INSERT INTO solicitation (solicitation_name) VALUES
     ('Inicio de estágio não obrigatório interno'),
     ('Envio de relatório parcial'),
     ('Envio de relatório final');
-    
 INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, is_initial_state) VALUES
 	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, TRUE),
     (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, False),
@@ -738,34 +674,7 @@ INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail
     (20, 2),
     (21, 3),
     (23, 4);
-
-INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, dynamic_page_has_component_id, dynamic_page_has_component_button_id, transition_decision, transition_reason) VALUES
-	(1, 2, 5, 46, 'Solicitado', NULL), (1, NULL, 6, 47, 'Cancelado pelo aluno', NULL),
-    (2, 3, 26, 50, 'Deferido', NULL), (2, NULL, 27, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (2, NULL, 28, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    (3, 4, 38, 46, 'Solicitado', NULL), (3, NULL, 39, 47, 'Cancelado pelo aluno', NULL),
-    (4, 5, 43, 48, 'Enviado', NULL), (4, NULL, 44, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
-    (5, 6, 49, 49, 'Deferido', NULL), (5, NULL, 50, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (5, NULL, 51, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    
-    (7, 8, 10, 46, 'Solicitado', NULL), (7, NULL, 11, 47, 'Cancelado pelo aluno', NULL),
-    (8, 9, 32, 50, 'Deferido', NULL), (8, NULL, 33, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (8, NULL, 34, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    (9, 10, 58, 46, 'Solicitado', NULL), (9, NULL, 59, 47, 'Cancelado pelo aluno', NULL),
-    (10, 11, 65, 48, 'Enviado', NULL), (10, NULL, 66, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
-    (11, 12, 74, 49, 'Deferido', NULL), (11, NULL, 75, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (11, NULL, 76, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    
-    (13, 14, 15, 46, 'Solicitado', NULL), (13, NULL, 16, 47, 'Cancelado pelo aluno', NULL),
-    (14, 15, 32, 50, 'Deferido', NULL), (14, NULL, 33, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (14, NULL, 34, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    (15, 16, 58, 46, 'Solicitado', NULL), (15, NULL, 59, 47, 'Cancelado pelo aluno', NULL),
-    (16, 17, 65, 48, 'Enviado', NULL), (16, NULL, 66, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
-    (17, 18, 74, 49, 'Deferido', NULL), (17, NULL, 75, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (17, NULL, 76, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    
-    (19, 20, 20, 46, 'Solicitado', NULL), (19, NULL, 21, 47, 'Cancelado pelo aluno', NULL),
-    (20, 21, 32, 50, 'Deferido', NULL), (20, NULL, 33, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (20, NULL, 34, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    (21, 22, 58, 46, 'Solicitado', NULL), (21, NULL, 59, 47, 'Cancelado pelo aluno', NULL),
-    (22, 23, 65, 48, 'Enviado', NULL), (22, NULL, 66, 47, 'Cancelado pelo orientador', 'Motivo a ser implementado para orientadores'),
-    (23, 24, 74, 49, 'Deferido', NULL), (23, NULL, 75, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'), (23, NULL, 76, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    
-    (25, 26, 82, 46, 'Solicitado', NULL), (25, NULL, 83, 47, 'Cancelado pelo aluno', NULL),
-    (26, 27, 87, 49, 'Deferido', NULL), (26, NULL, 88, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (26, NULL, 89, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação'),
-    
-    (28, 29, 94, 46, 'Solicitado', NULL), (28, NULL, 95, 47, 'Cancelado pelo aluno', NULL),
-    (29, 30, 99, 49, 'Deferido', NULL), (29, NULL, 100, 51, 'Indeferido', 'Motivo a ser implementado para cordenação'),  (29, NULL, 101, 47, 'Cancelado pela coordenação', 'Motivo a ser implementado para cordenação');
+INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to) VALUES 
+	(1, 2), (1, 2), (1, 2);
+INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
+	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'), (3, 'Table-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação');
