@@ -11,6 +11,7 @@ from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
 from utils.smtpMails import smtpStart
 
 from services.authentication import Login, Sign
+from services.advisors import Advisors
 from services.dynamicPage import DynamicPage
 from services.fileTransmission import FileTransmission
 from services.solicitations import CoordinatorSolicitations, AdvisorSolicitations, StudentSolicitations
@@ -30,6 +31,7 @@ api.add_resource(Sign, "/sign")
 api.add_resource(FileTransmission, "/file")
 api.add_resource(DynamicPage, "/dynamicpage")
 api.add_resource(CoordinatorSolicitations, "/coordinator/solicitations")
+api.add_resource(Advisors, "/advisors")
 api.add_resource(AdvisorSolicitations, "/advisor/solicitations")
 api.add_resource(StudentSolicitations, "/student/solicitations")
 api.add_resource(Solicitation, "/solicitation")

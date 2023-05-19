@@ -223,7 +223,7 @@ class Solicitation(Resource):
       dbExecute(
         " INSERT INTO user_has_solicitation "
         " (user_id, advisor_siape, solicitation_id, actual_solicitation_state_id, solicitation_user_data) VALUES "
-        "   (%s, \"SIAPERENATO\", %s, %s, NULL); ",
+        "   (%s, NULL, %s, %s, NULL); ",
         [userId, solicitationId, stateId], True, dbObjectIns)
 
       # select added user solicitation id

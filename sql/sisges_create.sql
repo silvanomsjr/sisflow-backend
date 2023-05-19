@@ -99,7 +99,11 @@ CREATE TABLE user_has_profile_student_data(
 INSERT INTO user_account (institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime) VALUES
 	("admin@ufu.br", "admin@gmail.com","Admin", 'M', "34111111111","96c287e89a2edf3e807560fd79d8a064b4248846379ab9fe691e2bc158e8293f","btoUCZer0lROFz0e",now()),
     ("prof.asoares@ufu.br","prof.asoares@gmail.com", "Alexsandro Santos Soares", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
-	("orientador@ufu.br", "orientador@gmail.com","Orientador Renato", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+	("abdala@ufu.br", NULL, "Daniel Duarte Abdala", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
+    ("gina@ufu.br", NULL, "Gina Maira Barbosa de Oliveira", 'F', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
+    ("luiz@ufu.br", NULL, "Luiz Gustavo Almeida Martins", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
+    ("maia@ufu.br", NULL, "Marcelo de Almeida Maia", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
+    ("stephane@ufu.br", NULL,"Stéphane Julia", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("aluno@ufu.br", "aluno@gmail.com","Aluno Vitor", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
 	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
 INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
@@ -112,16 +116,24 @@ INSERT INTO user_has_profile (user_id, profile_id, user_dinamyc_profile_fields_d
     (2, 2, NULL, NOW(), NULL),
     (2, 3, NULL, NOW(), NULL),
     (3, 3, NULL, NOW(), NULL),
-    (4, 4, NULL, NOW(), NULL),
-    (5, 4, NULL, NOW(), NULL);
-INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape)  VALUES
-	(2, 'SIAPEALEX');
+    (4, 3, NULL, NOW(), NULL),
+    (5, 3, NULL, NOW(), NULL),
+    (6, 3, NULL, NOW(), NULL),
+    (7, 3, NULL, NOW(), NULL),
+    (8, 4, NULL, NOW(), NULL),
+    (9, 4, NULL, NOW(), NULL);
+INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape) VALUES
+	(2, 'SIAPE-ALEX');
 INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
-	(3, 'SIAPEALEX'),
-	(4, 'SIAPERENATO');
+	(3, 'SIAPE-ALEX'),
+	(4, 'SIAPE-ABDALA'),
+    (5, 'SIAPE-GINA'),
+    (6, 'SIAPE-LUIZ'),
+    (7, 'SIAPE-MAIA'),
+    (8, 'SIAPE-STEPHANE');
 INSERT INTO user_has_profile_student_data (user_has_profile_id, matricula, course) VALUES
-	(5, '11111BSI111', 'BSI'),
-    (6, '11911BCC039', 'BCC');
+	(9, '11111BSI111', 'BSI'),
+    (10, '11911BCC039', 'BCC');
 
 /* Attachments */
 CREATE TABLE attachment(
@@ -550,6 +562,7 @@ CREATE TABLE solicitation_state(
     state_description VARCHAR(256),
     state_max_duration_days INT,
     state_dynamic_page_id INT,
+    state_static_page_name VARCHAR(100),
     is_initial_state BOOL NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
@@ -617,64 +630,51 @@ INSERT INTO solicitation (solicitation_name) VALUES
     ('Inicio de estágio não obrigatório interno'),
     ('Envio de relatório parcial'),
     ('Envio de relatório final');
-INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, is_initial_state) VALUES
-	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, TRUE),
-    (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, False),
-	(1, 4, 'Solicitação de assinaturas do PA pelo aluno', 4, 7, False),
-    (1, 3, 'Requerimento de assinatura do PA ao orientador', 4, 8, False),
-    (1, 2, 'Requerimento de assinatura do PA ao coordenador', 10, 9, False),
-    (1, NULL, 'Estágio iniciado', NULL, 10, False),
+INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES
+	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
+    (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, False),
+    (1, 4, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', False),
+    (1, 3, 'Aceite de orientado pelo orientador', 4, 7, NULL, False),
+	(1, 4, 'Solicitação de assinaturas do PA pelo aluno', 4, 7, NULL, False),
+    (1, 3, 'Requerimento de assinatura do PA ao orientador', 4, 8, NULL, False),
+    (1, 2, 'Requerimento de assinatura do PA ao coordenador', 10, 9, NULL, False),
+    (1, NULL, 'Estágio iniciado', NULL, 10, NULL, False),
     
-    (2, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 2, TRUE),
-    (2, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, False),
-	(2, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, False),
-    (2, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, False),
-    (2, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, False),
-    (2, NULL, 'Estágio iniciado', NULL, 14, False),
+    (2, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 2, NULL, TRUE),
+    (2, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, NULL, False),
+	(2, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, NULL, False),
+    (2, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, NULL, False),
+    (2, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, NULL, False),
+    (2, NULL, 'Estágio iniciado', NULL, 14, NULL, False),
     
-    (3, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 3, TRUE),
-    (3, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, False),
-	(3, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, False),
-    (3, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, False),
-    (3, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, False),
-    (3, NULL, 'Estágio iniciado', NULL, 14, False),
+    (3, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 3, NULL, TRUE),
+    (3, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, NULL, False),
+	(3, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, NULL, False),
+    (3, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, NULL, False),
+    (3, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, NULL, False),
+    (3, NULL, 'Estágio iniciado', NULL, 14, NULL, False),
     
-    (4, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 4, TRUE),
-    (4, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, False),
-	(4, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, False),
-    (4, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, False),
-    (4, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, False),
-    (4, NULL, 'Estágio iniciado', NULL, 14, False),
+    (4, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 4, NULL, TRUE),
+    (4, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, NULL, False),
+	(4, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, NULL, False),
+    (4, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, NULL, False),
+    (4, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, NULL, False),
+    (4, NULL, 'Estágio iniciado', NULL, 14, NULL, False),
     
-    (5, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório parcial pelo aluno', 4, 15, TRUE),
-    (5, 2, 'Avaliação e assinatura do relatório parcial pelo coordenador', 4, 16, False),
-    (5, NULL,  'Relatório parcial completo', NULL, 17, False),
+    (5, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório parcial pelo aluno', 4, 15, NULL, TRUE),
+    (5, 2, 'Avaliação e assinatura do relatório parcial pelo coordenador', 4, 16, NULL, False),
+    (5, NULL,  'Relatório parcial completo', NULL, 17, NULL, False),
     
-    (6, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório final pelo aluno', 4, 18, TRUE),
-    (6, 2, 'Avaliação e assinatura do relatório final pelo coordenador', 4, 19, False),
-    (6, NULL,  'Relatório final completo', NULL, 20, False);
+    (6, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório final pelo aluno', 4, 18, NULL, TRUE),
+    (6, 2, 'Avaliação e assinatura do relatório final pelo coordenador', 4, 19, NULL, False),
+    (6, NULL, 'Relatório final completo', NULL, 20, NULL, False);
 
 INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail_id) VALUES
 	(1, 1),
-    (2, 2),
-    (3, 3),
-    (5, 4),
-    
-    (7, 1),
-    (8, 2),
-    (9, 3),
-    (11, 4),
-    
-    (13, 1),
-    (14, 2),
-    (15, 3),
-    (17, 4),
-    
-    (19, 1),
-    (20, 2),
-    (21, 3),
-    (23, 4);
+    (2, 2);
 INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to) VALUES 
-	(1, 2), (1, 2), (1, 2);
+	(1, 2), (1, NULL),
+    (2, 3), (2, NULL), (2, NULL);
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
-	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'), (3, 'Table-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação');
+	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'),(5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
