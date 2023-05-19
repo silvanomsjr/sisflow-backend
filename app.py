@@ -11,9 +11,11 @@ from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
 from utils.smtpMails import smtpStart
 
 from services.authentication import Login, Sign
+from services.dynamicPage import DynamicPage
 from services.fileTransmission import FileTransmission
 from services.solicitations import CoordinatorSolicitations, AdvisorSolicitations, StudentSolicitations
 from services.solicitation import Solicitation
+from services.solicitationTransitions import SolicitationTransitions
 
 app = Flask(__name__)
 CORS(
@@ -26,10 +28,12 @@ api = Api(app)
 api.add_resource(Login, "/login")
 api.add_resource(Sign, "/sign")
 api.add_resource(FileTransmission, "/file")
+api.add_resource(DynamicPage, "/dynamicpage")
 api.add_resource(CoordinatorSolicitations, "/coordinator/solicitations")
 api.add_resource(AdvisorSolicitations, "/advisor/solicitations")
 api.add_resource(StudentSolicitations, "/student/solicitations")
 api.add_resource(Solicitation, "/solicitation")
+api.add_resource(SolicitationTransitions, "/solicitation/transitions")
 
 # For homol and production ambients like render.com the environment variables are already loaded
 if getMissingEnvironmentVar():
