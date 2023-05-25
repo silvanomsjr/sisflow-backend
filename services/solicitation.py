@@ -69,11 +69,11 @@ class Solicitation(Resource):
         " uhpsd.matricula AS student_matricula, uhpsd.course AS student_course, "
 
         " uc_adv.user_name AS advisor_name, uc_adv.institutional_email AS advisor_institutional_email, "
-        " uc_adv.secondary_email AS advisor_secondary_email, uc_adv.gender AS advisor_gender, "
-        " uc_adv.phone AS advisor_phone, uc_adv.creation_datetime AS advisor_creation_datetime, uhpad.siape AS advisor_siape, "
+        " uc_adv.secondary_email AS advisor_secondary_email, uc_adv.gender AS advisor_gender, uc_adv.phone AS advisor_phone, "
+        " uc_adv.creation_datetime AS advisor_creation_datetime, uhpad.siape AS advisor_siape, 3 AS advisor_students, "
 
         " s.solicitation_name, "
-        " ssprof.profile_acronym AS state_profile_editor_acronym, ss.id, ss.state_description, ss.state_max_duration_days, "
+        " ssprof.profile_acronym AS state_profile_editor_acronym, ss.id AS solicitation_step_id, ss.state_description, ss.state_max_duration_days, "
         " uhs.id AS user_has_solicitation_id, uhs.is_accepted_by_advisor, uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
         " uhss.id AS user_has_state_id, uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
         " ss.state_dynamic_page_id AS page_id "
@@ -119,7 +119,7 @@ class Solicitation(Resource):
     if solicitationQuery["page_id"]:
       dynamicPage = getDynamicPage(solicitationQuery["page_id"], studentParserToken, professorParserToken)
     
-    transitions = getTransitions(solicitationQuery["actual_solicitation_state_id"])
+    transitions = getTransitions(solicitationQuery["solicitation_step_id"])
 
     print("# Operation Done!")
     
@@ -141,7 +141,8 @@ class Solicitation(Resource):
         "gender": solicitationQuery["advisor_gender"],
         "phone": solicitationQuery["advisor_phone"],
         "creation_datetime": str(solicitationQuery["advisor_creation_datetime"]),
-        "siape": solicitationQuery["advisor_siape"]
+        "siape": solicitationQuery["advisor_siape"],
+        "advisor_students": solicitationQuery["advisor_students"]
       },
       "solicitation":{
         "solicitation_name": solicitationQuery["solicitation_name"],
@@ -369,7 +370,7 @@ class Solicitation(Resource):
       abort(401, "Esta solicitação já foi realizada!")
 
     # verify transitions
-    transitions = getTransitions(actualSolStateId)
+    transitions = getTransitions(stateId)
 
     if not transitions or len(transitions) == 0:
       abort(401, "Solicitação inválida!")
