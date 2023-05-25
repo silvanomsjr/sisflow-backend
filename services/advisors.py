@@ -15,7 +15,7 @@ def getAdvisors(offset=None, limit=None, advisorName=None):
   advQueryCount = None
   try:
     advQuery = dbGetAll(
-      " SELECT ua.id AS user_id, institutional_email, secondary_email, user_name, gender, phone, siape "
+      " SELECT ua.id AS user_id, institutional_email, secondary_email, user_name, gender, phone, siape, 3 AS advisor_students "
       "   FROM user_account ua "
       "   JOIN user_has_profile uhp ON ua.id = uhp.user_id "
       "   JOIN user_has_profile_advisor_data uhpad ON uhp.id = uhpad.user_has_profile_id "
@@ -33,7 +33,6 @@ def getAdvisors(offset=None, limit=None, advisorName=None):
     traceback.print_exc()
     return "Erro na base de dados", 409
 
-  print(advQueryCount)
   if not advQuery or not advQueryCount:
     return "Orientadores não encontrados", 404
   
@@ -42,10 +41,10 @@ def getAdvisors(offset=None, limit=None, advisorName=None):
     "advisors": advQuery
   }
 
-# Data from solicitation transitions (State machine)
+# Data from all advisors
 class Advisors(Resource):
 
-  # get dynamic page data
+  # get advisors
   def get(self):
 
     args = reqparse.RequestParser()

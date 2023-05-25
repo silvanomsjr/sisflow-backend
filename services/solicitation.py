@@ -74,7 +74,7 @@ class Solicitation(Resource):
 
         " s.solicitation_name, "
         " ssprof.profile_acronym AS state_profile_editor_acronym, ss.id, ss.state_description, ss.state_max_duration_days, "
-        " uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
+        " uhs.id AS user_has_solicitation_id, uhs.is_accepted_by_advisor, uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
         " uhss.id AS user_has_state_id, uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
         " ss.state_dynamic_page_id AS page_id "
         
@@ -150,7 +150,9 @@ class Solicitation(Resource):
         "state_max_duration_days": solicitationQuery["state_max_duration_days"],
         "actual_solicitation_state_id": solicitationQuery["actual_solicitation_state_id"],
         "solicitation_user_data": getFormatedMySQLJSON(solicitationQuery["solicitation_user_data"]),
+        "user_has_solicitation_id": solicitationQuery["user_has_solicitation_id"],
         "user_has_state_id": solicitationQuery["user_has_state_id"],
+        "is_accepted_by_advisor": solicitationQuery["is_accepted_by_advisor"],
         "decision": solicitationQuery["decision"],
         "reason": solicitationQuery["reason"],
         "start_datetime": str(solicitationQuery["start_datetime"]),
@@ -274,8 +276,10 @@ class Solicitation(Resource):
     args = reqparse.RequestParser()
     args.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
     args.add_argument("user_has_state_id", location="json", type=int, required=True)
-    args.add_argument("transition_id", location="json", type=int, required=True)
     args.add_argument("solicitation_user_data", location="json", required=True)
+    args.add_argument("transition_id", location="json", type=int, required=True)
+    args.add_argument("transition_decision", location="json", type=str)
+    args.add_argument("transition_reason", location="json", type=str)
     args = args.parse_args()
 
     # verify jwt and its signature correctness
@@ -366,13 +370,25 @@ class Solicitation(Resource):
 
     # verify transitions
     transitions = getTransitions(actualSolStateId)
+
+    if not transitions or len(transitions) == 0:
+      abort(401, "Solicitação inválida!")
+
+    print(transitions)
     transition = None
     for ts in transitions:
       if ts["id"] == args["transition_id"]:
+
+        if ts["type"] == "manual":
+          if not args["transition_decision"] or not args["transition_reason"]:
+            abort(500, "Missing transition decision or reason")
+          ts["transition_decision"] = args["transition_decision"]
+          ts["transition_reason"] = args["transition_reason"]
+
         transition = ts
     
     if transition == None:
-      return "Transição não encontrada para este estado", 404
+      return abort(404, "Transição não encontrada para este estado!")
 
     if transition["type"] == "from_dynamic_page":
 

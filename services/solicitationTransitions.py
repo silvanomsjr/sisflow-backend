@@ -24,7 +24,7 @@ def getTransitions(solicitationStateIdFrom):
     return "Erro na base de dados", 409
 
   if not tsQuery:
-    return "Transições não encontradas", 404
+    return []
   
   tsParsed = []
   for transition in tsQuery:

@@ -602,6 +602,7 @@ CREATE TABLE user_has_solicitation(
 	id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     advisor_siape VARCHAR(15),
+    is_accepted_by_advisor BOOL DEFAULT FALSE,
     solicitation_id INT NOT NULL,
     actual_solicitation_state_id INT NOT NULL,
     solicitation_user_data JSON,
@@ -672,9 +673,21 @@ INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_des
 INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail_id) VALUES
 	(1, 1),
     (2, 2);
+    
 INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to) VALUES 
-	(1, 2), (1, NULL),
-    (2, 3), (2, NULL), (2, NULL);
+	(1, 2), 
+    (1, NULL),
+    (2, 3),
+    (2, NULL),
+    (2, NULL),
+    (3, 4);
+
+INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id) VALUES
+    (6);
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
-	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'),(5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
+	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'),
+    (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'),
+    (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'),
+    (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
+	
