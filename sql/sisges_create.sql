@@ -558,7 +558,6 @@ CREATE TABLE solicitation(
 CREATE TABLE solicitation_state(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_id INT NOT NULL,
-    state_profile_editor INT,
     state_description VARCHAR(256),
     state_max_duration_days INT,
     state_dynamic_page_id INT,
@@ -566,8 +565,15 @@ CREATE TABLE solicitation_state(
     is_initial_state BOOL NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
-    FOREIGN KEY (state_profile_editor) REFERENCES profile(id),
     FOREIGN KEY (state_dynamic_page_id) REFERENCES dynamic_page(id)
+);
+CREATE TABLE solicitation_state_profile_editors(
+	id INT NOT NULL AUTO_INCREMENT,
+    solicitation_state_id INT NOT NULL,
+    state_profile_editor INT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (solicitation_state_id) REFERENCES solicitation_state(id),
+    FOREIGN KEY (state_profile_editor) REFERENCES profile(id)
 );
 CREATE TABLE solicitation_state_transition(
 	id INT NOT NULL AUTO_INCREMENT,
@@ -633,6 +639,42 @@ INSERT INTO solicitation (solicitation_name) VALUES
     ('Inicio de estágio não obrigatório interno'),
     ('Envio de relatório parcial'),
     ('Envio de relatório final');
+INSERT INTO solicitation_state (solicitation_id, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES
+	(1, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
+    (1, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, FALSE),
+    (1, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
+    (1, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', FALSE),
+	(1, 'Processo de assinaturas para início de estágio', 15, NULL, 'interbegin-signatures', FALSE),
+    (1, 'Estágio iniciado', NULL, 14, NULL, FALSE);
+INSERT INTO solicitation_state_profile_editors (solicitation_state_id, state_profile_editor) VALUES 
+	(1, 4),
+    (2, 2),
+    (3, 4),
+    (4, 3),
+    (5, 2), (5, 3), (5, 4);
+INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to) VALUES 
+	(1, 2), 
+    (1, NULL),
+    (2, 3),
+    (2, NULL),
+    (2, NULL),
+    (3, 4),
+    (3, NULL),
+    (4, 5),
+    (4, NULL),
+    (4, NULL);
+
+INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
+    (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação');
+    
+INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
+	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
+/*	
+INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail_id) VALUES
+	(1, 1),
+    (2, 2);
 INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES
 	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
     (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, False),
@@ -671,28 +713,4 @@ INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_des
     (6, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório final pelo aluno', 4, 18, NULL, TRUE),
     (6, 2, 'Avaliação e assinatura do relatório final pelo coordenador', 4, 19, NULL, False),
     (6, NULL, 'Relatório final completo', NULL, 20, NULL, False);
-
-INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail_id) VALUES
-	(1, 1),
-    (2, 2);
-    
-INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to) VALUES 
-	(1, 2), 
-    (1, NULL),
-    (2, 3),
-    (2, NULL),
-    (2, NULL),
-    (3, 4),
-    (3, NULL),
-    (4, 5),
-    (4, NULL),
-    (4, NULL);
-
-INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
-    (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação');
-    
-INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
-	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
-	
+*/

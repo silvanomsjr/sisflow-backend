@@ -73,10 +73,11 @@ class Solicitation(Resource):
         " uc_adv.creation_datetime AS advisor_creation_datetime, uhpad.siape AS advisor_siape, 3 AS advisor_students, "
 
         " s.solicitation_name, "
-        " ssprof.profile_acronym AS state_profile_editor_acronym, ss.id AS solicitation_step_id, ss.state_description, ss.state_max_duration_days, "
+        " ss.id AS state_id, ss.state_description, ss.state_max_duration_days, "
         " uhs.id AS user_has_solicitation_id, uhs.is_accepted_by_advisor, uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
         " uhss.id AS user_has_state_id, uhss.decision, uhss.reason, uhss.start_datetime, uhss.end_datetime, "
-        " ss.state_dynamic_page_id AS page_id "
+        " ss.state_dynamic_page_id AS page_id, "
+        " sspe.profile_acronyms "
         
         "   FROM user_account AS uc_stu "
         "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
@@ -87,10 +88,18 @@ class Solicitation(Resource):
         "     JOIN solicitation AS s ON uhs.solicitation_id = s.id "
         "     JOIN solicitation_state AS ss ON uhss.solicitation_state_id = ss.id "
 
-        "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
         "     LEFT JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
         "     LEFT JOIN user_has_profile AS uhp_adv ON uhpad.user_has_profile_id = uhp_adv.id "
         "     LEFT JOIN user_account AS uc_adv ON uhp_adv.user_id = uc_adv.id "
+
+        "     LEFT JOIN ( "
+        "       SELECT sspe.solicitation_state_id, "
+        "         GROUP_CONCAT(sspe.state_profile_editor) AS state_profile_editors, "
+        "         GROUP_CONCAT(p.profile_acronym) AS profile_acronyms "
+        "           FROM solicitation_state_profile_editors sspe "
+        "           JOIN profile p ON sspe.state_profile_editor = p.id "
+        "           GROUP BY sspe.solicitation_state_id) sspe ON ss.id = sspe.solicitation_state_id "
+        
         "   WHERE uc_stu.id = %s AND uhss.id = %s; ",
         [studentId, userHasStateId])
       
@@ -119,7 +128,7 @@ class Solicitation(Resource):
     if solicitationQuery["page_id"]:
       dynamicPage = getDynamicPage(solicitationQuery["page_id"], studentParserToken, professorParserToken)
     
-    transitions = getTransitions(solicitationQuery["solicitation_step_id"])
+    transitions = getTransitions(solicitationQuery["state_id"])
 
     print("# Operation Done!")
     
@@ -146,7 +155,7 @@ class Solicitation(Resource):
       },
       "solicitation":{
         "solicitation_name": solicitationQuery["solicitation_name"],
-        "state_profile_editor_acronym": solicitationQuery["state_profile_editor_acronym"],
+        "state_profile_editor_acronyms": solicitationQuery["profile_acronyms"],
         "state_description": solicitationQuery["state_description"],
         "state_max_duration_days": solicitationQuery["state_max_duration_days"],
         "actual_solicitation_state_id": solicitationQuery["actual_solicitation_state_id"],
@@ -302,7 +311,7 @@ class Solicitation(Resource):
         " uc_adv.id AS advisor_id, uc_adv.institutional_email AS advisor_ins_email, uc_adv.secondary_email AS advisor_sec_email, "
         " uhs.id AS user_has_solicitation_id, uhs.solicitation_id, uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
         " uhss.solicitation_state_id, uhss.decision, uhss.start_datetime, uhss.end_datetime, "
-        " ssprof.profile_acronym, "
+        " sspe.profile_acronyms, "
         " dp.id AS page_id "
         "   FROM user_account AS uc_stu "
         "     JOIN user_has_profile AS uhp_stu ON uc_stu.id = uhp_stu.user_id "
@@ -311,10 +320,16 @@ class Solicitation(Resource):
         "     JOIN user_has_solicitation_state AS uhss ON uhs.id = uhss.user_has_solicitation_id "
         "     JOIN solicitation_state AS ss ON uhss.solicitation_state_id = ss.id "
         "     LEFT JOIN dynamic_page AS dp ON ss.state_dynamic_page_id = dp.id "
-        "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
         "     LEFT JOIN user_has_profile_advisor_data AS uhpad ON uhs.advisor_siape = uhpad.siape "
         "     LEFT JOIN user_has_profile AS uhp_adv ON uhpad.user_has_profile_id = uhp_adv.id "
         "     LEFT JOIN user_account AS uc_adv ON uhp_adv.user_id = uc_adv.id "
+        "     LEFT JOIN ( "
+        "       SELECT sspe.solicitation_state_id, "
+        "         GROUP_CONCAT(sspe.state_profile_editor) AS state_profile_editors, "
+        "         GROUP_CONCAT(p.profile_acronym) AS profile_acronyms "
+        "           FROM solicitation_state_profile_editors sspe "
+        "           JOIN profile p ON sspe.state_profile_editor = p.id "
+        "           GROUP BY sspe.solicitation_state_id) sspe ON ss.id = sspe.solicitation_state_id "
         "   WHERE uhss.id = %s; ",
         [(userHasStateId)])
       
@@ -340,7 +355,7 @@ class Solicitation(Resource):
     stateDecision = queryRes["decision"]
     stateStartDatetime = queryRes["start_datetime"]
     stateEndDatetime = queryRes["end_datetime"]
-    stateProfileAcronymEditor = queryRes["profile_acronym"]
+    stateProfileAcronymEditors = queryRes["profile_acronyms"]
     pageId = queryRes["page_id"]
 
     # Verify solicitation args correcteness
@@ -351,7 +366,7 @@ class Solicitation(Resource):
       if tokenData["user_id"] != studentId and tokenData["user_id"] != advisorId:
         abort(401, "Edição a solicitação não permitida!")
 
-    if not stateProfileAcronymEditor in tokenData["profile_acronyms"]:
+    if not stateProfileAcronymEditors in tokenData["profile_acronyms"]:
       abort(401, "Perfil editor a solicitação inválido!")
       
     if actualSolStateId!=stateId:
@@ -435,10 +450,16 @@ class Solicitation(Resource):
     # get next state data
     try:
       queryRes = dbGetSingle(
-        " SELECT ss.id AS state_id, ss.state_max_duration_days, ssprof.profile_acronym "
+        " SELECT ss.id AS state_id, ss.state_max_duration_days, sspe.profile_acronyms "
         "   FROM solicitation_state_transition AS sst "
         "     LEFT JOIN solicitation_state AS ss ON sst.solicitation_state_id_to = ss.id "
-        "     LEFT JOIN profile AS ssprof ON ss.state_profile_editor = ssprof.id "
+        "     LEFT JOIN ( "
+        "       SELECT sspe.solicitation_state_id, "
+        "         GROUP_CONCAT(sspe.state_profile_editor) AS state_profile_editors, "
+        "         GROUP_CONCAT(p.profile_acronym) AS profile_acronyms "
+        "           FROM solicitation_state_profile_editors sspe "
+        "           JOIN profile p ON sspe.state_profile_editor = p.id "
+        "           GROUP BY sspe.solicitation_state_id) sspe ON ss.id = sspe.solicitation_state_id "
         "     WHERE sst.id = %s; ",
         (args["transition_id"],))
       
@@ -454,7 +475,7 @@ class Solicitation(Resource):
     transitionReason = transition["transition_reason"]
     nextStateId = transition["solicitation_state_id_to"]
     nextStateMaxDays = queryRes["state_max_duration_days"]
-    nextStateProfileEditorAcronym = queryRes["profile_acronym"]
+    nextStateProfileEditorAcronyms = queryRes["profile_acronyms"]
 
     # parse solicitation data
     newSolicitationUserData = None
@@ -493,13 +514,16 @@ class Solicitation(Resource):
         nextStateCreatedDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nextStateFinishDate = None if not nextStateMaxDays else (datetime.datetime.now() + datetime.timedelta(days=nextStateMaxDays)).strftime("%Y-%m-%d %H:%M:%S")
 
-        sendProfileName = None
-        if nextStateProfileEditorAcronym == "STU":
-          sendProfileName = "aluno"
-        elif nextStateProfileEditorAcronym == "ADV":
-          sendProfileName = "orientador"
-        elif nextStateProfileEditorAcronym == "COO":
-          sendProfileName = "coordenador"
+        sendProfileNames = None
+        if "STU" in nextStateProfileEditorAcronyms:
+          sendProfileNames = "aluno"
+        if "ADV" in nextStateProfileEditorAcronyms:
+          sendProfileNames = "orientador" if not sendProfileNames else sendProfileNames + ", orientador"
+        if "COO" in nextStateProfileEditorAcronyms:
+          sendProfileNames = "coordenador" if not sendProfileNames else sendProfileNames + ", coordenador"
+        if "," in sendProfileNames:
+          lastIndex = sendProfileNames.rfind(",")
+          sendProfileNames = sendProfileNames[:lastIndex] + " e" + sendProfileNames[lastIndex+1:]
 
         # inserts new user state
         dbExecute(
@@ -509,7 +533,7 @@ class Solicitation(Resource):
           [
             userHasSolId,
             nextStateId,
-            "Aguardando o envio de dados pelo " + sendProfileName if sendProfileName else None,
+            ("Aguardando o envio de dados pelo " + sendProfileNames) if sendProfileNames else None,
             nextStateCreatedDate,
             nextStateFinishDate],
           True, dbObjectIns)
