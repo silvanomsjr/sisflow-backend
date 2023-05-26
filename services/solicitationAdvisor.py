@@ -24,7 +24,6 @@ def getSolicitationAdvisor(userHasSolicitationId):
   return sAdvQuery
 
 def putSolicitationAdvisor(userHasSolicitationId, advisorSiape):
-  print(userHasSolicitationId, advisorSiape)
   try:
     dbExecute(
       " UPDATE user_has_solicitation SET "
@@ -35,6 +34,22 @@ def putSolicitationAdvisor(userHasSolicitationId, advisorSiape):
   except Exception as e:
     print("# Database insertion error:")
     print(str(e))
+    traceback.print_exc()
+    return "Erro na base de dados", 409
+
+  return "", 201
+
+def allowSolicitationAdvisor(userHasSolicitationId, advisorSiape):
+  try:
+    dbExecute(
+      " UPDATE user_has_solicitation SET "
+      "   is_accepted_by_advisor = TRUE "
+      "   WHERE id = %s AND advisor_siape = %s; ",
+      (userHasSolicitationId, advisorSiape))
+  except Exception as e:
+    print("# Database insertion error:")
+    print(str(e))
+    traceback.print_exc()
     return "Erro na base de dados", 409
 
   return "", 201
@@ -79,3 +94,19 @@ class SolicitationAdvisor(Resource):
       abort(401, errorMsg)
     
     return putSolicitationAdvisor(args['user_has_solicitation_id'], args['advisor_siape'])
+
+  # patch to allow solicitation advisor
+  def patch(self):
+
+    args = reqparse.RequestParser()
+    args.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
+    args.add_argument("user_has_solicitation_id", location="json", type=int, help="User solicitation data id, required", required=True)
+    args.add_argument("advisor_siape", location="json", type=str, help="Advisor unique Siape, required", required=True)
+    args = args.parse_args()
+
+    # verify jwt and its signature correctness
+    isTokenValid, errorMsg, tokenData = isAuthTokenValid(args)
+    if not isTokenValid:
+      abort(401, errorMsg)
+    
+    return allowSolicitationAdvisor(args['user_has_solicitation_id'], args['advisor_siape'])

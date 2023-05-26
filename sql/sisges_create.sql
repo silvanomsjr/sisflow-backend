@@ -579,6 +579,8 @@ CREATE TABLE solicitation_state_transition(
 );
 CREATE TABLE solicitation_state_transition_manual(
 	solicitation_state_transition_id INT NOT NULL,
+    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+    transition_reason VARCHAR(100) NOT NULL,
     PRIMARY KEY (solicitation_state_transition_id),
     FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
 );
@@ -635,7 +637,7 @@ INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_des
 	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
     (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, False),
     (1, 4, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', False),
-    (1, 3, 'Aceite de orientado pelo orientador', 4, 7, NULL, False),
+    (1, 3, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', False),
 	(1, 4, 'Solicitação de assinaturas do PA pelo aluno', 4, 7, NULL, False),
     (1, 3, 'Requerimento de assinatura do PA ao orientador', 4, 8, NULL, False),
     (1, 2, 'Requerimento de assinatura do PA ao coordenador', 10, 9, NULL, False),
@@ -680,14 +682,17 @@ INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitat
     (2, 3),
     (2, NULL),
     (2, NULL),
-    (3, 4);
+    (3, 4),
+    (3, NULL),
+    (4, 5),
+    (4, NULL),
+    (4, NULL);
 
-INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id) VALUES
-    (6);
+INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
+    (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação');
+    
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
-	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'),
-    (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'),
-    (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'),
-    (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
+	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
 	

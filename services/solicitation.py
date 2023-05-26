@@ -279,8 +279,6 @@ class Solicitation(Resource):
     args.add_argument("user_has_state_id", location="json", type=int, required=True)
     args.add_argument("solicitation_user_data", location="json", required=True)
     args.add_argument("transition_id", location="json", type=int, required=True)
-    args.add_argument("transition_decision", location="json", type=str)
-    args.add_argument("transition_reason", location="json", type=str)
     args = args.parse_args()
 
     # verify jwt and its signature correctness
@@ -375,18 +373,11 @@ class Solicitation(Resource):
     if not transitions or len(transitions) == 0:
       abort(401, "Solicitação inválida!")
 
-    print(transitions)
     transition = None
     for ts in transitions:
       if ts["id"] == args["transition_id"]:
-
-        if ts["type"] == "manual":
-          if not args["transition_decision"] or not args["transition_reason"]:
-            abort(500, "Missing transition decision or reason")
-          ts["transition_decision"] = args["transition_decision"]
-          ts["transition_reason"] = args["transition_reason"]
-
         transition = ts
+        break
     
     if transition == None:
       return abort(404, "Transição não encontrada para este estado!")

@@ -1,5 +1,6 @@
 from flask import Flask, abort, request
 from flask_restful import Resource, Api, reqparse
+import traceback
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
@@ -10,9 +11,11 @@ def getTransitions(solicitationStateIdFrom):
   try:
     tsQuery = dbGetAll(
       " SELECT sst.id, sst.solicitation_state_id_from, sst.solicitation_state_id_to, "
-      " sstm.solicitation_state_transition_id AS manual_transition_id, "
+      " sstm.solicitation_state_transition_id AS manual_transition_id, sstm.transition_decision AS manual_transition_decision, "
+      " sstm.transition_reason AS manual_transition_reason, "
       " sstdp.solicitation_state_transition_id AS dynamic_page_transition_id, "
-      " sstdp.dynamic_page_component, sstdp.transition_decision, sstdp.transition_reason "
+      " sstdp.dynamic_page_component, sstdp.transition_decision AS component_transition_decision, "
+      " sstdp.transition_reason AS component_transition_reason "
       "   FROM solicitation_state_transition sst "
       "   LEFT JOIN solicitation_state_transition_manual sstm ON sst.id = sstm.solicitation_state_transition_id "
       "   LEFT JOIN solicitation_state_transition_from_dynamic_page sstdp ON sst.id = sstdp.solicitation_state_transition_id "
@@ -21,6 +24,7 @@ def getTransitions(solicitationStateIdFrom):
   except Exception as e:
     print("# Database reading error:")
     print(str(e))
+    traceback.print_exc()
     return "Erro na base de dados", 409
 
   if not tsQuery:
@@ -35,11 +39,13 @@ def getTransitions(solicitationStateIdFrom):
     }
     if transition["manual_transition_id"]:
       obj["type"] = "manual"
+      obj["transition_decision"] = transition["manual_transition_decision"]
+      obj["transition_reason"] = transition["manual_transition_reason"]
     if transition["dynamic_page_transition_id"]:
       obj["type"] = "from_dynamic_page"
       obj["dynamic_page_component"] = transition["dynamic_page_component"]
-      obj["transition_decision"] = transition["transition_decision"]
-      obj["transition_reason"] = transition["transition_reason"]
+      obj["transition_decision"] = transition["component_transition_decision"]
+      obj["transition_reason"] = transition["component_transition_reason"]
 
     tsParsed.append(obj)
   
