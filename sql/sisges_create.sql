@@ -174,7 +174,7 @@ CREATE TABLE dynamic_page(
 );
 CREATE TABLE dynamic_component(
     id INT NOT NULL AUTO_INCREMENT,
-    type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+    type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (id, type)
 );
@@ -191,16 +191,16 @@ CREATE TABLE dynamic_page_has_component(
     UNIQUE (dynamic_page_id, dynamic_component_order)
 );
 CREATE TABLE dynamic_component_inner_html(
-	dynamic_component_id INT NOT NULl,
-    dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+	dynamic_component_id INT NOT NULL,
+    dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     inner_html VARCHAR(2000) NOT NULL,
     PRIMARY KEY (dynamic_component_id),
     FOREIGN KEY (dynamic_component_id, dynamic_component_type) REFERENCES dynamic_component(id, type),
     CHECK (dynamic_component_type = 'inner_html')
 );
 CREATE TABLE dynamic_component_input(
-    dynamic_component_id INT NOT NULl,
-    dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+    dynamic_component_id INT NOT NULL,
+    dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     input_name VARCHAR(100) UNIQUE NOT NULL,
     input_type ENUM('text', 'date') NOT NULL,
     input_required BOOL DEFAULT TRUE NOT NULL,
@@ -224,8 +224,8 @@ CREATE TABLE dynamic_component_input_date_rule(
     CHECK (dynamic_component_input_type = 'date')
 );
 CREATE TABLE dynamic_component_upload(
-    dynamic_component_id INT NOT NULl,
-	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+    dynamic_component_id INT NOT NULL,
+	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     upload_label VARCHAR(100) NOT NULL,
     upload_name VARCHAR(30) UNIQUE NOT NULL,
     upload_required BOOL DEFAULT TRUE NOT NULL,
@@ -236,7 +236,7 @@ CREATE TABLE dynamic_component_upload(
 );
 CREATE TABLE dynamic_component_select(
     dynamic_component_id INT NOT NULL,
-	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     select_name VARCHAR(30) NOT NULL UNIQUE,
     select_label VARCHAR(100) NOT NULL,
     select_initial_text VARCHAR(30) DEFAULT 'Selecione: ' NOT NULL,
@@ -255,8 +255,8 @@ CREATE TABLE dynamic_component_select_option(
     FOREIGN KEY (dynamic_component_select_id) REFERENCES dynamic_component_select(dynamic_component_id)
 );
 CREATE TABLE dynamic_component_select_upload(
-    dynamic_component_id INT NOT NULl,
-	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+    dynamic_component_id INT NOT NULL,
+	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     dynamic_component_select_name VARCHAR(30) NOT NULL UNIQUE,
     PRIMARY KEY (dynamic_component_id),
     FOREIGN KEY (dynamic_component_id, dynamic_component_type) REFERENCES dynamic_component(id, type),
@@ -264,8 +264,8 @@ CREATE TABLE dynamic_component_select_upload(
     CHECK (dynamic_component_type = 'select_upload')
 );
 CREATE TABLE dynamic_component_download(
-    dynamic_component_id INT NOT NULl,
-	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+    dynamic_component_id INT NOT NULL,
+	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     download_label VARCHAR(100),
     download_from ENUM ('internal_from_upload', 'internal_from_select_upload', 'external_from_link') NOT NULL,
     internal_upload_name VARCHAR(30),
@@ -283,8 +283,8 @@ CREATE TABLE dynamic_component_download(
     CHECK (dynamic_component_type = 'download')
 );
 CREATE TABLE dynamic_component_button(
-	dynamic_component_id INT NOT NULl,
-	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button') NOT NULL,
+	dynamic_component_id INT NOT NULL,
+	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
     button_label VARCHAR(100) NOT NULL,
     button_color ENUM('darkblue', 'red', 'black') NOT NULL,
     button_transation_type ENUM('Request', 'Cancel', 'Send', 'Send and Defer', 'Defer', 'Reject') NOT NULL,
@@ -292,11 +292,19 @@ CREATE TABLE dynamic_component_button(
     FOREIGN KEY (dynamic_component_id, dynamic_component_type) REFERENCES dynamic_component(id, type),
     CHECK (dynamic_component_type = 'button')
 );
+CREATE TABLE dynamic_component_details(
+	dynamic_component_id INT NOT NULL,
+	dynamic_component_type ENUM('inner_html', 'input', 'upload', 'download', 'select', 'select_upload', 'button', 'details') NOT NULL,
+    details_type ENUM('student', 'advisor') NOT NULL,
+    PRIMARY KEY (dynamic_component_id),
+    FOREIGN KEY (dynamic_component_id, dynamic_component_type) REFERENCES dynamic_component(id, type),
+    CHECK (dynamic_component_type = 'details')
+);
 INSERT INTO dynamic_page (title) VALUES 
-	('Solicitação de inicio de estágio obrigatório com vínculo - Avaliação de históricos e comprovante de vínculo empregatício'),
-    ('Solicitação de inicio de estágio obrigatório sem vínculo - Avaliação de históricos'),
-    ('Solicitação de inicio de estágio não obrigatório externo - Avaliação de históricos'),
-    ('Solicitação de inicio de estágio não obrigatório interno - Avaliação de históricos'),
+	('Solicitação de inicio de estágio obrigatório com vínculo - Envio de históricos e comprovante de vínculo empregatício'),
+    ('Solicitação de inicio de estágio obrigatório sem vínculo - Envio de históricos'),
+    ('Solicitação de inicio de estágio não obrigatório externo - Envio de históricos'),
+    ('Solicitação de inicio de estágio não obrigatório interno - Envio de históricos'),
     
     ('Solicitação de inicio de estágio - Verificação de históricos e comprovantes do aluno pela coordenação'),
     ('Solicitação de inicio de estágio - Verificação de históricos do aluno pela coordenação'),
@@ -330,7 +338,8 @@ INSERT INTO dynamic_component (type) VALUES
     ('select_upload'),
     ('download'),('download'),('download'),('download'),('download'),('download'),
     ('download'),('download'),('download'),('download'),('download'),('download'),('download'),
-    ('button'),('button'),('button'),('button'),('button'),('button');
+    ('button'),('button'),('button'),('button'),('button'),('button'),
+    ('details'), ('details');
 INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_component_type, inner_html) VALUES 
 	(
 		1, 
@@ -477,13 +486,16 @@ INSERT INTO dynamic_component_button (dynamic_component_id, dynamic_component_ty
     (49, 'button', 'Enviar e deferir', 'darkblue', 'Send and Defer'),
     (50, 'button', 'Deferir', 'darkblue', 'Defer'),
     (51, 'button', 'Indeferir', 'red', 'Reject');
+INSERT INTO dynamic_component_details (dynamic_component_id, dynamic_component_type, details_type) VALUES
+	(52, 'details', 'student'),
+    (53, 'details', 'advisor');
 INSERT INTO dynamic_page_has_component (dynamic_page_id, dynamic_component_id, dynamic_component_order) VALUES 
 	(1,1,1), (1,19,2), (1,20,3), (1,32,4), (1,46,5), (1,47,6),
     (2,1,1), (2,19,2), (2,20,3), (2,46,4), (2,47,5),
     (3,2,1), (3,19,2), (3,20,3), (3,46,4), (3,47,5),
     (4,2,1), (4,19,2), (4,20,3), (4,46,4), (4,47,5),
     
-    (5,3,1), (5,33,2), (5,34,3), (5,35,4), (5,50,5), (5,51,6), (5,47,7),
+    (5,3,1), (5,52,2), (5,33,3), (5,34,4), (5,35,5), (5,50,6), (5,51,7), (5,47,8),
     (6,4,1), (6,33,2), (6,34,3), (6,50,4), (6,51,5), (6,47,6),
     
     (7,5,1), (7,18,2), (7,21,3), (7,46,4), (7,47,5),

@@ -520,11 +520,16 @@ class Solicitation(Resource):
         if "ADV" in nextStateProfileEditorAcronyms:
           sendProfileNames = "orientador" if not sendProfileNames else sendProfileNames + ", orientador"
         if "COO" in nextStateProfileEditorAcronyms:
-          sendProfileNames = "coordenador" if not sendProfileNames else sendProfileNames + ", coordenador"
+          sendProfileNames = "coordenação" if not sendProfileNames else sendProfileNames + ", coordenação"
         if "," in sendProfileNames:
           lastIndex = sendProfileNames.rfind(",")
           sendProfileNames = sendProfileNames[:lastIndex] + " e" + sendProfileNames[lastIndex+1:]
-
+        
+        nextStateReason = ''
+        if sendProfileNames == "coordenação":
+          nextStateReason = "Aguardando o envio de dados pela coordenação"
+        else:
+          nextStateReason = ("Aguardando o envio de dados pelo " + sendProfileNames) if sendProfileNames else None
         # inserts new user state
         dbExecute(
           " INSERT INTO user_has_solicitation_state "
@@ -533,7 +538,7 @@ class Solicitation(Resource):
           [
             userHasSolId,
             nextStateId,
-            ("Aguardando o envio de dados pelo " + sendProfileNames) if sendProfileNames else None,
+            nextStateReason,
             nextStateCreatedDate,
             nextStateFinishDate],
           True, dbObjectIns)

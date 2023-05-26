@@ -40,7 +40,8 @@ def loadPageComponents(pageId, studentData=None, advisorData=None):
     " dcsupload_select.select_label AS select_upload_select_label, dcsupload_select.select_initial_text AS select_upload_select_initial_text, "
     " dcsupload_select.is_select_required AS select_upload_is_select_required, dcsupload_select.select_missing_message AS select_upload_select_missing_message, "
     " dc_download.download_label, dc_download.download_from, dc_download.internal_upload_name, dc_download.internal_select_upload_name, dc_download.external_download_link, "
-    " dc_button.button_label, dc_button.button_color, dc_button.button_transation_type "
+    " dc_button.button_label, dc_button.button_color, dc_button.button_transation_type, "
+    " dc_details.details_type "
     "   FROM dynamic_page AS dp "
     "     JOIN dynamic_page_has_component AS dphc ON dp.id = dphc.dynamic_page_id "
     "     JOIN dynamic_component AS dc ON dphc.dynamic_component_id = dc.id "
@@ -52,6 +53,7 @@ def loadPageComponents(pageId, studentData=None, advisorData=None):
     "     LEFT JOIN dynamic_component_select AS dcsupload_select ON dc_select_upload.dynamic_component_select_name = dcsupload_select.select_name "
     "     LEFT JOIN dynamic_component_download AS dc_download ON dc.id = dc_download.dynamic_component_id "
     "     LEFT JOIN dynamic_component_button AS dc_button ON dc.id = dc_button.dynamic_component_id "
+    "     LEFT JOIN dynamic_component_details AS dc_details ON dc.id = dc_details.dynamic_component_id "
     "   WHERE dp.id = %s "
     "   ORDER BY dphc.dynamic_component_order; ",
     (pageId,))
@@ -139,6 +141,9 @@ def loadPageComponents(pageId, studentData=None, advisorData=None):
       component["button_label"] = componentQ["button_label"]
       component["button_color"] = componentQ["button_color"]
       component["button_transation_type"] = componentQ["button_transation_type"]
+    
+    if component["component_type"] == "details":
+      component["details_type"] = componentQ["details_type"]
     
     # index by component order
     pageComponents.append(component)
