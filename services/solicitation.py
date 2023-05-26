@@ -254,7 +254,7 @@ class Solicitation(Resource):
       dbExecute(
         " INSERT INTO user_has_solicitation_state "
         " (user_has_solicitation_id, solicitation_state_id, decision, reason, start_datetime, end_datetime) VALUES "
-        "   (%s, %s, \"Em analise\", \"Aguardando o envio de dados pelo aluno\", %s, %s); ",
+        "   (%s, %s, \"Em analise\", \"Aguardando o aluno\", %s, %s); ",
         [userHasSolId, stateId, createdDate, finishDate], True, dbObjectIns)
 
       # select added user solicitation state id
@@ -520,16 +520,16 @@ class Solicitation(Resource):
         if "ADV" in nextStateProfileEditorAcronyms:
           sendProfileNames = "orientador" if not sendProfileNames else sendProfileNames + ", orientador"
         if "COO" in nextStateProfileEditorAcronyms:
-          sendProfileNames = "coordenação" if not sendProfileNames else sendProfileNames + ", coordenação"
+          sendProfileNames = "coordenação de estágios" if not sendProfileNames else sendProfileNames + ", coordenação de estágios"
         if "," in sendProfileNames:
           lastIndex = sendProfileNames.rfind(",")
           sendProfileNames = sendProfileNames[:lastIndex] + " e" + sendProfileNames[lastIndex+1:]
         
         nextStateReason = ''
-        if sendProfileNames == "coordenação":
-          nextStateReason = "Aguardando o envio de dados pela coordenação"
+        if sendProfileNames == "coordenação de estágios":
+          nextStateReason = "Aguardando a coordenação de estágios"
         else:
-          nextStateReason = ("Aguardando o envio de dados pelo " + sendProfileNames) if sendProfileNames else None
+          nextStateReason = ("Aguardando o " + sendProfileNames) if sendProfileNames else None
         # inserts new user state
         dbExecute(
           " INSERT INTO user_has_solicitation_state "

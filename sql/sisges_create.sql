@@ -104,6 +104,11 @@ INSERT INTO user_account (institutional_email, secondary_email, user_name, gende
     ("luiz@ufu.br", NULL, "Luiz Gustavo Almeida Martins", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
     ("maia@ufu.br", NULL, "Marcelo de Almeida Maia", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3", now()),
     ("stephane@ufu.br", NULL,"Stéphane Julia", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("adriano@ufu.br", NULL,"Adriano Mendonça Rocha", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("eliana@ufu.br", NULL,"Eliana Pantaleão", 'F', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("ivan@ufu.br", NULL,"Ivan da Silva Sendin", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("leandro@ufu.br", NULL,"Leandro Nogueira Couto", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("mauricio@ufu.br", NULL,"Mauricio Cunha Escarpinati", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("aluno@ufu.br", "aluno@gmail.com","Aluno Vitor", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
 	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
 INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
@@ -120,8 +125,13 @@ INSERT INTO user_has_profile (user_id, profile_id, user_dinamyc_profile_fields_d
     (5, 3, NULL, NOW(), NULL),
     (6, 3, NULL, NOW(), NULL),
     (7, 3, NULL, NOW(), NULL),
-    (8, 4, NULL, NOW(), NULL),
-    (9, 4, NULL, NOW(), NULL);
+    (8, 3, NULL, NOW(), NULL),
+    (9, 3, NULL, NOW(), NULL),
+    (10, 3, NULL, NOW(), NULL),
+    (11, 3, NULL, NOW(), NULL),
+    (12, 3, NULL, NOW(), NULL),
+    (13, 4, NULL, NOW(), NULL),
+    (14, 4, NULL, NOW(), NULL);
 INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape) VALUES
 	(2, 'SIAPE-ALEX');
 INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
@@ -130,10 +140,15 @@ INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
     (5, 'SIAPE-GINA'),
     (6, 'SIAPE-LUIZ'),
     (7, 'SIAPE-MAIA'),
-    (8, 'SIAPE-STEPHANE');
+    (8, 'SIAPE-STEPHANE'),
+    (9, 'SIAPE-ADRIANO'),
+    (10, 'SIAPE-ELIANA'),
+    (11, 'SIAPE-IVAN'),
+    (12, 'SIAPE-LEANDRO'),
+    (13, 'SIAPE-MAURICIO');
 INSERT INTO user_has_profile_student_data (user_has_profile_id, matricula, course) VALUES
-	(9, '11111BSI111', 'BSI'),
-    (10, '11911BCC039', 'BCC');
+	(14, '11111BSI111', 'BSI'),
+    (15, '11911BCC039', 'BCC');
 
 /* Attachments */
 CREATE TABLE attachment(
