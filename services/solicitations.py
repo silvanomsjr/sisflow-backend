@@ -65,8 +65,6 @@ class CoordinatorSolicitations(Resource):
       print("# Database reading error:")
       print(str(e))
       return "Erro na base de dados", 409
-    
-    print(solicitationsData)
 
     print("# Operation done!")
     return solicitationsData, 200
