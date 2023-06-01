@@ -1,7 +1,9 @@
-import os
-import smtplib
-from email.mime.multipart import MIMEMultipart
+from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
+import os
+
 from threading import Thread
 
 smtpServer = None
@@ -23,9 +25,15 @@ def smtpStart():
 
   print("# Connection to SMTP successfull")
 
-def smtp_working():
+def isSmtpWorking():
 
   global smtpServer
+
+  if not smtpServer:
+    smtpStart()
+    if not smtpServer:
+      print("# Could not reconnect to smtp local server")
+      return False
   
   try:
     status = smtpServer.noop()[0]
@@ -36,47 +44,53 @@ def smtp_working():
     return True
   return False
 
-def smtpSend(mailTo, mailSubject, mailInnerHtml):
+def mailArgsFormat(rawTo, rawSubject, rawBody):
+
+  to = rawTo
+  subject = rawSubject
+
+  with open('./utils/smtpMailTemplate.html', 'r', encoding="utf8") as f:
+    templateHtml = f.read()
+
+    soup = BeautifulSoup(templateHtml, 'html.parser')
+    divTopContent = soup.find('div', id='top-content')
+    divBottomContent = soup.find('div', id='bottom-content')
+    btnContent = soup.find('tr', id="button-content")
+
+    divTopContent.append(BeautifulSoup(rawBody, 'html.parser'))
+    btnContent.append(BeautifulSoup(
+      f'''<td> <a href="{os.getenv("FRONT_BASE_URL")}" target="_blank">Acessar o Sisges</a> </td>''', 
+      'html.parser'))
+    
+    if os.getenv("SYS_DEBUG") == "True":
+      to = os.getenv("SMTP_LOGIN")
+      divBottomContent.append(BeautifulSoup(
+        f"""
+          <p> Modo de testes ativo </p>
+          <p> Deveria ser enviado a este email: {rawTo} </p>
+        """
+        , 'html.parser'))
+  
+  return to, subject, soup.prettify()
+
+def mailMIMEMultipartFormat(to, subject, body):
+
+  mmMail = MIMEMultipart()
+  mmMail["From"] = os.getenv("SMTP_LOGIN")
+  mmMail["To"] = to
+  mmMail["Subject"] = subject
+  mmMail.attach(MIMEText(body, "html"))
+
+  return mmMail.as_string()
+
+def smtpSend(rawTo, rawSubject, rawBody):
 
   global smtpServer
 
-  if not smtpServer:
-    print("# Smtp not started")
+  if not isSmtpWorking:
     return
 
-  if not smtp_working():
-    smtpStart()
-    if not smtp_working():
-      print("# Could not reconnect to smtp")
-      return
+  to, subject, body = mailArgsFormat(rawTo, rawSubject, rawBody)
+  mmMail = mailMIMEMultipartFormat(to, subject, body)
 
-  mailToTmp = None
-  mailHtml = None
-  if os.getenv("SYS_DEBUG") == "True":
-    mailToTmp = os.getenv("SMTP_LOGIN")
-    mailHtml = f'''
-    <!DOCTYPE html><html><body><h1 style="color:blue;">Sisges</h1>
-    {mailInnerHtml}
-    <br><p> Modo de testes ativo </p><p> Deveria ser enviado a este email: {mailTo} </p>
-    </body></html>
-    '''
-  else:
-    mailToTmp = mailTo
-    mailHtml = f'''
-    <!DOCTYPE html><html><body><h1 style="color:blue;">Sisges</h1>
-    {mailInnerHtml}
-    </body></html>
-    '''
-
-  mail = MIMEMultipart()
-  mail["From"] = os.getenv("SMTP_LOGIN")
-  mail["To"] = mailToTmp
-  mail["Subject"] = mailSubject
-  mail.attach(MIMEText(mailHtml, "html"))
-
-  smtpServer.sendmail(
-    os.getenv("SMTP_LOGIN"),
-    mailToTmp,
-    mail.as_string())
-
-  return
+  smtpServer.sendmail(os.getenv("SMTP_LOGIN"), to, mmMail)
