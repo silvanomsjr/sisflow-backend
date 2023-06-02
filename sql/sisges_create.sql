@@ -109,7 +109,7 @@ INSERT INTO user_account (institutional_email, secondary_email, user_name, gende
     ("ivan@ufu.br", NULL,"Ivan da Silva Sendin", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("leandro@ufu.br", NULL,"Leandro Nogueira Couto", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("mauricio@ufu.br", NULL,"Mauricio Cunha Escarpinati", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
-    ("aluno@ufu.br", "aluno@gmail.com","Aluno Vitor", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
+    ("aluno@ufu.br", "aluno@gmail.com","Vitor Borges", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
 	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
 INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
 	("admin", "ADM", NULL),
@@ -324,21 +324,21 @@ INSERT INTO dynamic_page (title) VALUES
     ('Solicitação de inicio de estágio - Verificação de históricos e comprovantes do aluno pela coordenação'),
     ('Solicitação de inicio de estágio - Verificação de históricos do aluno pela coordenação'),
     
-    ('Solicitação de inicio de estágio - Assinatura do PA [[[ifMale?pelo aluno:::pela aluna]]]'),
+    ('Solicitação de inicio de estágio - Assinatura do PA [[[ifStudentMale?pelo aluno:::pela aluna]]]'),
     ('Solicitação de inicio de estágio - Assinatura do PA pelo orientador'),
     ('Solicitação de inicio de estágio - Assinatura do PA pela coordenação de estágios'),
     ('Solicitação de inicio de estágio - Concluída'),
     
-    ('Solicitação de inicio de estágio - Assinatura do PA e TCE [[[ifMale?pelo aluno:::pela aluna]]]'),
+    ('Solicitação de inicio de estágio - Assinatura do PA e TCE [[[ifStudentMale?pelo aluno:::pela aluna]]]'),
     ('Solicitação de inicio de estágio - Assinatura do PA e TCE pelo orientador'),
     ('Solicitação de inicio de estágio - Assinatura do PA e TCE pela coordenação de estágios'),
     ('Solicitação de inicio de estágio - Concluída'),
     
-    ('Envio de relatório parcial - Assinatura [[[ifMale?do aluno:::da aluna]]]'),
+    ('Envio de relatório parcial - Assinatura [[[ifStudentMale?do aluno:::da aluna]]]'),
     ('Envio de relatório parcial - Assinatura da coordenação de estágios'),
     ('Envio de relatório parcial - Concluída'),
     
-    ('Envio de relatório final - Assinatura [[[ifMale?do aluno:::da aluna]]]'),
+    ('Envio de relatório final - Assinatura [[[ifStudentMale?do aluno:::da aluna]]]'),
     ('Envio de relatório final - Assinatura da coordenação de estágios'),
     ('Envio de relatório final - Concluída');
 INSERT INTO dynamic_component (type) VALUES 
@@ -359,28 +359,28 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 	(
 		1, 
         'inner_html', 
-		'<p>Nesta etapa [[[ifMale?o aluno:::a aluna]]] solicita uma avaliação de sua documentação ao coordenador de estágios para que este '
-			'verifique se [[[ifMale?o aluno:::a aluna]]] atende às normas gerais de estágio, as regras mudam de acordo com cada modalidade de estágio.</p>'
-            '<p>Algumas normas para poder efetuar o estágio obrigatório no [[[ifBCC? BCC ::: BSI ]]]:</p>'
-            '[[[ifBCC? 
+		'<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] solicita uma avaliação de sua documentação ao coordenador de estágios para que este '
+			'verifique se [[[ifStudentMale?o aluno:::a aluna]]] atende às normas gerais de estágio, as regras mudam de acordo com cada modalidade de estágio.</p>'
+            '<p>Algumas normas para poder efetuar o estágio obrigatório no [[[ifBCCStudent? BCC ::: BSI ]]]:</p>'
+            '[[[ifBCCStudent? 
 				<p><b>Duração</b>: 10 a 20 semanas, <b>Carga horária mínima</b>: 210 horas com o máximo de 30 horas semanais, <b>Aprovação</b>: 1 ao 4 períodos completos</p>
             ::: 
 				<p><b>Duração</b>: 16 a 32 semanas, <b>Carga horária mínima</b>: 440 horas com o máximo de 30 horas semanais, <b>Aprovação</b>: 1 ao 4 períodos completos</p>
             ]]]'
 			'<p>As normas do seu curso podem ser visualizadas no link: '
-			'[[[ifBCC?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
+			'[[[ifBCCStudent?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
             '<a href="https://facom.ufu.br/legislacoes/normas-de-estagio-curricular-do-bacharelado-em-sistemas-de-informacao">Normas de Estagio BSI</a>.</p>]]]'
 			'<p>Para prosseguir anexe os documentos solicitados:</p>'
 	),(
 		2, 
         'inner_html', 
-		'<p>Nesta etapa [[[ifMale?o aluno:::a aluna]]] solicita uma avaliação de sua documentação ao coordenador de estágios para que este '
-			'verifique se [[[ifMale?o aluno:::a aluna]]] atende às normas gerais de estágio, as regras mudam de acordo com cada modalidade de estágio.</p>'
-            '<p>Algumas normas para poder efetuar o estágio não obrigatório no [[[ifBCC? BCC ::: BSI ]]]:</p>'
+		'<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] solicita uma avaliação de sua documentação ao coordenador de estágios para que este '
+			'verifique se [[[ifStudentMale?o aluno:::a aluna]]] atende às normas gerais de estágio, as regras mudam de acordo com cada modalidade de estágio.</p>'
+            '<p>Algumas normas para poder efetuar o estágio não obrigatório no [[[ifBCCStudent? BCC ::: BSI ]]]:</p>'
             '<p><b>Duração</b>: 8 a 24 semanas, <b>Carga horária mínima</b>: 220 horas, <b>Aprovação</b>: 1 e 2 períodos completos</p>'
 			'<p>Com carga horária de disciplinas acima de 1200 é possível estagiar de 30 horas semanais e, caso contrário, 20 horas</p>'
 			'<p>As normas do seu curso podem ser visualizadas no link: '
-			'[[[ifBCC?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
+			'[[[ifBCCStudent?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
             '<a href="https://facom.ufu.br/legislacoes/normas-de-estagio-curricular-do-bacharelado-em-sistemas-de-informacao">Normas de Estagio BSI</a>.</p>]]]'
 			'<p>Para prosseguir anexe os documentos solicitados:</p>'
 	),(
@@ -394,7 +394,7 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 	),(
 		5,
         'inner_html', 
-        '<p>Nesta etapa [[[ifMale?o aluno:::a aluna]]] envia o Plano de Atividades(PA) contendo a sua assinatura e aguarda a assinatura dos docentes</p>'
+        '<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] envia o Plano de Atividades(PA) contendo a sua assinatura e aguarda a assinatura dos docentes</p>'
 			'<p>A data planejada para o início do estágio serve para verificação de prazos para as assinaturas</p>'
 	),(
 		6,
@@ -407,7 +407,7 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 	),(
 		8,
         'inner_html',
-        '<p>Nesta etapa [[[ifMale?o aluno:::a aluna]]] envia o Termo de Compromisso de Estágio(TCE) e o Plano de Atividades(PA)'
+        '<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] envia o Termo de Compromisso de Estágio(TCE) e o Plano de Atividades(PA)'
 			' contendo a sua assinatura e aguarda a assinatura dos docentes</p>'
             '<p>A data planejada para o início do estágio serve para verificação de prazos para as assinaturas</p>'
 	),(
@@ -428,7 +428,7 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 	),(
 		12,
         'inner_html',
-        '<p>Nesta etapa [[[ifMale?o aluno:::a aluna]]] envia o relatório parcial contendo a sua assinatura e aguarda os docentes assinarem</p>'
+        '<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] envia o relatório parcial contendo a sua assinatura e aguarda os docentes assinarem</p>'
 	),(
 		13,
         'inner_html',
@@ -441,7 +441,7 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 	),(
 		15,
         'inner_html',
-        '<p>Nesta etapa [[[ifMale?o aluno:::a aluna]]] envia o relatório final contendo a sua assinatura e aguarda os docentes assinarem</p>'
+        '<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] envia o relatório final contendo a sua assinatura e aguarda os docentes assinarem</p>'
 	),(
 		16,
         'inner_html',
@@ -541,10 +541,32 @@ CREATE TABLE dynamic_mail(
     is_sent_to_coordinator BOOL DEFAULT FALSE,
     PRIMARY KEY (id)
 );
-INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_sent_to_advisor, is_sent_to_coordinator) VALUES 
+INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_sent_to_advisor, is_sent_to_coordinator) VALUES
+	(
+		'Sistema de estágios: Inicio de processo de estágio',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Um aluno criou uma solicitação de estágio obrigatório com vínculo empregatício:</p>'
+        '<br>'
+		'<p>Aluno: [[[studentName]]]</p>'
+        '<p>   Curso: [[[studentCourse]]]</p>'
+        '<p>   Matricula: [[[studentMatricula]]]</p>'
+        '<p>   Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        FALSE, FALSE, TRUE
+    ),
+	(
+		'Sistema de estágios: Solicitação de avaliação dos históricos',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Você possui uma solicitação de avaliação de históricos:</p>'
+        '<br>'
+		'<p>Aluno: [[[studentName]]]</p>'
+        '<p>   Curso: [[[studentCourse]]]</p>'
+        '<p>   Matricula: [[[studentMatricula]]]</p>'
+        '<p>   Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        FALSE, FALSE, TRUE
+    ),
 	(
 		'Sistema de estágios - Solicitação de avaliação dos históricos',
-        '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
 		'<p>Você solicitou ao coordenador de estágios a avaliação dos seus históricos.</p>'
 			'<p>O coordenador de estágios possui até 4 dias úteis para realizar a avaliação retornando se a solicitação foi deferida ou indeferida.</p>'
 			'<br>'
@@ -553,14 +575,14 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
     ),
     (
 		'Sistema de estágios - Solicitação de avaliação dos históricos completa',
-        '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
 			'<p>O coordenador avaliou seus documentos enviados.</p>'
 			'<p>Verifique o status da avaliação no sistema de estágios.</p>',
         TRUE, FALSE, FALSE
     ),
     (
 		'Sistema de estágios - Solicitação de assinaturas para início de estágio',
-        '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
 			'<p>Você solicitou o complemento de assinaturas para dar inicio ao estágio.</p>'
 			'<p>O orientador, coordenador e o setor de estágios SESTA podem demorar até 10 dias úteis no processo.</p>'
 			'<br>'
@@ -569,7 +591,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
     ),
     (
 		'Sistema de estágios - Solicitação de assinaturas completa',
-        '<p>Olá [[[ifMale?aluno:::aluna]]] [[[ifBCC?do BCC:::do BSI]]] [[[userName]]]</p>'
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
 			'<p>Os documentos para início de estágio foram assinados.</p>'
 			'<p>Com estes documentos é possível dar início ao estágio, não se esqueça de produzir relatórios parciais '
             'durante o período em estágio e o relatório final na conclusão.</p>',
@@ -581,6 +603,14 @@ CREATE TABLE solicitation(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_name VARCHAR(256),
     PRIMARY KEY (id)
+);
+CREATE TABLE solicitation_start_mail(
+	id INT NOT NULL AUTO_INCREMENT,
+    solicitation_id INT NOT NULL,
+    dynamic_mail_id INT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (solicitation_id) REFERENCES solicitation(id),
+    FOREIGN KEY (dynamic_mail_id) REFERENCES dynamic_mail(id)
 );
 CREATE TABLE solicitation_state(
 	id INT NOT NULL AUTO_INCREMENT,
@@ -625,12 +655,13 @@ CREATE TABLE solicitation_state_transition_from_dynamic_page(
     PRIMARY KEY (solicitation_state_transition_id),
     FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
 );
-CREATE TABLE solicitation_state_dynamic_mail(
+#solicitation_state_dynamic_mail
+CREATE TABLE solicitation_state_transition_mail(
 	id INT NOT NULL AUTO_INCREMENT,
-    solicitation_state_id INT NOT NULL,
+    solicitation_state_transition_id INT NOT NULL,
     dynamic_mail_id INT NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (solicitation_state_id) REFERENCES solicitation_state(id),
+    FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id),
     FOREIGN KEY (dynamic_mail_id) REFERENCES dynamic_mail(id)
 );
 CREATE TABLE user_has_solicitation(
@@ -666,6 +697,8 @@ INSERT INTO solicitation (solicitation_name) VALUES
     ('Inicio de estágio não obrigatório interno'),
     ('Envio de relatório parcial'),
     ('Envio de relatório final');
+INSERT INTO solicitation_start_mail(solicitation_id, dynamic_mail_id) VALUES 
+	(1, 1);
 INSERT INTO solicitation_state (solicitation_id, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES
 	(1, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
     (1, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, FALSE),
@@ -690,16 +723,16 @@ INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitat
     (4, 5),
     (4, NULL),
     (4, NULL);
-
+INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
+	(1, 2);
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
     (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação');
-    
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
 	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
 /*	
-INSERT INTO solicitation_state_dynamic_mail (solicitation_state_id, dynamic_mail_id) VALUES
+INSERT INTO solicitation_state_transition_mail (solicitation_state_transition_id, dynamic_mail_id) VALUES
 	(1, 1),
     (2, 2);
 INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES

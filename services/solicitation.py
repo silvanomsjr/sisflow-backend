@@ -14,6 +14,64 @@ from utils.utils import getFormatedMySQLJSON, sistemStrParser
 from services.dynamicPage import getDynamicPage
 from services.solicitationTransitions import getTransitions
 
+def sendSolicitationMails(solicitationId, studentData):
+  
+  try:
+    solicitationMails = dbGetAll(
+      " SELECT dm.mail_subject, dm.mail_body_html, dm.is_sent_to_student, dm.is_sent_to_advisor, dm.is_sent_to_coordinator "
+      "   FROM solicitation AS s "
+      "     JOIN solicitation_start_mail AS ssm ON s.id = ssm.solicitation_id "
+      "     JOIN dynamic_mail AS dm ON ssm.dynamic_mail_id = dm.id "
+      "     WHERE s.id = %s; ",
+    [(solicitationId)])
+  except Exception as e:
+    print("# Database reading error:")
+    print(str(e))
+    return False
+  
+  return sendMails(solicitationMails, studentData)
+
+def sendTransitionMails(transitionId, studentData=None, advisorData=None):
+  try:
+    transitionMails = dbGetAll(
+      " SELECT dm.mail_subject, dm.mail_body_html, dm.is_sent_to_student, dm.is_sent_to_advisor, dm.is_sent_to_coordinator "
+      "   FROM solicitation_state_transition AS sst "
+      "     JOIN solicitation_state_transition_mail AS sstm ON sst.id = sstm.solicitation_state_transition_id "
+      "     JOIN dynamic_mail AS dm ON sstm.dynamic_mail_id = dm.id "
+      "     WHERE sst.id = %s; ",
+      [(transitionId)])
+  except Exception as e:
+    print("# Database reading error:")
+    print(str(e))
+    return False
+  
+  return sendMails(transitionMails, studentData, advisorData)
+
+def sendMails(mailList, studentData=None, advisorData=None):
+  
+  try:
+    for mail in mailList:
+      
+      # treat mail subject and body
+      parsedSubject = sistemStrParser(mail["mail_subject"], studentData, advisorData)
+      parsedBody = sistemStrParser(mail["mail_body_html"], studentData, advisorData)
+
+      if mail["is_sent_to_student"]:
+        smtpSend(studentData['institutional_email'], parsedSubject, parsedBody)
+
+      if mail["is_sent_to_advisor"]:
+        smtpSend(advisorData['institutional_email'], parsedSubject, parsedBody)
+
+      if mail["is_sent_to_coordinator"]:
+        smtpSend(getCoordinatorEmail(), parsedSubject, parsedBody)
+
+  except Exception as e:
+    print("# Smtp sending error:")
+    print(str(e))
+    return False
+
+  return True
+
 # Data from single solicitation
 class Solicitation(Resource):
 
@@ -111,7 +169,7 @@ class Solicitation(Resource):
     if not solicitationQuery:
       abort(401, "Usuario não possui o estado da solicitação!")
 
-    # Refactor this in future
+    # Tokens for parsing string
     studentParserToken={
       "user_name": solicitationQuery["student_name"],
       "gender": solicitationQuery["student_gender"],
@@ -121,8 +179,14 @@ class Solicitation(Resource):
         "course": solicitationQuery["student_course"]
       }]
     }
-
-    professorParserToken={}
+    professorParserToken={
+      "user_name": solicitationQuery["advisor_name"],
+      "gender": solicitationQuery["advisor_gender"],
+      "profiles": [{
+        "profile_acronym":"ADV",
+        "siape": solicitationQuery["advisor_siape"]
+      }]
+    }
     
     dynamicPage = None
     if solicitationQuery["page_id"]:
@@ -181,14 +245,11 @@ class Solicitation(Resource):
     args = args.parse_args()
 
     # verify jwt and its signature correctness
-    isTokenValid, errorMsg, tokenData = isAuthTokenValid(args, ["STU"])
+    isTokenValid, errorMsg, studentData = isAuthTokenValid(args, ["STU"])
     if not isTokenValid:
       abort(401, errorMsg)
 
-    solicitationId = args["solicitation_id"]
-    userId = tokenData["user_id"]
-
-    print("\n# Starting put Single Solicitation for " + tokenData["institutional_email"] + "\n# Reading data from DB")
+    print("\n# Starting put Single Solicitation for " + studentData["institutional_email"] + "\n# Reading data from DB")
     
     stateId = None
     stateMaxDurationDays = None
@@ -198,10 +259,10 @@ class Solicitation(Resource):
         " SELECT ss.id AS state_id, ss.state_max_duration_days "
         "   FROM solicitation AS s JOIN solicitation_state AS ss ON s.id = ss.solicitation_id "
         "   WHERE s.id = %s AND ss.is_initial_state = TRUE; ",
-        [(solicitationId)])
+        [(args["solicitation_id"])])
 
       if not queryRes:
-        raise Exception("No initial state return for solicitation with id " + str(solicitationId))
+        raise Exception("No initial state return for solicitation with id " + str(args["solicitation_id"]))
       
       stateId = queryRes["state_id"]
       stateMaxDurationDays = queryRes["state_max_duration_days"]
@@ -211,7 +272,7 @@ class Solicitation(Resource):
 	      "   JOIN user_has_solicitation AS uhs ON us.id = uhs.user_id "
 	      "   JOIN solicitation AS s ON uhs.solicitation_id = s.id "
 	      "   WHERE s.id = %s AND us.id = %s; ",
-        [solicitationId, userId])
+        [args["solicitation_id"], studentData["user_id"]])
 
     except Exception as e:
       print("# Database reading error:")
@@ -228,6 +289,11 @@ class Solicitation(Resource):
     userHasSolId = None
     userHasSolStateId = None
 
+    print("# Sending mails")
+    mailsSended = sendSolicitationMails(args["solicitation_id"], studentData)
+    if not mailsSended:
+      raise Exception("Error while sending start solicitation mails")
+
     # start transaction
     dbObjectIns = dbStartTransactionObj()
     try:
@@ -236,14 +302,14 @@ class Solicitation(Resource):
         " INSERT INTO user_has_solicitation "
         " (user_id, advisor_siape, solicitation_id, actual_solicitation_state_id, solicitation_user_data) VALUES "
         "   (%s, NULL, %s, %s, NULL); ",
-        [userId, solicitationId, stateId], True, dbObjectIns)
+        [studentData["user_id"], args["solicitation_id"], stateId], True, dbObjectIns)
 
       # select added user solicitation id
       queryRes = dbGetSingle(
         " SELECT uhs.id "
         "   FROM user_has_solicitation AS uhs "
         "   WHERE uhs.user_id = %s AND solicitation_id = %s; ",
-        [userId, solicitationId], True, dbObjectIns)
+        [studentData["user_id"], args["solicitation_id"]], True, dbObjectIns)
       
       if not queryRes:
         raise Exception("No return for user_has_solicitation insertion ")
@@ -307,8 +373,15 @@ class Solicitation(Resource):
     queryRes = None
     try:
       queryRes = dbGetSingle(
-        " SELECT uc_stu.id AS student_id, uc_stu.institutional_email AS student_ins_email, uc_stu.secondary_email AS student_sec_email, "
-        " uc_adv.id AS advisor_id, uc_adv.institutional_email AS advisor_ins_email, uc_adv.secondary_email AS advisor_sec_email, "
+        " SELECT uc_stu.id AS student_id, uc_stu.user_name AS student_name, uc_stu.institutional_email AS student_institutional_email, "
+        " uc_stu.secondary_email AS student_secondary_email, uc_stu.gender AS student_gender, "
+        " uc_stu.phone AS student_phone, uc_stu.creation_datetime AS student_creation_datetime, "
+        " uhpsd.matricula AS student_matricula, uhpsd.course AS student_course, "
+
+        " uc_adv.id AS advisor_id, uc_adv.user_name AS advisor_name, uc_adv.institutional_email AS advisor_institutional_email, "
+        " uc_adv.secondary_email AS advisor_secondary_email, uc_adv.gender AS advisor_gender, uc_adv.phone AS advisor_phone, "
+        " uc_adv.creation_datetime AS advisor_creation_datetime, uhpad.siape AS advisor_siape, 3 AS advisor_students, "
+
         " uhs.id AS user_has_solicitation_id, uhs.solicitation_id, uhs.actual_solicitation_state_id, uhs.solicitation_user_data, "
         " uhss.solicitation_state_id, uhss.decision, uhss.start_datetime, uhss.end_datetime, "
         " sspe.profile_acronyms, "
@@ -341,12 +414,29 @@ class Solicitation(Resource):
     if not queryRes:
       abort(401, "Usuario não possui o estado da solicitação!")
 
-    studentId = queryRes["student_id"]
-    studentInsEmail = queryRes["student_ins_email"]
-    studentSecEmail = queryRes["student_sec_email"]
-    advisorId = queryRes["advisor_id"]
-    advisorInsEmail = queryRes["advisor_ins_email"]
-    advisorSecEmail = queryRes["advisor_sec_email"]
+    # Data used by parser
+    studentData={
+      "user_id": queryRes["student_id"],
+      "institutional_email": queryRes["student_institutional_email"],
+      "user_name": queryRes["student_name"],
+      "gender": queryRes["student_gender"],
+      "profiles": [{
+        "profile_acronym":"STU",
+        "matricula": queryRes["student_matricula"],
+        "course": queryRes["student_course"]
+      }]
+    }
+    advisorData={
+      "user_id": queryRes["advisor_id"],
+      "institutional_email": queryRes["advisor_institutional_email"],
+      "user_name": queryRes["advisor_name"],
+      "gender": queryRes["advisor_gender"],
+      "profiles": [{
+        "profile_acronym":"ADV",
+        "siape": queryRes["advisor_siape"]
+      }]
+    }
+
     userHasSolId = queryRes["user_has_solicitation_id"]
     solicitationId = queryRes["solicitation_id"]
     actualSolStateId = queryRes["actual_solicitation_state_id"]
@@ -361,14 +451,16 @@ class Solicitation(Resource):
     # Verify solicitation args correcteness
     print("# Validating data")
 
-    # user acess
+    # if not adm check if is student or advisor
     if not "ADM" in tokenData["profile_acronyms"] and not "COO" in tokenData["profile_acronyms"]:
-      if tokenData["user_id"] != studentId and tokenData["user_id"] != advisorId:
+      if tokenData["user_id"] != studentData["user_id"] and tokenData["user_id"] != advisorData["user_id"]:
         abort(401, "Edição a solicitação não permitida!")
 
+    # checks if profile is allowed to change solicitation
     if not stateProfileAcronymEditors in tokenData["profile_acronyms"]:
       abort(401, "Perfil editor a solicitação inválido!")
-      
+    
+    # checks if if the solicitation is actual and editable
     if actualSolStateId!=stateId:
       abort(401, "Edição do estado da solicitação não permitido!")
 
@@ -569,46 +661,7 @@ class Solicitation(Resource):
     dbCommit(dbObjectIns)
     print("# Solicitation done!\n# Sending mails")
 
-    # mail message sending
-    try:
-      queryRes = dbGetAll(
-        " SELECT dm.mail_subject, dm.mail_body_html, dm.is_sent_to_student, dm.is_sent_to_advisor, dm.is_sent_to_coordinator "
-        "   FROM solicitation AS s "
-        "     JOIN solicitation_state AS ss ON s.id = ss.solicitation_id "
-        "     JOIN solicitation_state_dynamic_mail AS ssdm ON ss.id = ssdm.solicitation_state_id "
-        "     JOIN dynamic_mail AS dm ON ssdm.dynamic_mail_id = dm.id "
-        "     WHERE ss.id = %s; ",
-        [(stateId)])
-    except Exception as e:
-      print("# Database reading error:")
-      print(str(e))
-      return "Erro na base de dados", 409
-    
-    if queryRes:
-
-      mailList = []
-      for r in queryRes:
-        mailList.append({
-          "mailSubject": r["mail_subject"],
-          "mailBodyHtml": sistemStrParser(r["mail_body_html"], tokenData),
-          "isSentToStudent": r["is_sent_to_student"],
-          "isSentToAdvisor": r["is_sent_to_advisor"],
-          "isSentToCoordinator": r["is_sent_to_coordinator"]
-        })
-
-      for mail in mailList:
-
-        if mail["isSentToStudent"]:
-          smtpSend(studentInsEmail, mail["mailSubject"], mail["mailBodyHtml"])
-          smtpSend(studentSecEmail, mail["mailSubject"], mail["mailBodyHtml"])
-          
-        if mail["isSentToAdvisor"]:
-          smtpSend(advisorInsEmail, mail["mailSubject"], mail["mailBodyHtml"])
-          smtpSend(advisorSecEmail, mail["mailSubject"], mail["mailBodyHtml"])
-
-        if mail["isSentToCoordinator"]:
-          smtpSend(getCoordinatorEmail(), mail["mailSubject"], mail["mailBodyHtml"])
-      
-      print("# Operation done!")
+    sendTransitionMails(args["transition_id"], studentData, advisorData)
+    print("# Operation done!")
 
     return {}, 200
