@@ -1,4 +1,4 @@
-CREATE SCHEMA sisgesteste;
+#CREATE SCHEMA sisgesteste;
 USE sisgesteste;
 
 /* Sistem configurations */

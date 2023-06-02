@@ -93,4 +93,13 @@ def smtpSend(rawTo, rawSubject, rawBody):
   to, subject, body = mailArgsFormat(rawTo, rawSubject, rawBody)
   mmMail = mailMIMEMultipartFormat(to, subject, body)
 
-  smtpServer.sendmail(os.getenv("SMTP_LOGIN"), to, mmMail)
+  #if an exception occur, restart conection and try again(avoid disconnection by timeout)
+  exceptionOcurred = False
+  try:
+    smtpServer.sendmail(os.getenv("SMTP_LOGIN"), to, mmMail)
+  except Exception as e:
+    exceptionOcurred = True
+    smtpStart()
+
+  if exceptionOcurred:
+    smtpServer.sendmail(os.getenv("SMTP_LOGIN"), to, mmMail)
