@@ -545,57 +545,140 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
 	(
 		'Sistema de estágios: Inicio de processo de estágio',
         '<p>Olá [[[coordinatorName]]]</p>'
-		'<p>Um aluno criou uma solicitação de estágio obrigatório com vínculo empregatício:</p>'
+		'<p>Um aluno criou uma solicitação de estágio obrigatório com vínculo empregatício</p>'
         '<br>'
 		'<p>Aluno: [[[studentName]]]</p>'
-        '<p>   Curso: [[[studentCourse]]]</p>'
-        '<p>   Matricula: [[[studentMatricula]]]</p>'
-        '<p>   Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
         FALSE, FALSE, TRUE
     ),
 	(
 		'Sistema de estágios: Solicitação de avaliação dos históricos',
         '<p>Olá [[[coordinatorName]]]</p>'
-		'<p>Você possui uma solicitação de avaliação de históricos:</p>'
+		'<p>Você possui uma <b>solicitação de avaliação de históricos</b></p>'
         '<br>'
 		'<p>Aluno: [[[studentName]]]</p>'
-        '<p>   Curso: [[[studentCourse]]]</p>'
-        '<p>   Matricula: [[[studentMatricula]]]</p>'
-        '<p>   Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
         FALSE, FALSE, TRUE
     ),
 	(
-		'Sistema de estágios - Solicitação de avaliação dos históricos',
+		'Sistema de estágios: Solicitação de avaliação dos históricos',
         '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
-		'<p>Você solicitou ao coordenador de estágios a avaliação dos seus históricos.</p>'
-			'<p>O coordenador de estágios possui até 4 dias úteis para realizar a avaliação retornando se a solicitação foi deferida ou indeferida.</p>'
-			'<br>'
-			'<p>Não esqueça de verificar sua caixa de mensagens e a plataforma de estágios para novidades neste período.</p>',
+		'<p>Você solicitou à coordenação de estágios a avaliação dos seus históricos</p>'
+		'<p>A coordenação de estágios possui até 4 dias úteis para realizar a avaliação retornando se a solicitação foi deferida ou indeferida</p>'
+		'<br>'
+		'<p>Não esqueça de verificar sua caixa de mensagens e a plataforma de estágios para novidades neste período</p>',
         TRUE, FALSE, FALSE
     ),
     (
-		'Sistema de estágios - Solicitação de avaliação dos históricos completa',
+		'Sistema de estágios: Cancelamento de inicio de processo de estágio',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Um aluno cancelou uma solicitação de estágio obrigatório com vínculo empregatício antes de solicitar a avaliação de históricos</p>'
+        '<br>'
+		'<p>Aluno: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios - Solicitação de avaliação dos históricos deferida',
         '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
-			'<p>O coordenador avaliou seus documentos enviados.</p>'
-			'<p>Verifique o status da avaliação no sistema de estágios.</p>',
+		'<p>Sua documentação enviada para a solicitação de início de estágio foi <b>deferida</b></p>'
+        '<br>'
+		'<p>O próximo passo é a escolha de um orientador para seu estágio na plataforma</p>'
+        '<p>O orientador deve concordar em ser seu orientador previamente bem como participar dos processos de assinaturas para a homologação dos documentos</p>'
+        '<p>Mantenha seu orientador atualizado com as solicitações e procedimentos realizados na plataforma</p>',
         TRUE, FALSE, FALSE
     ),
     (
-		'Sistema de estágios - Solicitação de assinaturas para início de estágio',
+		'Sistema de estágios - Solicitação de avaliação dos históricos indeferida',
         '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
-			'<p>Você solicitou o complemento de assinaturas para dar inicio ao estágio.</p>'
-			'<p>O orientador, coordenador e o setor de estágios SESTA podem demorar até 10 dias úteis no processo.</p>'
-			'<br>'
-			'<p>Não esqueça de verificar sua caixa de mensagens e a plataforma de estágios para novidades neste período.</p>',
+		'<p>Seus históricos enviados para início de estágio foram <b>indeferidos</b></p>'
+        '<br>'
+		'<p>Motivo: To be develop</p>'
+        '<p>Artigo: To be develop</p>'
+        '<p>Qualquer dúvida enviar um email para a coordenação de estágios: </p>'
+        '<p>Você também pode solicitar ao colegiado apoio caso necessário</p>',
         TRUE, FALSE, FALSE
     ),
     (
-		'Sistema de estágios - Solicitação de assinaturas completa',
+		'Sistema de estágios - Solicitação de orientação',
+        '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
+		'<p>[[[ifStudentMale?O aluno:::A aluna]]] [[[studentName]]] solicitou a sua orientação para o processo de estágio</p>'
+        '<br>'
+		'<p>Aluno: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
+        '<br>'
+        '<p>Acesse a plataforma para aceitar ou recusar a solicitação</p>'
+        '<p>Lembre-se de participar do processo de assinaturas no caso do aceite para a homologação dos documentos</p>',
+        FALSE, TRUE, FALSE
+    ),
+    (
+		'Sistema de estágios - Solicitação de orientação rejeitada',
         '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
-			'<p>Os documentos para início de estágio foram assinados.</p>'
-			'<p>Com estes documentos é possível dar início ao estágio, não se esqueça de produzir relatórios parciais '
-            'durante o período em estágio e o relatório final na conclusão.</p>',
+		'<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] rejeitou sua solicitação</p>'
+        '<br>'
+		'<p>Motivo: To be develop</p>'
+        '<p>Artigo: To be develop</p>'
+        '<p>Qualquer dúvida enviar um email para a coordenação de estágios: </p>'
+        '<p>Você também pode solicitar ao colegiado apoio caso necessário</p>',
         TRUE, FALSE, FALSE
+    ),
+    (
+		'Sistema de estágios - Solicitação de orientação aceita e início de coleta de assinaturas',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
+		'<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] aceitou sua solicitação</p>'
+        '<br>'
+		'<p>O próximo passo é a assinatura dos documentos para dar início ao estágio</p>'
+        '<p>Nesta etapa as pessoas envolvidas no processo de inicio de estágio realizam a assinatura dos documentos Termo de Compromisso de Estágio(TCE) e Plano de Atividades(PA) e as enviam na plataforma para dar inicio ao estágio</p>'
+        '<p>Para mais informações sobre estes documentos verifique as [[[ifBCCStudent?'
+        '<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">normas de estagio do curso de Ciências da Computação</a>.</p>:::'
+		'<a href="https://facom.ufu.br/legislacoes/normas-de-estagio-curricular-do-bacharelado-em-sistemas-de-informacao">normas de estagio do curso de Sistemas de Informação</a>.</p>]]]'
+        '</p>'
+        '<p>Seguir a ordem de assinaturas: Aluno, Supervisor e Orientador</p>'
+        '<p>Envie os documentos mais recentes na plataforma para validação da coordenação</p>'
+        '<p>Mantenha seu orientador e supervisor atualizados com as solicitações e procedimentos realizados na plataforma</p>',
+        TRUE, FALSE, FALSE
+    ),
+    (
+		'Sistema de estágios - Início de coleta de assinaturas',
+        '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
+		'<p>O processo de coleta de assinaturas para homologação do estágio [[[ifStudentMale?do aluno:::da aluna]]] [[[studentName]]] foi iniciado</p>'
+        '<p>Nesta etapa as pessoas envolvidas no processo de inicio de estágio realizam a assinatura dos documentos Termo de Compromisso de Estágio(TCE) e Plano de Atividades(PA) e as enviam na plataforma para dar inicio ao estágio</p>'
+		'<p>Para mais informações sobre estes documentos verifique as [[[ifBCCStudent?'
+        '<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">normas de estagio do curso de Ciências da Computação</a>.</p>:::'
+		'<a href="https://facom.ufu.br/legislacoes/normas-de-estagio-curricular-do-bacharelado-em-sistemas-de-informacao">normas de estagio do curso de Sistemas de Informação</a>.</p>]]]'
+        '</p>'
+        '<p>É importante seguir a ordem de assinaturas: Aluno, Supervisor e Orientador</p>'
+        '<br>'
+		'<p>Aluno: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
+        '<br>'
+        '<p>Acesse a plataforma para realizar o envio do documento com sua assinatura caso for necessário</p>',
+        FALSE, TRUE, FALSE
+    ),
+    (
+		'Sistema de estágios - Início de coleta de assinaturas',
+        '<p>Olá [[[coordinatorName]]]</p>'
+        '<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] aceitou a solicitação [[[ifStudentMale?do aluno:::da aluna]]] [[[studentName]]]</p>'
+		'<p>Com isso, <b>o processo de coleta de assinaturas iniciou</b></p>'
+        '<br>'
+		'<p>Aluno: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
+        '<br>'
+		'<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
+        '<p>Siape: [[[advisorSiape]]]</p>',
+        FALSE, FALSE, TRUE
     );
 
 /* Solicitation and its associated data - Solicitation is the state machine */
@@ -724,7 +807,16 @@ INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitat
     (4, NULL),
     (4, NULL);
 INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
-	(1, 2);
+	(1, 2),
+    (1, 3),
+    (2, 4),
+    (3, 5),
+    (4, 6),
+    (6, 7),
+    (7, 8),
+    (8, 9),
+    (8, 10),
+    (8, 11);
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
     (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação');

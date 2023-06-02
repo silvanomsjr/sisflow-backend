@@ -73,7 +73,7 @@ def sistemStrParser(str, studentData=None, advisorData=None):
       str = str.replace(substrP, studentProfile.get("course") if studentProfile else "")
     
     # put advisor siape
-    elif "advisorSiape?" in command:
+    elif "advisorSiape" in command:
       str = str.replace(substrP, advisorProfile.get("siape") if advisorProfile else "")
       
     # conditional parsing
