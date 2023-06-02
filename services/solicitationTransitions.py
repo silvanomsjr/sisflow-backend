@@ -10,7 +10,7 @@ def getTransitions(solicitationStateIdFrom):
   tsQuery = None
   try:
     tsQuery = dbGetAll(
-      " SELECT sst.id, sst.solicitation_state_id_from, sst.solicitation_state_id_to, "
+      " SELECT sst.id, sst.solicitation_state_id_from, sst.solicitation_state_id_to, sst.transition_name, "
       " sstm.solicitation_state_transition_id AS manual_transition_id, sstm.transition_decision AS manual_transition_decision, "
       " sstm.transition_reason AS manual_transition_reason, "
       " sstdp.solicitation_state_transition_id AS dynamic_page_transition_id, "
@@ -34,6 +34,7 @@ def getTransitions(solicitationStateIdFrom):
   for transition in tsQuery:
     obj = {
       "id": transition["id"],
+      "transition_name": transition["transition_name"],
       "solicitation_state_id_from": transition["solicitation_state_id_from"],
       "solicitation_state_id_to": transition["solicitation_state_id_to"]
     }

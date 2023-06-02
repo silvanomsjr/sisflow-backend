@@ -547,7 +547,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<p>Olá [[[coordinatorName]]]</p>'
 		'<p>Um aluno criou uma solicitação de estágio obrigatório com vínculo empregatício</p>'
         '<br>'
-		'<p>Aluno: [[[studentName]]]</p>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
@@ -558,7 +558,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<p>Olá [[[coordinatorName]]]</p>'
 		'<p>Você possui uma <b>solicitação de avaliação de históricos</b></p>'
         '<br>'
-		'<p>Aluno: [[[studentName]]]</p>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
@@ -578,7 +578,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<p>Olá [[[coordinatorName]]]</p>'
 		'<p>Um aluno cancelou uma solicitação de estágio obrigatório com vínculo empregatício antes de solicitar a avaliação de históricos</p>'
         '<br>'
-		'<p>Aluno: [[[studentName]]]</p>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
@@ -610,7 +610,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
 		'<p>[[[ifStudentMale?O aluno:::A aluna]]] [[[studentName]]] solicitou a sua orientação para o processo de estágio</p>'
         '<br>'
-		'<p>Aluno: [[[studentName]]]</p>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
@@ -657,7 +657,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '</p>'
         '<p>É importante seguir a ordem de assinaturas: Aluno, Supervisor e Orientador</p>'
         '<br>'
-		'<p>Aluno: [[[studentName]]]</p>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
@@ -671,7 +671,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] aceitou a solicitação [[[ifStudentMale?do aluno:::da aluna]]] [[[studentName]]]</p>'
 		'<p>Com isso, <b>o processo de coleta de assinaturas iniciou</b></p>'
         '<br>'
-		'<p>Aluno: [[[studentName]]]</p>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
@@ -679,6 +679,84 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
 		'<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
         '<p>Siape: [[[advisorSiape]]]</p>',
         FALSE, FALSE, TRUE
+    ),
+    
+    (
+		'Sistema de estágios - Atualização de assinaturas',
+        '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
+        '<br>'
+        '<p>[[[ifStudentMale?O aluno:::A aluna]]] [[[studentName]]] realizou o envio dos documentos de assinaturas na plataforma de estágios</p>'
+		'<p>Lembre-se de enviar sua assinatura quando necessário</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        FALSE, TRUE, FALSE
+    ),
+    (
+		'Sistema de estágios - Atualização de assinaturas',
+        '<p>Olá [[[coordinatorName]]]</p>'
+        '<br>'
+        '<p>[[[ifStudentMale?O aluno:::A aluna]]] [[[studentName]]] realizou o envio dos documentos de assinaturas na plataforma de estágios</p>'
+		'<p>Lembre-se de enviar sua assinatura quando necessário</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
+        '<br>'
+		'<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
+        '<p>Siape: [[[advisorSiape]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    
+    (
+		'Sistema de estágios - Atualização de assinaturas',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
+        '<br>'
+        '<p>[[[ifAdvisorMale?Seu orientador:::Sua orientadora]]] [[[advisorName]]] realizou o envio dos documentos de assinaturas na plataforma de estágios</p>'
+		'<p>Lembre-se de enviar sua assinatura quando necessário</p>',
+        TRUE, FALSE, FALSE
+    ),
+    (
+		'Sistema de estágios - Atualização de assinaturas',
+        '<p>Olá [[[coordinatorName]]]</p>'
+        '<br>'
+        '<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] [[[ifStudentMale?do aluno:::da aluna]]] [[[studentName]]] realizou o envio dos documentos de assinaturas na plataforma de estágios</p>'
+		'<p>Lembre-se de enviar sua assinatura quando necessário</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
+        '<br>'
+		'<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
+        '<p>Siape: [[[advisorSiape]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    
+    (
+		'Sistema de estágios - Atualização de assinaturas',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
+        '<br>'
+        '<p>A coordenação de estágios realizou o envio dos documentos de assinaturas na plataforma de estágios</p>'
+		'<p>A próxima etapa é o envio e homologação dos documentos pelo SESTA com o período de espera máximo de 5 dias úteis</p>'
+        '<p>Aguarde e caso necessário entre em contato com a coordenação de estágios ou diretamente com o SESTA</p>',
+        TRUE, FALSE, FALSE
+    ),
+    (
+		'Sistema de estágios - Atualização de assinaturas',
+        '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
+        '<br>'
+        '<p>A coordenação de estágios realizou o envio dos documentos de assinaturas na plataforma de estágios</p>'
+		'<p>A próxima etapa é o envio e homologação dos documentos pelo SESTA com o período de espera máximo de 5 dias úteis</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        FALSE, TRUE, FALSE
     );
 
 /* Solicitation and its associated data - Solicitation is the state machine */
@@ -719,6 +797,7 @@ CREATE TABLE solicitation_state_transition(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_state_id_from INT NOT NULL,
     solicitation_state_id_to INT,
+    transition_name VARCHAR(30) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_state_id_from) REFERENCES solicitation_state(id),
     FOREIGN KEY (solicitation_state_id_to) REFERENCES solicitation_state(id)
@@ -795,31 +874,38 @@ INSERT INTO solicitation_state_profile_editors (solicitation_state_id, state_pro
     (3, 4),
     (4, 3),
     (5, 2), (5, 3), (5, 4);
-INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to) VALUES 
-	(1, 2), 
-    (1, NULL),
-    (2, 3),
-    (2, NULL),
-    (2, NULL),
-    (3, 4),
-    (3, NULL),
-    (4, 5),
-    (4, NULL),
-    (4, NULL);
+INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, transition_name) VALUES 
+	(1, 2, 'STU: send docs'),
+    (1, NULL, 'STU: cancel'),
+    (2, 3, 'COO: defer'),
+    (2, NULL, 'COO: reject docs'),
+    (2, NULL, 'COO: cancel'),
+    (3, 4, 'STU: request ADV'),
+    (3, NULL, 'STU: cancel'),
+    (4, 5, 'ADV: defer ADV'),
+    (4, NULL, 'ADV: reject ADV'),
+    (4, NULL, 'ADV: cancel ADV'),
+    (5, 5, 'STU: send docs loopback'),
+    (5, 5, 'ADV: send docs loopback'),
+    (5, 5, 'COO: send docs loopback'),
+    (5, 6, 'COO: defer'),
+    (5, NULL, 'COO: reject');
 INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
-	(1, 2),
-    (1, 3),
+	(1, 2), (1, 3),
     (2, 4),
     (3, 5),
     (4, 6),
     (6, 7),
     (7, 8),
-    (8, 9),
-    (8, 10),
-    (8, 11);
+    (8, 9), (8, 10), (8, 11),
+    (11, 12), (11, 13),
+    (12, 14), (12, 15),
+    (13, 16), (13, 17);
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
     (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação');
+    (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação'),
+    (11, 'Enviado', 'Atualização de documentos pelo aluno'), (12, 'Enviado', 'Atualização de documentos pelo orientador'), (13, 'Enviado', 'Atualização de documentos pela coordenação'),
+    (14, 'Deferido', 'Documentos assinados e processo deferido pela coordenação'), (15, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
 	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
