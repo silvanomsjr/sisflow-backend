@@ -49,7 +49,7 @@ def sistemStrParser(str, studentData=None, advisorData=None):
   if studentData:
     studentProfile = getUserTokenProfile(studentData, "STU")
   if advisorData:
-    advisorProfile = getUserTokenProfile(studentData, "ADV")
+    advisorProfile = getUserTokenProfile(advisorData, "ADV")
   
   substrP = getParserSubstring(str)
   while substrP:

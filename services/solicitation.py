@@ -611,22 +611,26 @@ class Solicitation(Resource):
         nextStateCreatedDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nextStateFinishDate = None if not nextStateMaxDays else (datetime.datetime.now() + datetime.timedelta(days=nextStateMaxDays)).strftime("%Y-%m-%d %H:%M:%S")
 
-        sendProfileNames = None
-        if "STU" in nextStateProfileEditorAcronyms:
-          sendProfileNames = "aluno"
-        if "ADV" in nextStateProfileEditorAcronyms:
-          sendProfileNames = "orientador" if not sendProfileNames else sendProfileNames + ", orientador"
-        if "COO" in nextStateProfileEditorAcronyms:
-          sendProfileNames = "coordenação de estágios" if not sendProfileNames else sendProfileNames + ", coordenação de estágios"
-        if "," in sendProfileNames:
-          lastIndex = sendProfileNames.rfind(",")
-          sendProfileNames = sendProfileNames[:lastIndex] + " e" + sendProfileNames[lastIndex+1:]
-        
         nextStateReason = ''
-        if sendProfileNames == "coordenação de estágios":
-          nextStateReason = "Aguardando a coordenação de estágios"
+        sendProfileNames = None
+        if nextStateProfileEditorAcronyms:
+          if "STU" in nextStateProfileEditorAcronyms:
+            sendProfileNames = "aluno"
+          if "ADV" in nextStateProfileEditorAcronyms:
+            sendProfileNames = "orientador" if not sendProfileNames else sendProfileNames + ", orientador"
+          if "COO" in nextStateProfileEditorAcronyms:
+            sendProfileNames = "coordenação de estágios" if not sendProfileNames else sendProfileNames + ", coordenação de estágios"
+          if "," in sendProfileNames:
+            lastIndex = sendProfileNames.rfind(",")
+            sendProfileNames = sendProfileNames[:lastIndex] + " e" + sendProfileNames[lastIndex+1:]
+
+          if sendProfileNames == "coordenação de estágios":
+            nextStateReason = "Aguardando a coordenação de estágios"
+          else:
+            nextStateReason = ("Aguardando o " + sendProfileNames) if sendProfileNames else None
         else:
-          nextStateReason = ("Aguardando o " + sendProfileNames) if sendProfileNames else None
+          nextStateReason = "Finalizado"
+          
         # inserts new user state
         dbExecute(
           " INSERT INTO user_has_solicitation_state "

@@ -545,7 +545,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
 	(
 		'Sistema de estágios: Inicio de processo de estágio',
         '<p>Olá [[[coordinatorName]]]</p>'
-		'<p>Um aluno criou uma solicitação de estágio obrigatório com vínculo empregatício</p>'
+		'<p>Um aluno <b>criou uma solicitação</b> de estágio obrigatório com vínculo empregatício</p>'
         '<br>'
 		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
@@ -757,6 +757,31 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<p>Matricula: [[[studentMatricula]]]</p>'
         '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
         FALSE, TRUE, FALSE
+    ),
+    
+    (
+		'Sistema de estágios - Coleta de assinaturas finalizada e documento homologado',
+        '<p>A coordenação de estágios juntamente ao SESTA homologaram os documentos do [[[ifStudentMale?aluno:::aluna]]]: [[[studentName]]]</p>'
+		'<p>Com isso o estágio é iniciado</p>'
+        '<p>O aluno e orientador devem realizar relatórios parciais e/ou final com detalhamento do ocorrido no estágio</p>'
+        '<p>Quando necessário acesse a plataforma para solicitar a avaliação e assinaturas dos relatórios parciais e final</p>'
+        '<br>'
+		'<p>Agradecemos pela utilização do sistema e um bom processo de estágio para o aluno</p>',
+        TRUE, TRUE, FALSE
+    ),
+    (
+		'Sistema de estágios - Coleta de assinaturas finalizada e documento homologado',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Os documentos do [[[ifStudentMale?aluno:::aluna]]]: [[[studentName]]] foram homologaram e a <b>solicitação foi concluída</b></p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
+        '<br>'
+        '<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
+        '<p>Siape: [[[advisorSiape]]]</p>',
+        FALSE, FALSE, TRUE
     );
 
 /* Solicitation and its associated data - Solicitation is the state machine */
@@ -888,6 +913,7 @@ INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitat
     (5, 5, 'STU: send docs loopback'),
     (5, 5, 'ADV: send docs loopback'),
     (5, 5, 'COO: send docs loopback'),
+    (5, 6, 'SESTA: send docs and defer'),
     (5, 6, 'COO: defer'),
     (5, NULL, 'COO: reject');
 INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
@@ -900,55 +926,14 @@ INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id,
     (8, 9), (8, 10), (8, 11),
     (11, 12), (11, 13),
     (12, 14), (12, 15),
-    (13, 16), (13, 17);
+    (13, 16), (13, 17),
+	(14, 18), (14, 19),
+    (15, 18), (15, 19);
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
     (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação'),
     (11, 'Enviado', 'Atualização de documentos pelo aluno'), (12, 'Enviado', 'Atualização de documentos pelo orientador'), (13, 'Enviado', 'Atualização de documentos pela coordenação'),
-    (14, 'Deferido', 'Documentos assinados e processo deferido pela coordenação'), (15, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
+    (14, 'Deferido', 'Documentos homologados'), (15, 'Deferido', 'Documentos homologados'), (16, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
 	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
-/*	
-INSERT INTO solicitation_state_transition_mail (solicitation_state_transition_id, dynamic_mail_id) VALUES
-	(1, 1),
-    (2, 2);
-INSERT INTO solicitation_state (solicitation_id, state_profile_editor, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES
-	(1, 4, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
-    (1, 2, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, False),
-    (1, 4, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', False),
-    (1, 3, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', False),
-	(1, 4, 'Solicitação de assinaturas do PA pelo aluno', 4, 7, NULL, False),
-    (1, 3, 'Requerimento de assinatura do PA ao orientador', 4, 8, NULL, False),
-    (1, 2, 'Requerimento de assinatura do PA ao coordenador', 10, 9, NULL, False),
-    (1, NULL, 'Estágio iniciado', NULL, 10, NULL, False),
-    
-    (2, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 2, NULL, TRUE),
-    (2, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, NULL, False),
-	(2, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, NULL, False),
-    (2, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, NULL, False),
-    (2, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, NULL, False),
-    (2, NULL, 'Estágio iniciado', NULL, 14, NULL, False),
-    
-    (3, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 3, NULL, TRUE),
-    (3, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, NULL, False),
-	(3, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, NULL, False),
-    (3, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, NULL, False),
-    (3, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, NULL, False),
-    (3, NULL, 'Estágio iniciado', NULL, 14, NULL, False),
-    
-    (4, 4, 'Solicitação de avaliação dos históricos pelo aluno', 4, 4, NULL, TRUE),
-    (4, 2, 'Avaliação dos históricos pelo coordenador', 4, 6, NULL, False),
-	(4, 4, 'Solicitação de assinaturas do TCE e PA pelo aluno', 4, 11, NULL, False),
-    (4, 3, 'Requerimento de assinatura do TCE e PA ao orientador', 4, 12, NULL, False),
-    (4, 2, 'Requerimento de assinatura do TCE e PA ao coordenador', 10, 13, NULL, False),
-    (4, NULL, 'Estágio iniciado', NULL, 14, NULL, False),
-    
-    (5, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório parcial pelo aluno', 4, 15, NULL, TRUE),
-    (5, 2, 'Avaliação e assinatura do relatório parcial pelo coordenador', 4, 16, NULL, False),
-    (5, NULL,  'Relatório parcial completo', NULL, 17, NULL, False),
-    
-    (6, 4, 'Solicitação de avaliação e complemento de assinaturas do relatório final pelo aluno', 4, 18, NULL, TRUE),
-    (6, 2, 'Avaliação e assinatura do relatório final pelo coordenador', 4, 19, NULL, False),
-    (6, NULL, 'Relatório final completo', NULL, 20, NULL, False);
-*/
