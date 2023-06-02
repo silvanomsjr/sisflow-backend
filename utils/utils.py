@@ -39,37 +39,59 @@ def getParserSubstring(str):
   return str[substrStart:substrEnd+3]
 
 # PARSER - parses a given string changing text options based on user data
-def sistemStrParser(str, studentData):
+def sistemStrParser(str, studentData=None, advisorData=None):
+
+  studentProfile = None
 
   if not str:
     return None
+  
+  if studentData:
+    studentProfile = getUserTokenProfile(studentData, "STU")
+  if advisorData:
+    advisorProfile = getUserTokenProfile(studentData, "ADV")
   
   substrP = getParserSubstring(str)
   while substrP:
     command = substrP.replace("[[[",'').replace("]]]",'').strip()
 
-    # put user name
-    if "userName" in command:
-      str = str.replace(substrP, studentData["user_name"])
-    
-    # put coordinator name
-    if "coordinatorName" in command:
+    # single attributes parsing
+    # put names
+    if "studentName" in command:
+      str = str.replace(substrP, studentData.get("user_name") if studentData else "")
+    elif "advisorName" in command:
+      str = str.replace(substrP, advisorData.get("user_name") if advisorData else "")
+    elif "coordinatorName" in command:
       str = str.replace(substrP, getCoordinatorName())
-
-    # gender differences
-    if "ifMale?" in command:
-      str = str.replace(substrP, command.replace("ifMale?",'').split(":::")[ 0 if studentData["gender"] == 'M' else 1 ])
-
-    # course differences, works only users with student profiles
-    if "ifBCC?" in command:
-      
-      studentProfile = getUserTokenProfile(studentData, "STU")
-
-      if studentProfile and studentProfile["course"]:
-        str = str.replace(substrP, command.replace("ifBCC?",'').split(":::")[ 0 if studentProfile["course"] == "BCC" else 1 ])
-      else:
-        str = str.replace(substrP, '')
     
+    # put student matricula
+    elif "studentMatricula" in command:
+      str = str.replace(substrP, studentProfile.get("matricula") if studentProfile else "")
+    
+    # put student course
+    elif "studentCourse" in command:
+      str = str.replace(substrP, studentProfile.get("course") if studentProfile else "")
+    
+    # put advisor siape
+    elif "advisorSiape?" in command:
+      str = str.replace(substrP, advisorProfile.get("siape") if advisorProfile else "")
+      
+    # conditional parsing
+    elif ":::" in command:
+      
+      # gender differences
+      if "ifStudentMale?" in command:
+        str = str.replace(substrP, command.replace("ifStudentMale?",'').split(":::")[ 0 if studentData["gender"] == 'M' else 1 ])
+      if "ifAdvisorMale?" in command:
+        str = str.replace(substrP, command.replace("ifAdvisorMale?",'').split(":::")[ 0 if advisorData["gender"] == 'M' else 1 ])
+
+      # course differences, works only with students
+      if "ifBCCStudent?" in command:
+        if studentProfile and studentProfile["course"]:
+          str = str.replace(substrP, command.replace("ifBCCStudent?",'').split(":::")[ 0 if studentProfile["course"] == "BCC" else 1 ])
+        else:
+          str = str.replace(substrP, '')
+      
     # avoid loops when not configured correctly
     else:
       str = str.replace(substrP, '')

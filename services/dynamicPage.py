@@ -27,7 +27,7 @@ def getDynamicPage(pageId, studentData=None, advisorData=None):
 
 def loadPageComponents(pageId, studentData=None, advisorData=None):
 
-  useParser = studentData!=None
+  useParser = studentData!=None or advisorData!=None
 
   pageComponentsQuery = dbGetAll(
     " SELECT dphc.dynamic_component_order AS component_order, "
@@ -71,7 +71,7 @@ def loadPageComponents(pageId, studentData=None, advisorData=None):
     component["component_type"] = componentQ["component_type"]
 
     if component["component_type"] == "inner_html":
-      component["inner_html"] = sistemStrParser(componentQ["inner_html"], studentData) if useParser else componentQ["inner_html"]
+      component["inner_html"] = sistemStrParser(componentQ["inner_html"], studentData, advisorData) if useParser else componentQ["inner_html"]
 
     if component["component_type"] == "input":
       component["input_name"] = componentQ["input_name"]
