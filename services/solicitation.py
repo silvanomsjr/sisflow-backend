@@ -457,7 +457,12 @@ class Solicitation(Resource):
         abort(401, "Edição a solicitação não permitida!")
 
     # checks if profile is allowed to change solicitation
-    if not stateProfileAcronymEditors in tokenData["profile_acronyms"]:
+    profileCanEdit = False
+    for profileEditor in stateProfileAcronymEditors.split(','):
+      if profileEditor in tokenData["profile_acronyms"]:
+        profileCanEdit = True
+    
+    if not profileCanEdit:
       abort(401, "Perfil editor a solicitação inválido!")
     
     # checks if if the solicitation is actual and editable
