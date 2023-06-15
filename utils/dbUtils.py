@@ -3,47 +3,49 @@ import os
 
 def dbCheckCreate():
 
-  dbConnection = mysql.connector.connect(
-    host = os.getenv("SQL_HOST"),
-    port = os.getenv("SQL_PORT"),
-    user = os.getenv("SQL_USER"),
-    passwd = os.getenv("SQL_PASSWORD"),
-    auth_plugin="mysql_native_password")
+  dbObject = dbStartTransactionObj(False)
 
-  if dbConnection:
+  if dbObject.dbConnection:
     print("# Connection to database successfull")
   else:
     print("# Connection to database failed")
     return
 
-  dbCursor = dbConnection.cursor(buffered=True, dictionary=True)
-  dbCursor.execute("show databases")
+  dbObject.dbCursor.execute("show databases")
 
   schemaFound = False
-  for db in dbCursor:
+  for db in dbObject.dbCursor:
     if os.getenv("SQL_SCHEMA") == db["Database"]:
       schemaFound = True
       break
+  dbCloseTransactionObj(dbObject)
 
   if not schemaFound:
     print("# Schema " + str(os.getenv("SQL_SCHEMA")) + " not found! creating schema and tables")
-    dbCreate(dbConnection, dbCursor)
+    dbCreate()
     print("# Schema " + str(os.getenv("SQL_SCHEMA")) + " and tables created")
   else:
     print("# Schema " + str(os.getenv("SQL_SCHEMA")) + " is in database")
-  
-  dbCursor.close()
-  dbConnection.close()
 
-def dbStartTransactionObj():
+def dbStartTransactionObj(withSchema=True):
 
-  dbConnection = mysql.connector.connect(
-    host = os.getenv("SQL_HOST"),
-    port = os.getenv("SQL_PORT"),
-    user = os.getenv("SQL_USER"),
-    passwd = os.getenv("SQL_PASSWORD"),
-    database = os.getenv("SQL_SCHEMA"),
-    auth_plugin = "mysql_native_password")
+  dbConnection = None
+
+  if withSchema:
+    dbConnection = mysql.connector.connect(
+      host = os.getenv("SQL_HOST"),
+      port = os.getenv("SQL_PORT"),
+      user = os.getenv("SQL_USER"),
+      passwd = os.getenv("SQL_PASSWORD"),
+      database = os.getenv("SQL_SCHEMA"),
+      auth_plugin = "mysql_native_password")
+  else:
+    dbConnection = mysql.connector.connect(
+      host = os.getenv("SQL_HOST"),
+      port = os.getenv("SQL_PORT"),
+      user = os.getenv("SQL_USER"),
+      passwd = os.getenv("SQL_PASSWORD"),
+      auth_plugin="mysql_native_password")
 
   dbCursor = dbConnection.cursor(buffered=True, dictionary=True)
 
@@ -232,28 +234,27 @@ def dbGetSqlFilterScrypt(argsObj, groupByCollumns=None, orderByCollumns=None, li
 
 def getSqlScrypt(name):
 
-  textFile = open("./sql/" + name + ".sql", "r")
+  textFile = open("./sql/" + name + ".sql", "r", encoding="utf-8")
   strFile = textFile.read()
   textFile.close()
 
   return strFile
 
-def dbCreate(dbConnection, dbCursor):
+def dbCreate():
 
-  dbCursor.execute("create schema " + str(os.getenv("SQL_SCHEMA")))
+  dbObject = dbStartTransactionObj(False)
 
-  dbConnection = mysql.connector.connect(
-    host = os.getenv("SQL_HOST"),
-    port = os.getenv("SQL_PORT"),
-    user = os.getenv("SQL_USER"),
-    passwd = os.getenv("SQL_PASSWORD"),
-    database = os.getenv("SQL_SCHEMA"),
-    auth_plugin = "mysql_native_password")
+  # creates schema and tables
+  sqlScrypt = getSqlScrypt("sisges_create")
+  for createTable in sqlScrypt.split(";"):
+    dbObject.dbCursor.execute(createTable)
 
-  # opens and close cursor to avoid sync problens
-  dbCursor = dbConnection.cursor(buffered=True, dictionary=True)
-  dbCursor.execute(getSqlScrypt("sisges_create"))
-  dbCursor.close()
+  # insert default values
+  sqlScrypt = getSqlScrypt("sisges_insert_default")
+  for insertTable in sqlScrypt.split(";"):
+    dbObject.dbCursor.execute(insertTable)
+
+  dbCommit(dbObject)
 
 class dbObject():
   def __init__(self, dbConnection, dbCursor, dbTransactionDone):
