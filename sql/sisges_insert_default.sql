@@ -6,8 +6,8 @@ INSERT INTO config(config_name) VALUES
     ("root path user files"),
     ("coordinator mail");
 INSERT INTO config_system_path(config_id, system_path) VALUES
-	(1, "/sisges/secrets/"),
-	(2, "/sisges/userfiles/");
+	(1, "../sisgesFiles/secrets/"),
+	(2, "../sisgesFiles/userfiles/");
 INSERT INTO config_mail(config_id, mail, mail_name) VALUES
 	(3, "prof.asoares@ufu.br", "Alexsandro Santos Soares");
     
