@@ -527,7 +527,7 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         FALSE, FALSE, TRUE
     );
     
-/* solicitations */    
+# all solicitations
 INSERT INTO solicitation (solicitation_name) VALUES 
 	('Inicio de estágio obrigatório externo com vinculo empregatício'),
     ('Inicio de estágio obrigatório externo sem vinculo empregatício'),
@@ -535,38 +535,43 @@ INSERT INTO solicitation (solicitation_name) VALUES
     ('Inicio de estágio não obrigatório interno'),
     ('Envio de relatório parcial'),
     ('Envio de relatório final');
+# mail sended when solicitation starts
 INSERT INTO solicitation_start_mail(solicitation_id, dynamic_mail_id) VALUES 
 	(1, 1);
+# states for solicitation 1
 INSERT INTO solicitation_state (solicitation_id, state_description, state_max_duration_days, state_dynamic_page_id, state_static_page_name, is_initial_state) VALUES
 	(1, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
-    (1, 'Avaliação dos históricos e complementos pelo coordenador', 4, 5, NULL, FALSE),
+    (1, 'Avaliação dos históricos e complementos pelo coordenador', 4, NULL, 'interbegin-coordinatoracception', FALSE),
     (1, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
     (1, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', FALSE),
 	(1, 'Processo de assinaturas para início de estágio', 15, NULL, 'interbegin-signatures', FALSE),
     (1, 'Estágio iniciado', NULL, 14, NULL, FALSE);
+# editors for states in solicitation 1
 INSERT INTO solicitation_state_profile_editors (solicitation_state_id, state_profile_editor) VALUES 
 	(1, 4),
     (2, 2),
     (3, 4),
     (4, 3),
     (5, 2), (5, 3), (5, 4);
+# transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, transition_name) VALUES 
-	(1, 2, 'STU: send docs'),
-    (1, NULL, 'STU: cancel'),
-    (2, 3, 'COO: defer'),
-    (2, NULL, 'COO: reject docs'),
-    (2, NULL, 'COO: cancel'),
-    (3, 4, 'STU: request ADV'),
-    (3, NULL, 'STU: cancel'),
-    (4, 5, 'ADV: defer ADV'),
-    (4, NULL, 'ADV: reject ADV'),
-    (4, NULL, 'ADV: cancel ADV'),
-    (5, 5, 'STU: send docs loopback'),
-    (5, 5, 'ADV: send docs loopback'),
-    (5, 5, 'COO: send docs loopback'),
-    (5, 6, 'SESTA: send docs and defer'),
-    (5, 6, 'COO: defer'),
-    (5, NULL, 'COO: reject');
+	(1, 2, 'STU: send docs'),				#1:s1:  state 1 to 2
+    (1, NULL, 'STU: cancel'),				#2:s1:  state 1 to end
+    (2, 3, 'COO: defer'),					#3:s1:  state 2 to 3
+    (2, NULL, 'COO: reject docs'),			#4:s1:  state 2 to end
+    (2, NULL, 'COO: cancel'),				#5:s1:  state 2 to end
+    (3, 4, 'STU: request ADV'),				#6:s1:  state 3 to 4 end
+    (3, NULL, 'STU: cancel'),				#7:s1:  state 3 to end
+    (4, 5, 'ADV: defer ADV'),				#8:s1:  state 4 to 5 end
+    (4, NULL, 'ADV: reject ADV'),			#9:s1:  state 4 to end
+    (4, NULL, 'ADV: cancel ADV'),			#10:s1: state 4 to end
+    (5, 5, 'STU: send docs loopback'),		#11:s1: state 5 to 5
+    (5, 5, 'ADV: send docs loopback'),		#12:s1: state 5 to 5
+    (5, 5, 'COO: send docs loopback'),		#13:s1: state 5 to 5
+    (5, 6, 'SESTA: send docs and defer'),	#14:s1: state 5 to 6
+    (5, 6, 'COO: defer'),					#15:s1: state 5 to 6
+    (5, NULL, 'COO: reject');				#16:s1: state 1 to end
+# email sended when transitions occurs for states in solicitation 1
 INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
 	(1, 2), (1, 3),
     (2, 4),
@@ -580,11 +585,13 @@ INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id,
     (13, 16), (13, 17),
 	(14, 18), (14, 19),
     (15, 18), (15, 19);
+# static pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
+    (3, 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação'),
     (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
     (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação'),
     (11, 'Enviado', 'Atualização de documentos pelo aluno'), (12, 'Enviado', 'Atualização de documentos pelo orientador'), (13, 'Enviado', 'Atualização de documentos pela coordenação'),
     (14, 'Deferido', 'Documentos homologados'), (15, 'Deferido', 'Documentos homologados'), (16, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
+# dynamic pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
-	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (3, 'Button-Defer', 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Button-Reject', 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Button-Cancel', 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação');
+	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação');
