@@ -1,8 +1,7 @@
-import os
 from dotenv import load_dotenv, find_dotenv
 
-from flask import Flask, abort
-from flask_restful import Resource, Api, reqparse
+from flask import Flask
+from flask_restful import Api
 from flask_cors import CORS
 
 from utils.dbUtils import dbCheckCreate
@@ -18,7 +17,9 @@ from services.solicitations import CoordinatorSolicitations, AdvisorSolicitation
 from services.solicitation import Solicitation
 from services.solicitationAdvisor import SolicitationAdvisor
 from services.solicitationTransitions import SolicitationTransitions
+from services.reasons import Reasons
 
+# create flask api server with enabled Authorization cors to all origins used to do user authentication
 app = Flask(__name__)
 CORS(
   app,
@@ -26,6 +27,7 @@ CORS(
   headers=["Content-Type", "Authorization"],
   expose_headers="Authorization")
 
+# set service endpoints
 api = Api(app)
 api.add_resource(Login, "/login")
 api.add_resource(Sign, "/sign")
@@ -38,6 +40,7 @@ api.add_resource(StudentSolicitations, "/student/solicitations")
 api.add_resource(Solicitation, "/solicitation")
 api.add_resource(SolicitationAdvisor, "/solicitation/advisor")
 api.add_resource(SolicitationTransitions, "/solicitation/transitions")
+api.add_resource(Reasons, "/reasons")
 
 # For homol and production ambients like render.com the environment variables are already loaded
 if getMissingEnvironmentVar():
