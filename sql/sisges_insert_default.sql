@@ -4,12 +4,23 @@ USE sisgesteste;
 INSERT INTO config(config_name) VALUES
 	("root path key files"),
     ("root path user files"),
-    ("coordinator mail");
+    ("coordinator mail"),
+    ("reason class: student hist validation");
+# Path COnfigurations
 INSERT INTO config_system_path(config_id, system_path) VALUES
 	(1, "../sisgesFiles/secrets/"),
 	(2, "../sisgesFiles/userfiles/");
+# Email Configurations
 INSERT INTO config_mail(config_id, mail, mail_name) VALUES
 	(3, "prof.asoares@ufu.br", "Alexsandro Santos Soares");
+# Reason class and reasons for reason tables
+INSERT INTO config_reason_class(config_id, class_name) VALUES
+	(4, "Validação Históricos Aluno");
+INSERT INTO config_reason(reason_class_id, inner_html) VALUES
+	(4, 'teste motivo 1[[[ifBCCStudent?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
+		'<a href="https://facom.ufu.br/legislacoes/normas-de-estagio-curricular-do-bacharelado-em-sistemas-de-informacao">Normas de Estagio BSI</a>.</p>]]]'),
+    (4, 'Motivo 2 <a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>');
+/* */
     
 /* User data and Profiles */   
 INSERT INTO user_account (institutional_email, secondary_email, user_name, gender, phone, password_hash, password_salt, creation_datetime) VALUES

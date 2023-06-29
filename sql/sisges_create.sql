@@ -35,6 +35,19 @@ CREATE TABLE config_year_holiday(
     PRIMARY KEY (id),
     FOREIGN KEY (year) REFERENCES config_year(year)
 );
+CREATE TABLE config_reason_class(
+	config_id INT NOT NULL,
+    class_name VARCHAR(50) NOT NULL UNIQUE,
+    PRIMARY KEY (config_id),
+    FOREIGN KEY (config_id) REFERENCES config(id)
+);
+CREATE TABLE config_reason(
+	id INT NOT NULL AUTO_INCREMENT,
+	reason_class_id INT NOT NULL,
+    inner_html VARCHAR(2000) NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reason_class_id) REFERENCES config_reason_class(config_id)
+);
 
 /* User data and Profiles */
 CREATE TABLE user_account(
