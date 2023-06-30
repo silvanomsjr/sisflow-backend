@@ -5,7 +5,9 @@ INSERT INTO config(config_name) VALUES
 	("root path key files"),
     ("root path user files"),
     ("coordinator mail"),
-    ("reason class: student hist validation");
+    ("reason class: geral student hist validation"),
+    ("reason class: bcc student hist validation"),
+    ("reason class: bsi student hist validation");
 # Path COnfigurations
 INSERT INTO config_system_path(config_id, system_path) VALUES
 	(1, "../sisgesFiles/secrets/"),
@@ -15,11 +17,21 @@ INSERT INTO config_mail(config_id, mail, mail_name) VALUES
 	(3, "prof.asoares@ufu.br", "Alexsandro Santos Soares");
 # Reason class and reasons for reason tables
 INSERT INTO config_reason_class(config_id, class_name) VALUES
-	(4, "Validação Históricos Aluno");
+	(4, "Validação Históricos Geral"),
+	(5, "Validação Históricos BCC"),
+    (6, "Validação Históricos BSI");
 INSERT INTO config_reason(reason_class_id, inner_html) VALUES
-	(4, 'teste motivo 1[[[ifBCCStudent?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
-		'<a href="https://facom.ufu.br/legislacoes/normas-de-estagio-curricular-do-bacharelado-em-sistemas-de-informacao">Normas de Estagio BSI</a>.</p>]]]'),
-    (4, 'Motivo 2 <a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>');
+	(4, 'O histórico textual [[[ifStudentMale?do aluno:::da aluna]]] está em formato inválido, acesse o mesmo pelo <a href="https://www.portalestudante.ufu.br/">Portal do Estudante UFU</a>'),
+    (4, 'O histórico visual [[[ifStudentMale?do aluno:::da aluna]]] está em formato inválido, acesse o mesmo pelo <a href="https://www.portalestudante.ufu.br/">Portal do Estudante UFU</a>'),
+    (4, 'O comprovante de vínculo empregatício [[[ifStudentMale?do aluno:::da aluna]]] está em formato inválido'),
+	(5, '[[[ifStudentMale?O aluno:::A aluna]]] não possui concluído todas as matérias entre o 1º e o 4º período conforme solicita o Artigo 15 do capítulo III das '
+		'<a href="https://facom.ufu.br/system/files/conteudo/sei_23117.080702_2022_71.pdf">Normas de Estagio do BCC</a>.'),
+	(6, '[[[ifStudentMale?O aluno:::A aluna]]] não possui concluído com aproveitamento 1.200 horas-aula conforme solicita o Artigo 13 do capítulo IV das '
+		'<a href="https://facom.ufu.br/system/files/conteudo/normasestagio_bsi.pdf">Normas de Estagio do BSI</a>.'),
+	(6, '[[[ifStudentMale?O aluno:::A aluna]]] não está aprovado em todas as disciplinas do primeiro e segundo períodos conforme solicita o Artigo 14 do capítulo IV das '
+		'<a href="https://facom.ufu.br/system/files/conteudo/normasestagio_bsi.pdf">Normas de Estagio do BSI</a>.'),
+    (6, '[[[ifStudentMale?O aluno:::A aluna]]] não possui (CRA) mínimo de 60 conforme o Artigo 14 do capítulo IV das '
+		'<a href="https://facom.ufu.br/system/files/conteudo/normasestagio_bsi.pdf">Normas de Estagio do BSI</a>.');
 /* */
     
 /* User data and Profiles */   
