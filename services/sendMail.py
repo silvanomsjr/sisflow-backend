@@ -4,20 +4,23 @@ import traceback
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
+from utils.sistemConfig import getCoordinatorEmail
+from utils.smtpMails import smtpSend
 from utils.utils import sistemStrParser
 
-# Data from reasons
-class Reasons(Resource):
+# Send mail with post
+class SendMail(Resource):
 
-  # get reasons
-  def get(self):
+  def post(self):
 
     args = reqparse.RequestParser()
     args.add_argument("Authorization", location="headers", type=str, help="Bearer with jwt given by server in user autentication, required", required=True)
-    args.add_argument("user_has_state_id", location="args", type=int, required=True)
-    args.add_argument("class_names", location="args", type=str, help="Reason class names separated by comma")
-    args.add_argument("reason_id", location="args", type=str)
-    args.add_argument("reason_content", location="args", type=str)
+    args.add_argument("user_has_state_id", location="json", type=int, required=True)
+    args.add_argument("mail_subject", location="json", type=str, required=True)
+    args.add_argument("mail_body", location="json", type=str, required=True)
+    args.add_argument("is_sent_to_student", location="json", type=bool)
+    args.add_argument("is_sent_to_advisor", location="json", type=bool)
+    args.add_argument("is_sent_to_coordinator", location="json", type=bool)
     args = args.parse_args()
 
     # verify jwt and its signature correctness
@@ -25,45 +28,10 @@ class Reasons(Resource):
     if not isTokenValid:
       abort(401, errorMsg)
 
-    print("\n# Starting get reasons\n# Reading data filtered from DB")
+    print("\n# Starting send Email\n# Reading data from DB")
 
-    filterScrypt = None
-    filterValues = None
-
-    reasonQStr = (
-      " SELECT rclass.config_id AS reason_class_id, rclass.class_name AS reason_class_name, "
-      " r.id AS reason_id, r.inner_html AS reason_inner_html "
-      "   FROM config_reason_class rclass "
-      "   JOIN config_reason r ON rclass.config_id = r.reason_class_id "
-    )
-
-    if args.get("class_names"):
-      classNames = ' (' + ''.join(map(lambda el : (",\'" if el[0] > 0 else "\'") + str(el[1]) + "\'", enumerate(args["class_names"].split(",")))) + ') '
-      reasonQStr += " WHERE rclass.class_name IN " + classNames
-      filterScrypt, filterValues = dbGetSqlFilterScrypt([
-        {'filterCollum':'r.id', 'filterOperator':'=', 'filterValue': args.get("reason_id")},
-        {'filterCollum':'r.inner_html', 'filterOperator':'LIKE%_%', 'filterValue': args.get("reason_content")}
-      ], initialSqlJunctionClause=" AND ")
-
-    else:
-      filterScrypt, filterValues = dbGetSqlFilterScrypt([
-        {'filterCollum':'r.id', 'filterOperator':'=', 'filterValue': args.get("reason_id")},
-        {'filterCollum':'r.inner_html', 'filterOperator':'LIKE%_%', 'filterValue': args.get("reason_content")}
-      ])
-
-    qReasonClassesRes = None
-    qReasonsRes = None
     qUserRes = None
     try:
-      # reason classes
-      qReasonClassesRes = dbGetAll(
-        " SELECT rclass.config_id AS reason_class_id, rclass.class_name AS reason_class_name "
-        "   FROM config_reason_class rclass;"
-      )
-
-      # reasons
-      qReasonsRes = dbGetAll(reasonQStr + filterScrypt, filterValues)
-
       # student and advisor data
       qUserRes = dbGetSingle(
         " SELECT uc_stu.id AS student_id, uc_stu.user_name AS student_name, uc_stu.institutional_email AS student_institutional_email, "
@@ -126,11 +94,22 @@ class Reasons(Resource):
         "siape": qUserRes["advisor_siape"]
       }]
     }
+
+    print("# Sending Mail")
     
-    # parse reason
-    for reason in qReasonsRes:
-      reason["reason_inner_html"] = sistemStrParser(reason["reason_inner_html"], studentData, advisorData)
+    # parse mail subject and body
+    parsedSubject = sistemStrParser(args["mail_subject"], studentData, advisorData)
+    parsedBody = sistemStrParser(args["mail_body"], studentData, advisorData)
 
-    print("# Get reasons done!")
+    if args.get("is_sent_to_student") == True:
+      smtpSend(studentData['institutional_email'], parsedSubject, parsedBody)
 
-    return { "classes": qReasonClassesRes, "reasons": qReasonsRes }, 200
+    if args.get("is_sent_to_advisor") == True:
+      smtpSend(advisorData['institutional_email'], parsedSubject, parsedBody)
+
+    if args.get("is_sent_to_coordinator") == True:
+      smtpSend(getCoordinatorEmail(), parsedSubject, parsedBody)
+
+    print("# Sending Mail done!")
+
+    return {}, 200

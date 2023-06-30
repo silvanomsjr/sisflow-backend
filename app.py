@@ -13,6 +13,7 @@ from services.authentication import Login, Sign
 from services.advisors import Advisors
 from services.dynamicPage import DynamicPage
 from services.fileTransmission import FileTransmission
+from services.sendMail import SendMail
 from services.solicitations import CoordinatorSolicitations, AdvisorSolicitations, StudentSolicitations
 from services.solicitation import Solicitation
 from services.solicitationAdvisor import SolicitationAdvisor
@@ -36,6 +37,7 @@ api.add_resource(DynamicPage, "/dynamicpage")
 api.add_resource(CoordinatorSolicitations, "/coordinator/solicitations")
 api.add_resource(Advisors, "/advisors")
 api.add_resource(AdvisorSolicitations, "/advisor/solicitations")
+api.add_resource(SendMail, "/sendmail")
 api.add_resource(StudentSolicitations, "/student/solicitations")
 api.add_resource(Solicitation, "/solicitation")
 api.add_resource(SolicitationAdvisor, "/solicitation/advisor")
