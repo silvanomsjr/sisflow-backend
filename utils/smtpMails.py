@@ -3,46 +3,36 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 import os
+import threading
+import time
 
-from threading import Thread
+systemSmtpServer = None
 
-smtpServer = None
+def startSmtpServer():
 
-def smtpStart():
+  global systemSmtpServer
 
-  global smtpServer
+  if systemSmtpServer == None:
+    systemSmtpServer = SmtpServer()
 
-  smtpServer = smtplib.SMTP(
-    os.getenv("SMTP_HOST"),
-    os.getenv("SMTP_PORT"))
+def addToSmtpMailServer(rawTo, rawSubject, rawBody):
 
-  smtpServer.ehlo()
-  smtpServer.starttls()
+  global systemSmtpServer
 
-  smtpServer.login(
-    os.getenv("SMTP_LOGIN"),
-    os.getenv("SMTP_PASSWORD"))
+  if systemSmtpServer == None:
+    systemSmtpServer = SmtpServer()
 
-  print("# Connection to SMTP successfull")
+  to, subject, body = mailArgsFormat(rawTo, rawSubject, rawBody)
+  mmMail = mailMIMEMultipartFormat(to, subject, body)
 
-def isSmtpWorking():
+  systemSmtpServer.appendToMailList(to, mmMail)
 
-  global smtpServer
+def stopSmtpServer():
 
-  if not smtpServer:
-    smtpStart()
-    if not smtpServer:
-      print("# Could not reconnect to smtp local server")
-      return False
-  
-  try:
-    status = smtpServer.noop()[0]
-  except:  # smtplib.SMTPServerDisconnected
-    status = -1
+  global systemSmtpServer
 
-  if status == 250:
-    return True
-  return False
+  if systemSmtpServer != None:
+    systemSmtpServer.stop()
 
 def mailArgsFormat(rawTo, rawSubject, rawBody):
 
@@ -83,23 +73,66 @@ def mailMIMEMultipartFormat(to, subject, body):
 
   return mmMail.as_string()
 
-def smtpSend(rawTo, rawSubject, rawBody):
+# Creates a smtp server thread to asynchronous send mails from a mail list
+class SmtpServer:
 
-  global smtpServer
+  # Starts thread to run smtp server for sending mails, self is shared
+  def __init__(self):
+    self.finishThread = False
+    self.mailList = []
+    threading.Thread(target = self.__run).start()
 
-  if not isSmtpWorking:
-    return
+  # Private method used by thread to run smtp server asynchronous
+  def __run(self):
+    self.__connectSMTP()
+    self.__awaitsForMailList()
 
-  to, subject, body = mailArgsFormat(rawTo, rawSubject, rawBody)
-  mmMail = mailMIMEMultipartFormat(to, subject, body)
+  # Creates a SMTP connection to host and port with login credentials
+  def __connectSMTP(self):
+    self.smtpServer = smtplib.SMTP(
+      os.getenv("SMTP_HOST"),
+      os.getenv("SMTP_PORT"))
 
-  #if an exception occur, restart conection and try again(avoid disconnection by timeout)
-  exceptionOcurred = False
-  try:
-    smtpServer.sendmail(os.getenv("SMTP_LOGIN"), to, mmMail)
-  except Exception as e:
-    exceptionOcurred = True
-    smtpStart()
+    self.smtpServer.ehlo()
+    self.smtpServer.starttls()
 
-  if exceptionOcurred:
-    smtpServer.sendmail(os.getenv("SMTP_LOGIN"), to, mmMail)
+    self.smtpServer.login(
+      os.getenv("SMTP_LOGIN"),
+      os.getenv("SMTP_PASSWORD"))
+    
+    print(f'# Smtp thread {threading.get_ident()}: Connection to SMTP successfull')
+  
+  # Awaits for appends to mail list
+  def __awaitsForMailList(self):
+
+    while self.finishThread == False:
+      if len(self.mailList) > 0:
+        self.__sendMail(self.mailList[0])
+        del self.mailList[0]
+      else:
+        print(f'# Smtp thread {threading.get_ident()}: # Awaiting for mails')
+        time.sleep(10)
+
+  # Sends mail from mail object
+  #   if an exception occur, restart conection and try again(avoid disconnection by timeout)
+  def __sendMail(self, mailObj):
+
+    print(f'# Smtp thread {threading.get_ident()}: Sending mail to {mailObj["emailTo"]}')
+    exceptionOcurred = False
+    try:
+      self.smtpServer.sendmail(os.getenv("SMTP_LOGIN"), mailObj['emailTo'], mailObj['mmMailBody'])
+    except Exception as e:
+      exceptionOcurred = True
+      self.__connectSMTP()
+
+    if exceptionOcurred:
+      self.smtpServer.sendmail(os.getenv("SMTP_LOGIN"), mailObj['emailTo'], mailObj['mmMailBody'])
+    print(f'# Smtp thread {threading.get_ident()}: Done!')
+  
+  # append a mail object to the mailList, python append() is thread safe
+  def appendToMailList(self, emailTo, mmMailBody):
+    self.mailList.append({'emailTo': emailTo, 'mmMailBody': mmMailBody})
+
+  # Stops thread
+  def stop(self):
+    self.finishThread = True

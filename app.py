@@ -6,8 +6,9 @@ from flask_cors import CORS
 
 from utils.dbUtils import dbCheckCreate
 from utils.cryptoFunctions import loadGenerateKeys
+from utils.eventScheduler import addToEventScheduler, printEventSchedulerInfo, startEventScheduler
 from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
-from utils.smtpMails import smtpStart
+from utils.smtpMails import startSmtpServer, addToSmtpMailServer
 
 from services.authentication import Login, Sign
 from services.advisors import Advisors
@@ -57,8 +58,67 @@ if getMissingEnvironmentVar():
 # Start MySQL
 dbCheckCreate()
 # Start SMTP Server
-smtpStart()
-# Load Sistem Configutations
+startSmtpServer()
+# Load System Configutations
 sisConfigStart()
 # Load Secret Keys
 loadGenerateKeys()
+# Load System Event Scheduler
+startEventScheduler
+
+# For testing
+def test():
+
+  tmpSeconds = 0
+  addToEventScheduler(1, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = -10
+  addToEventScheduler(2, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 20
+  addToEventScheduler(3, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 5
+  addToEventScheduler(4, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 2
+  addToEventScheduler(5, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 7
+  addToEventScheduler(6, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 15
+  addToEventScheduler(7, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 15
+  addToEventScheduler(8, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 19
+  addToEventScheduler(9, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  tmpSeconds = 1
+  addToEventScheduler(10, tmpSeconds, addToSmtpMailServer, {
+    'rawTo': 'test@ufu.br',
+    'rawSubject': f'test with {tmpSeconds} seconds',
+    'rawBody': f'this has sended by event scheduler with {tmpSeconds} timestamp seconds'})
+  printEventSchedulerInfo()
+
+test()

@@ -5,7 +5,7 @@ import traceback
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
 from utils.sistemConfig import getCoordinatorEmail
-from utils.smtpMails import smtpSend
+from utils.smtpMails import addToSmtpMailServer
 from utils.utils import sistemStrParser
 
 # Send mail with post
@@ -102,13 +102,13 @@ class SendMail(Resource):
     parsedBody = sistemStrParser(args["mail_body"], studentData, advisorData)
 
     if args.get("is_sent_to_student") == True:
-      smtpSend(studentData['institutional_email'], parsedSubject, parsedBody)
+      addToSmtpMailServer(studentData['institutional_email'], parsedSubject, parsedBody)
 
     if args.get("is_sent_to_advisor") == True:
-      smtpSend(advisorData['institutional_email'], parsedSubject, parsedBody)
+      addToSmtpMailServer(advisorData['institutional_email'], parsedSubject, parsedBody)
 
     if args.get("is_sent_to_coordinator") == True:
-      smtpSend(getCoordinatorEmail(), parsedSubject, parsedBody)
+      addToSmtpMailServer(getCoordinatorEmail(), parsedSubject, parsedBody)
 
     print("# Sending Mail done!")
 

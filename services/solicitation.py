@@ -8,7 +8,7 @@ from flask_restful import Resource, Api, reqparse
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
 from utils.sistemConfig import getCoordinatorEmail
-from utils.smtpMails import smtpSend
+from utils.smtpMails import addToSmtpMailServer
 from utils.utils import getFormatedMySQLJSON, sistemStrParser
 
 from services.dynamicPage import getDynamicPage
@@ -57,13 +57,13 @@ def sendMails(mailList, studentData=None, advisorData=None):
       parsedBody = sistemStrParser(mail["mail_body_html"], studentData, advisorData)
 
       if mail["is_sent_to_student"]:
-        smtpSend(studentData['institutional_email'], parsedSubject, parsedBody)
+        addToSmtpMailServer(studentData['institutional_email'], parsedSubject, parsedBody)
 
       if mail["is_sent_to_advisor"]:
-        smtpSend(advisorData['institutional_email'], parsedSubject, parsedBody)
+        addToSmtpMailServer(advisorData['institutional_email'], parsedSubject, parsedBody)
 
       if mail["is_sent_to_coordinator"]:
-        smtpSend(getCoordinatorEmail(), parsedSubject, parsedBody)
+        addToSmtpMailServer(getCoordinatorEmail(), parsedSubject, parsedBody)
 
   except Exception as e:
     print("# Smtp sending error:")

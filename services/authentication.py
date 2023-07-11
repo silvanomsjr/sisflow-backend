@@ -9,7 +9,7 @@ from flask_restful import Resource, Api, reqparse
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import jwtEncode, jwtDecode, getHashPassword
-from utils.smtpMails import smtpSend
+from utils.smtpMails import addToSmtpMailServer
 
 class Login(Resource):
     
@@ -181,7 +181,7 @@ class Sign(Resource):
     '''
 
     try:
-      smtpSend(insEmail, "Confirmação de cadastro Sisges", innerMailHtml)
+      addToSmtpMailServer(insEmail, "Confirmação de cadastro Sisges", innerMailHtml)
     except Exception as e:
       print("# SMTP error:")
       print(str(e))

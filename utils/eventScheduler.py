@@ -1,29 +1,32 @@
 import sched, time
-from threading import Thread
+import threading
 
 systemEventScheduler = None
 
-def startSystemEventScheduler():
+def startEventScheduler():
 
   global systemEventScheduler
 
   if systemEventScheduler == None:
     systemEventScheduler = EventScheduler()
 
-def addToSystemEventScheduler(eventId, delay, action, kwargs=None, priority=1):
+def addToEventScheduler(eventId, delay, action, kwargs=None, priority=1):
 
   global systemEventScheduler
 
   if systemEventScheduler == None:
     systemEventScheduler = EventScheduler()
 
-  if kwargs == None:
-    kwargs = {}
-  kwargs['event_id'] = eventId
+  systemEventScheduler.enterEvent(eventId, delay, priority, action, kwargs)
 
-  systemEventScheduler.enterEvent(delay, priority, action, kwargs)
-  
-def stopSystemEventScheduler():
+def printEventSchedulerInfo():
+
+  global systemEventScheduler
+
+  if systemEventScheduler != None:
+    systemEventScheduler.printEvents()
+
+def stopEventScheduler():
 
   global systemEventScheduler
 
@@ -41,14 +44,15 @@ class EventScheduler:
     #   time.monotonic: Uses OSs clock syscalls to create a monotonic clock based on what time the system is on
     #   python scheduler class can be safely used in multi-threaded environments
     self.scheduler = sched.scheduler(timefunc=time.monotonic, delayfunc=time.sleep)
+    self.schedulerEventIds = []
 
     # Start thread to run scheduler and not block main thread, self is shared
     self.finishThread = False
-    Thread(target = self.__run).start()
+    threading.Thread(target = self.__run).start()
 
   # Private method used by thread to run scheduler asynchronous
   def __run(self):
-    print("# Event Scheduler thread created and running!")
+    print(f'# EventScheduler thread {threading.get_ident()}: Scheduler running!')
     while self.finishThread == False:
       self.scheduler.run(blocking=False)
       time.sleep(1)
@@ -62,39 +66,11 @@ class EventScheduler:
   #   action function that takes arguments kwargs
   #   dictionary arguments kwargs
   #   priority with default value 1
-  def enterEvent(self, delay, priority, action, kwargs):
+  def enterEvent(self, eventId, delay, priority, action, kwargs):
+    self.schedulerEventIds.append(eventId);
     self.scheduler.enter(delay, priority, action, kwargs=kwargs)
     
-  # prints (time, priority, action, argument, kwargs) of each queue object 
-  def printEventQueue(self):
+  # prints event id list and (time, priority, action, argument, kwargs) of each queue object
+  def printEvents(self):
+    print(self.schedulerEventIds)
     print(self.scheduler.queue)
-
-# For testing
-def test():
-
-  def printMonotomicTime(event_id=0):
-    print("From printMonotomicTime: " + str(time.monotonic()) + ", With Kwargs event_id: " + str(event_id))
-
-  printMonotomicTime()
-
-  startSystemEventScheduler
-
-  addToSystemEventScheduler(0, 10, printMonotomicTime)
-  addToSystemEventScheduler(1, 10, printMonotomicTime)
-
-  addToSystemEventScheduler(2, -1, printMonotomicTime)
-  addToSystemEventScheduler(3, 0, printMonotomicTime)
-
-  addToSystemEventScheduler(4, 2, printMonotomicTime)
-  addToSystemEventScheduler(5, 2, printMonotomicTime)
-
-  addToSystemEventScheduler(6, 5, printMonotomicTime)
-  addToSystemEventScheduler(7, 15, printMonotomicTime)
-
-  time.sleep(20)
-  
-  addToSystemEventScheduler(8, 1, printMonotomicTime)
-
-  time.sleep(2)
-
-  stopSystemEventScheduler()
