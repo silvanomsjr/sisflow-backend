@@ -1,6 +1,35 @@
 import sched, time
 from threading import Thread
 
+systemEventScheduler = None
+
+def startSystemEventScheduler():
+
+  global systemEventScheduler
+
+  if systemEventScheduler == None:
+    systemEventScheduler = EventScheduler()
+
+def addToSystemEventScheduler(eventId, delay, action, kwargs=None, priority=1):
+
+  global systemEventScheduler
+
+  if systemEventScheduler == None:
+    systemEventScheduler = EventScheduler()
+
+  if kwargs == None:
+    kwargs = {}
+  kwargs['event_id'] = eventId
+
+  systemEventScheduler.enterEvent(delay, priority, action, kwargs)
+  
+def stopSystemEventScheduler():
+
+  global systemEventScheduler
+
+  if systemEventScheduler != None:
+    systemEventScheduler.stop()
+
 class EventScheduler:
 
   def __init__(self):
@@ -33,42 +62,39 @@ class EventScheduler:
   #   action function that takes arguments kwargs
   #   dictionary arguments kwargs
   #   priority with default value 1
-  def enterEvent(self, delay, action, kwargs, priority=1):
+  def enterEvent(self, delay, priority, action, kwargs):
     self.scheduler.enter(delay, priority, action, kwargs=kwargs)
     
   # prints (time, priority, action, argument, kwargs) of each queue object 
   def printEventQueue(self):
     print(self.scheduler.queue)
 
-def printTime(parameter=''):
-  print("From printTime", time.time(), parameter)
-
-def printMonotomicTime(parameter=''):
-  print("From printMonotomicTime", time.monotonic(), parameter)
-
+# For testing
 def test():
 
-  printTime()
+  def printMonotomicTime(event_id=0):
+    print("From printMonotomicTime: " + str(time.monotonic()) + ", With Kwargs event_id: " + str(event_id))
+
   printMonotomicTime()
 
-  eventScheduler = EventScheduler()
+  startSystemEventScheduler
 
-  eventScheduler.enterEvent(10, printMonotomicTime, {'parameter': 'parametro 10'})
-  eventScheduler.enterEvent(10, printMonotomicTime, {'parameter': 'parametro 10'})
+  addToSystemEventScheduler(0, 10, printMonotomicTime)
+  addToSystemEventScheduler(1, 10, printMonotomicTime)
 
-  eventScheduler.enterEvent(-1, printMonotomicTime, {'parameter': 'parametro -1'})
-  eventScheduler.enterEvent(0, printMonotomicTime, {'parameter': 'parametro 0'})
+  addToSystemEventScheduler(2, -1, printMonotomicTime)
+  addToSystemEventScheduler(3, 0, printMonotomicTime)
 
-  eventScheduler.enterEvent(2, printMonotomicTime, {'parameter': 'parametro 2'})
-  eventScheduler.enterEvent(2, printMonotomicTime, {'parameter': 'parametro 2'})
+  addToSystemEventScheduler(4, 2, printMonotomicTime)
+  addToSystemEventScheduler(5, 2, printMonotomicTime)
 
-  eventScheduler.enterEvent(5, printMonotomicTime, {'parameter': 'parametro 5 added after start'})
-  eventScheduler.enterEvent(15, printMonotomicTime, {'parameter': 'parametro 15 added after start'})
+  addToSystemEventScheduler(6, 5, printMonotomicTime)
+  addToSystemEventScheduler(7, 15, printMonotomicTime)
 
   time.sleep(20)
   
-  eventScheduler.enterEvent(1, printMonotomicTime, {'parameter': 'parametro 21'})
+  addToSystemEventScheduler(8, 1, printMonotomicTime)
 
   time.sleep(2)
 
-  eventScheduler.stop()
+  stopSystemEventScheduler()
