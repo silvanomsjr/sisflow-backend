@@ -328,6 +328,14 @@ CREATE TABLE solicitation_state_transition_manual(
     PRIMARY KEY (solicitation_state_transition_id),
     FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
 );
+CREATE TABLE solicitation_state_transition_scheduled(
+	solicitation_state_transition_id INT NOT NULL,
+    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+    transition_reason VARCHAR(100) NOT NULL,
+    transition_delay_seconds INT NOT NULL,
+    PRIMARY KEY (solicitation_state_transition_id),
+    FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
+);
 CREATE TABLE solicitation_state_transition_from_dynamic_page(
 	solicitation_state_transition_id INT NOT NULL,
     dynamic_page_component ENUM('Button-Request', 'Button-Cancel', 'Button-Send', 'Button-Send and Defer', 'Button-Defer', 'Button-Reject', 'Table-Cancel') NOT NULL,
@@ -369,4 +377,22 @@ CREATE TABLE user_has_solicitation_state(
     PRIMARY KEY (id),
     FOREIGN KEY (user_has_solicitation_id) REFERENCES user_has_solicitation(id),
     FOREIGN KEY (solicitation_state_id) REFERENCES solicitation_state(id)
+);
+
+/* Event Scheduling */
+CREATE TABLE scheduling(
+	id INT NOT NULL AUTO_INCREMENT,
+    scheduled_action ENUM('Send Mail', 'Solicitation State Transition') NOT NULL,
+    scheduled_datetime DATETIME NOT NULL,
+    scheduled_status ENUM('Pending', 'Sended', 'Canceled') NOT NULL,
+    PRIMARY KEY (id)
+);
+CREATE TABLE scheduling_state_transision(
+	scheduling_id INT NOT NULL,
+    state_transition_scheduled_id INT NOT NULL,
+    user_has_solicitation_state_id INT NOT NULL,
+    PRIMARY KEY (scheduling_id),
+    FOREIGN KEY (scheduling_id) REFERENCES scheduling(id),
+    FOREIGN KEY (state_transition_scheduled_id) REFERENCES solicitation_state_transition_scheduled(solicitation_state_transition_id),
+    FOREIGN KEY (user_has_solicitation_state_id) REFERENCES user_has_solicitation_state(id)
 );
