@@ -1,5 +1,7 @@
+from datetime import datetime
 import sched, time
 import threading
+from utils.smtpMails import addToSmtpMailServer
 
 systemEventScheduler = None
 
@@ -18,6 +20,24 @@ def addToEventScheduler(eventId, delay, action, kwargs=None, priority=1):
     systemEventScheduler = EventScheduler()
 
   systemEventScheduler.enterEvent(eventId, delay, priority, action, kwargs)
+
+def addMailToEventScheduler(eventId, sendDatetime, rawTo, rawSubject, rawBody, priority=1):
+
+  global systemEventScheduler
+
+  if systemEventScheduler == None:
+    systemEventScheduler = EventScheduler()
+
+  kwargs = {
+    'rawTo': rawTo,
+    'rawSubject': rawSubject,
+    'rawBody': rawBody
+  }
+
+  actualDatetime = datetime.now()
+  delay = (sendDatetime - actualDatetime).total_seconds()
+
+  systemEventScheduler.enterEvent(eventId, delay, priority, addToSmtpMailServer, kwargs)
 
 def printEventSchedulerInfo():
 

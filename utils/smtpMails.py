@@ -110,8 +110,7 @@ class SmtpServer:
         self.__sendMail(self.mailList[0])
         del self.mailList[0]
       else:
-        print(f'# Smtp thread {threading.get_ident()}: # Awaiting for mails')
-        time.sleep(10)
+        time.sleep(1)
 
   # Sends mail from mail object
   #   if an exception occur, restart conection and try again(avoid disconnection by timeout)
