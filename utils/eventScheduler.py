@@ -39,6 +39,23 @@ def addMailToEventScheduler(eventId, sendDatetime, rawTo, rawSubject, rawBody, p
 
   systemEventScheduler.enterEvent(eventId, delay, priority, addToSmtpMailServer, kwargs)
 
+def addTransitionToEventScheduler(eventId, sendDatetime, userHasStateId, userData, transitionId, action, priority=1):
+  
+  global systemEventScheduler
+
+  if systemEventScheduler == None:
+    systemEventScheduler = EventScheduler()
+
+  userHasStateId, userData, transitionId
+  kwargs = {
+    'userHasStateId': userHasStateId,
+    'userData': userData,
+    'transitionId': transitionId
+  }
+
+  delay = (sendDatetime - datetime.now()).total_seconds()
+  systemEventScheduler.enterEvent(eventId, delay, priority, action, kwargs)
+
 def printEventSchedulerInfo():
 
   global systemEventScheduler

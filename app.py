@@ -65,7 +65,7 @@ sisConfigStart()
 # Load Secret Keys
 loadGenerateKeys()
 # Load System Event Scheduler
-startEventScheduler
+startEventScheduler()
 
 # For testing
 def test():
@@ -74,4 +74,3 @@ def test():
     addMailToEventScheduler(1, datetime.now()+timedelta(0, second),
       'test@ufu.br', f'test with {second} seconds', f'this has sended by event scheduler with {second} timestamp seconds')
   printEventSchedulerInfo()
-test()

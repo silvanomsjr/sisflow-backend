@@ -323,24 +323,24 @@ CREATE TABLE solicitation_state_transition(
 );
 CREATE TABLE solicitation_state_transition_manual(
 	solicitation_state_transition_id INT NOT NULL,
-    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação', 'Expirado') DEFAULT 'Em analise' NOT NULL,
     transition_reason VARCHAR(100) NOT NULL,
-    PRIMARY KEY (solicitation_state_transition_id),
-    FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
-);
-CREATE TABLE solicitation_state_transition_scheduled(
-	solicitation_state_transition_id INT NOT NULL,
-    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
-    transition_reason VARCHAR(100) NOT NULL,
-    transition_delay_seconds INT NOT NULL,
     PRIMARY KEY (solicitation_state_transition_id),
     FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
 );
 CREATE TABLE solicitation_state_transition_from_dynamic_page(
 	solicitation_state_transition_id INT NOT NULL,
     dynamic_page_component ENUM('Button-Request', 'Button-Cancel', 'Button-Send', 'Button-Send and Defer', 'Button-Defer', 'Button-Reject', 'Table-Cancel') NOT NULL,
-	transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+	transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação', 'Expirado') DEFAULT 'Em analise' NOT NULL,
     transition_reason VARCHAR(100) NOT NULL,
+    PRIMARY KEY (solicitation_state_transition_id),
+    FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
+);
+CREATE TABLE solicitation_state_transition_scheduled(
+	solicitation_state_transition_id INT NOT NULL,
+    transition_decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação', 'Expirado') DEFAULT 'Em analise' NOT NULL,
+    transition_reason VARCHAR(100) NOT NULL,
+    transition_delay_seconds INT NOT NULL,
     PRIMARY KEY (solicitation_state_transition_id),
     FOREIGN KEY (solicitation_state_transition_id) REFERENCES solicitation_state_transition(id)
 );
@@ -370,7 +370,7 @@ CREATE TABLE user_has_solicitation_state(
 	id INT NOT NULL AUTO_INCREMENT,
     user_has_solicitation_id INT NOT NULL,
     solicitation_state_id INT NOT NULL,
-    decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação') DEFAULT 'Em analise' NOT NULL,
+    decision ENUM('Em analise', 'Solicitado', 'Enviado', 'Deferido', 'Indeferido', 'Cancelado pelo aluno', 'Cancelado pelo orientador', 'Cancelado pela coordenação', 'Expirado') DEFAULT 'Em analise' NOT NULL,
     reason VARCHAR(100),
     start_datetime DATETIME NOT NULL,
     end_datetime DATETIME,
@@ -384,7 +384,7 @@ CREATE TABLE scheduling(
 	id INT NOT NULL AUTO_INCREMENT,
     scheduled_action ENUM('Send Mail', 'Solicitation State Transition') NOT NULL,
     scheduled_datetime DATETIME NOT NULL,
-    scheduled_status ENUM('Pending', 'Sended', 'Canceled') NOT NULL,
+    scheduled_status ENUM('Pending', 'Sended', 'Canceled') DEFAULT 'Pending' NOT NULL,
     PRIMARY KEY (id)
 );
 CREATE TABLE scheduling_state_transision(

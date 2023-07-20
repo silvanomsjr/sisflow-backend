@@ -578,43 +578,47 @@ INSERT INTO solicitation_state_profile_editors (solicitation_state_id, state_pro
     (5, 2), (5, 3), (5, 4);
 # transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitation_state_id_to, transition_name) VALUES 
-	(1, 2, 'STU: send docs'),				#1:s1:  state 1 to 2
-    (1, NULL, 'STU: cancel'),				#2:s1:  state 1 to end
-    (2, 3, 'COO: defer'),					#3:s1:  state 2 to 3
-    (2, NULL, 'COO: reject docs'),			#4:s1:  state 2 to end
-    (2, NULL, 'COO: cancel'),				#5:s1:  state 2 to end
-    (3, 4, 'STU: request ADV'),				#6:s1:  state 3 to 4 end
-    (3, NULL, 'STU: cancel'),				#7:s1:  state 3 to end
-    (4, 5, 'ADV: defer ADV'),				#8:s1:  state 4 to 5 end
-    (4, NULL, 'ADV: reject ADV'),			#9:s1:  state 4 to end
-    (4, NULL, 'ADV: cancel ADV'),			#10:s1: state 4 to end
-    (5, 5, 'STU: send docs loopback'),		#11:s1: state 5 to 5
-    (5, 5, 'ADV: send docs loopback'),		#12:s1: state 5 to 5
-    (5, 5, 'COO: send docs loopback'),		#13:s1: state 5 to 5
-    (5, 6, 'SESTA: send docs and defer'),	#14:s1: state 5 to 6
-    (5, 6, 'COO: defer'),					#15:s1: state 5 to 6
-    (5, NULL, 'COO: reject');				#16:s1: state 1 to end
+	(1, 2, 'STU: send docs'),				#1:s1:  dynamp: state 1 to 2
+    (1, NULL, 'STU: cancel'),				#2:s1:  dynamp: state 1 to end
+    (1, NULL, 'Expired'),				    #3:s1:  schedu: state 1 to end
+    (2, 3, 'COO: defer'),					#3:s1:  manual: state 2 to 3
+    (2, NULL, 'COO: reject docs'),			#4:s1:  manual: state 2 to end
+    (2, NULL, 'COO: cancel'),				#5:s1:  manual: state 2 to end
+    (3, 4, 'STU: request ADV'),				#6:s1:  manual: state 3 to 4 end
+    (3, NULL, 'STU: cancel'),				#7:s1:  manual: state 3 to end
+    (4, 5, 'ADV: defer ADV'),				#8:s1:  manual: state 4 to 5 end
+    (4, NULL, 'ADV: reject ADV'),			#9:s1:  manual: state 4 to end
+    (4, NULL, 'ADV: cancel ADV'),			#10:s1: manual: state 4 to end
+    (5, 5, 'STU: send docs loopback'),		#11:s1: manual: state 5 to 5
+    (5, 5, 'ADV: send docs loopback'),		#12:s1: manual: state 5 to 5
+    (5, 5, 'COO: send docs loopback'),		#13:s1: manual: state 5 to 5
+    (5, 6, 'SESTA: send docs and defer'),	#14:s1: manual: state 5 to 6
+    (5, 6, 'COO: defer'),					#15:s1: manual: state 5 to 6
+    (5, NULL, 'COO: reject');				#16:s1: manual: state 5 to end
 # email sended when transitions occurs for states in solicitation 1
 INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
 	(1, 2), (1, 3),
     (2, 4),
     (3, 5),
-    (4, 6),
-    (6, 7),
-    (7, 8),
-    (8, 9), (8, 10), (8, 11),
-    (11, 12), (11, 13),
-    (12, 14), (12, 15),
-    (13, 16), (13, 17),
-	(14, 18), (14, 19),
-    (15, 18), (15, 19);
+    (5, 6),
+    (7, 7),
+    (8, 8),
+    (9, 9), (9, 10), (9, 11),
+    (12, 12), (12, 13),
+    (13, 14), (13, 15),
+    (14, 16), (14, 17),
+	(15, 18), (15, 19),
+    (16, 18), (16, 19);
 # static pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
-    (3, 'Deferido', 'A documentação do aluno está aprovada'), (4, 'Indeferido', 'A documentação do aluno está com algum problema'), (5, 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação'),
-    (6, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (7, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (8, 'Deferido', 'O orientador aceitou a solicitação'), (9, 'Indeferido', 'O orientador não aceitou a solicitação'), (10, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação'),
-    (11, 'Enviado', 'Atualização de documentos pelo aluno'), (12, 'Enviado', 'Atualização de documentos pelo orientador'), (13, 'Enviado', 'Atualização de documentos pela coordenação'),
-    (14, 'Deferido', 'Documentos homologados'), (15, 'Deferido', 'Documentos homologados'), (16, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
+    (4, 'Deferido', 'A documentação do aluno está aprovada'), (5, 'Indeferido', 'A documentação do aluno está com algum problema'), (6, 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação'),
+    (7, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (8, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (9, 'Deferido', 'O orientador aceitou a solicitação'), (10, 'Indeferido', 'O orientador não aceitou a solicitação'), (11, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação'),
+    (12, 'Enviado', 'Atualização de documentos pelo aluno'), (13, 'Enviado', 'Atualização de documentos pelo orientador'), (14, 'Enviado', 'Atualização de documentos pela coordenação'),
+    (15, 'Deferido', 'Documentos homologados'), (16, 'Deferido', 'Documentos homologados'), (17, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
 # dynamic pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
 	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação');
+# dynamic pages transitions for states in solicitation 1
+INSERT INTO solicitation_state_transition_scheduled (solicitation_state_transition_id, transition_decision, transition_reason, transition_delay_seconds) VALUES 
+	(3, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 300);
