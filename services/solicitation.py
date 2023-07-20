@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 import json
 import traceback
+import threading
 
 from flask import Flask, abort, request
 from flask_restful import Resource, Api, reqparse
 
 from utils.dbUtils import *
 from utils.cryptoFunctions import isAuthTokenValid
-from utils.eventScheduler import addTransitionToEventScheduler
+from utils.eventScheduler import addTransitionToEventScheduler, removeEventFromScheduler, printEventSchedulerInfo
 from utils.sistemConfig import getCoordinatorEmail
 from utils.smtpMails import addToSmtpMailServer
 from utils.utils import getFormatedMySQLJSON, sistemStrParser
@@ -28,6 +29,7 @@ def sendSolicitationMails(solicitationId, studentData):
   except Exception as e:
     print("# Database reading error:")
     print(str(e))
+    traceback.print_exc()
     return False
   
   return sendMails(solicitationMails, studentData)
@@ -44,6 +46,7 @@ def sendTransitionMails(transitionId, studentData=None, advisorData=None):
   except Exception as e:
     print("# Database reading error:")
     print(str(e))
+    traceback.print_exc()
     return False
   
   return sendMails(transitionMails, studentData, advisorData)
@@ -69,22 +72,12 @@ def sendMails(mailList, studentData=None, advisorData=None):
   except Exception as e:
     print("# Smtp sending error:")
     print(str(e))
+    traceback.print_exc()
     return False
 
   return True
-
-def resolveScheduledSolicitation(userHasStateId, userData, transitionId):
-
-  print("\n# Starting scheduled solicitation for " + userData["institutional_email"] + "\n# Reading data from DB")
   
-  response, status = resolveSolicitation(userHasStateId, userData, transitionId, None)
-  
-  if status != 200:
-    print(f"# Error: {response}, {status}")
-  else:
-    print(f"# Done without errors")
-
-def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUserData):
+def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUserData, scheduled):
 
   queryRes = None
   try:
@@ -125,6 +118,7 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
   except Exception as e:
     print("# Database reading error:")
     print(str(e))
+    traceback.print_exc()
     return "Erro na base de dados", 409
 
   if not queryRes:
@@ -179,7 +173,7 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
       profileCanEdit = True
   
   # checks if if the solicitation is actual and editable
-  if not profileCanEdit:
+  if not scheduled and not profileCanEdit:
     return "Perfil editor a solicitação inválido!", 401
   if actualSolStateId!=stateId:
     return "Edição do estado da solicitação não permitido!", 401
@@ -215,6 +209,7 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
     except Exception as e:
       print("# Database reading error:")
       print(str(e))
+      traceback.print_exc()
       return "Erro na base de dados", 409
 
     for component in dynamicPage["components"]:
@@ -248,6 +243,7 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
             except Exception as e:
               print("# Database reading error:")
               print(str(e))
+              traceback.print_exc()
               return "Erro na base de dados", 409
                 
         if not found:
@@ -279,6 +275,7 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
   except Exception as e:
     print("# Database reading error:")
     print(str(e))
+    traceback.print_exc()
     return "Erro na base de dados", 409
   
   transitionDecision = transition["transition_decision"]
@@ -319,6 +316,9 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
       "   WHERE id = %s; ",
       [transitionDecision, transitionReason, userHasStateId], True, dbObjectIns)
     
+    # remove old events from scheduler
+    removeScheduledSolicitation(userHasStateId, True, dbObjectIns)
+
     # if next state exists
     if nextStateId:
       nextStateCreatedDate = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -356,13 +356,19 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
           nextStateCreatedDate,
           nextStateFinishDate],
         True, dbObjectIns)
-      
+
+      userHasNextStateId = dbGetSingle("SELECT LAST_INSERT_ID() AS id;", (), True, dbObjectIns)['id']
+      nextStateTransitions = getTransitions(nextStateId)
+
       # updates user solicitation data and changes its actual state
       dbExecute(
         " UPDATE user_has_solicitation "
         "   SET actual_solicitation_state_id = %s, solicitation_user_data = %s "
         "   WHERE id = %s; ",
         [nextStateId, newSolicitationUserData, userHasSolId], True, dbObjectIns)
+
+      # sets schedule
+      scheduleTransitions(userHasNextStateId, userData, nextStateTransitions, True, dbObjectIns)
 
     # if next state not exists
     else:
@@ -376,8 +382,8 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
   except Exception as e:
     dbRollback(dbObjectIns)
     print("# Database reading error:")
-    traceback.print_exc()
     print(str(e))
+    traceback.print_exc()
     return "Erro na base de dados", 409
 
   dbCommit(dbObjectIns)
@@ -387,6 +393,70 @@ def resolveSolicitation(userHasStateId, userData, transitionId, solicitationUser
   print("# Operation done!")
 
   return {}, 200
+
+def scheduleTransitions(userHasStateId, userData, stateTransitions,  transactionMode, dbObjectIns):
+
+  for transition in stateTransitions:
+    if transition["type"] == "scheduled":
+
+      sendDatetime = (datetime.now() + timedelta(seconds=transition["transition_delay_seconds"]))
+      sendDatetimeFormated = sendDatetime.strftime("%Y-%m-%d %H:%M:%S")
+
+      # insert scheduling
+      dbExecute(
+        " INSERT INTO scheduling "
+        " (scheduled_action, scheduled_datetime) VALUES "
+        "   (%s, %s); ",
+        ["Solicitation State Transition", sendDatetimeFormated], transactionMode, dbObjectIns)
+
+      # select added scheduling id
+      scheduledId = dbGetSingle("SELECT LAST_INSERT_ID() AS id;", (), transactionMode, dbObjectIns)['id']
+      
+      # insert transition to schedule table
+      dbExecute(
+        " INSERT INTO scheduling_state_transition "
+        " (scheduling_id, state_transition_scheduled_id, user_has_solicitation_state_id) VALUES "
+        "   (%s, %s, %s); ",
+        [scheduledId, transition["id"], userHasStateId], transactionMode, dbObjectIns)
+
+      # insert to system schedule
+      addTransitionToEventScheduler(scheduledId, sendDatetime, userHasStateId, userData, transition["id"], resolveScheduledSolicitation)
+
+def resolveScheduledSolicitation(eventId, userHasStateId, userData, transitionId):
+
+  print("\n# Starting scheduled solicitation for " + userData["institutional_email"] + "\n# Reading data from DB")
+
+  dbExecute(
+    " UPDATE scheduling SET "
+    "   scheduled_status = %s "
+    "   WHERE id = %s ",
+    ["Sended", eventId])
+  
+  response, status = resolveSolicitation(userHasStateId, userData, transitionId, None, True)
+
+  if status != 200:
+    print(f"# EventScheduler thread {threading.get_ident()}: Error: {response}, {status}")
+  else:
+    print(f'# EventScheduler thread {threading.get_ident()}: Done without errors')
+
+def removeScheduledSolicitation(userHasStateId, transactionMode, dbObjectIns):
+
+  schQuery = """
+    SELECT sch.id AS id, sch.scheduled_action, sch.scheduled_datetime, sch.scheduled_status, 
+    scht.state_transition_scheduled_id, scht.user_has_solicitation_state_id  
+      FROM sisgesteste.scheduling sch 
+      JOIN scheduling_state_transition scht ON sch.id = scht.scheduling_id
+      WHERE user_has_solicitation_state_id = %s;
+    """
+  schs = dbGetAll(schQuery,(userHasStateId,), transactionMode, dbObjectIns)
+
+  for sch in schs:
+    removeEventFromScheduler(sch['id'])
+    dbExecute(
+      " UPDATE scheduling SET "
+      "   scheduled_status = %s "
+      "   WHERE id = %s; ",
+      ["Canceled", sch['id']],  transactionMode, dbObjectIns)
 
 # Data from single solicitation
 class Solicitation(Resource):
@@ -422,6 +492,7 @@ class Solicitation(Resource):
     except Exception as e:
       print("# Database reading error:")
       print(str(e))
+      traceback.print_exc()
       return "Erro na base de dados", 409
 
     if not queryRes:
@@ -480,6 +551,7 @@ class Solicitation(Resource):
     except Exception as e:
       print("# Database reading error:")
       print(str(e))
+      traceback.print_exc()
       return "Erro na base de dados", 409
 
     if not solicitationQuery:
@@ -595,6 +667,7 @@ class Solicitation(Resource):
     except Exception as e:
       print("# Database reading error:")
       print(str(e))
+      traceback.print_exc()
       return "Erro na base de dados", 409
 
     if queryRes:
@@ -654,36 +727,13 @@ class Solicitation(Resource):
       userHasStateId = queryRes["id"]
 
       # schedule transitions for initial state if any
-      for transition in stateTransitions:
-        if transition["type"] == "scheduled":
-
-          sendDatetime = (datetime.now() + timedelta(seconds=transition["transition_delay_seconds"]))
-          sendDatetimeFormated = sendDatetime.strftime("%Y-%m-%d %H:%M:%S")
-
-          # insert scheduling
-          dbExecute(
-            " INSERT INTO scheduling "
-            " (scheduled_action, scheduled_datetime) VALUES "
-            "   (%s, %s); ",
-            ["Solicitation State Transition", sendDatetimeFormated], True, dbObjectIns)
-
-          # select added scheduling id
-          scheduledId = dbGetSingle("SELECT LAST_INSERT_ID() AS id;", (), True, dbObjectIns)['id']
-          
-          # insert transision to schedule table
-          dbExecute(
-            " INSERT INTO scheduling_state_transision "
-            " (scheduling_id, state_transition_scheduled_id, user_has_solicitation_state_id) VALUES "
-            "   (%s, %s, %s); ",
-            [scheduledId, transition["id"], userHasStateId], True, dbObjectIns)
-
-          # insert to system schedule
-          addTransitionToEventScheduler(scheduledId, sendDatetime, userHasStateId, studentData, transition["id"], resolveScheduledSolicitation)
+      scheduleTransitions(userHasStateId, studentData, stateTransitions, True, dbObjectIns)
 
     except Exception as e:
       dbRollback(dbObjectIns)
       print("# Database reading error:")
       print(str(e))
+      traceback.print_exc()
       return "Erro na base de dados", 409
 
     # ends transaction
@@ -716,5 +766,5 @@ class Solicitation(Resource):
         solicitationUserData.replace("\'", "\"") if isinstance(solicitationUserData, str) else solicitationUserData.decode("utf-8"))
     
     print("\n# Starting post to resolve solicitation for " + tokenUserData["institutional_email"] + "\n# Reading data from DB")
-    response, status = resolveSolicitation(userHasStateId, tokenUserData, transitionId, solicitationUserData)
+    response, status = resolveSolicitation(userHasStateId, tokenUserData, transitionId, solicitationUserData, False)
     return response, status

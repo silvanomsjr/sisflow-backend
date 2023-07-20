@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 from utils.dbUtils import dbCheckCreate
 from utils.cryptoFunctions import loadGenerateKeys
-from utils.eventScheduler import addMailToEventScheduler, printEventSchedulerInfo, startEventScheduler
+from utils.eventScheduler import addMailToEventScheduler, printEventSchedulerInfo, startEventScheduler, removeEventFromScheduler
 from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
 from utils.smtpMails import startSmtpServer
 
@@ -70,7 +70,10 @@ startEventScheduler()
 # For testing
 def test():
   seconds = [0, -10, 20, 5, 2, 7, 15, 15, 19, 1]
+  id = 0
   for second in seconds:
-    addMailToEventScheduler(1, datetime.now()+timedelta(0, second),
+    id += 1
+    addMailToEventScheduler(id, datetime.now()+timedelta(0, second),
       'test@ufu.br', f'test with {second} seconds', f'this has sended by event scheduler with {second} timestamp seconds')
+  removeEventFromScheduler(4)
   printEventSchedulerInfo()

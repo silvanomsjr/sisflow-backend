@@ -387,7 +387,7 @@ CREATE TABLE scheduling(
     scheduled_status ENUM('Pending', 'Sended', 'Canceled') DEFAULT 'Pending' NOT NULL,
     PRIMARY KEY (id)
 );
-CREATE TABLE scheduling_state_transision(
+CREATE TABLE scheduling_state_transition(
 	scheduling_id INT NOT NULL,
     state_transition_scheduled_id INT NOT NULL,
     user_has_solicitation_state_id INT NOT NULL,
