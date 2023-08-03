@@ -1,7 +1,10 @@
 import datetime
-import requests
 from pathlib import Path
-from utils.dbUtils import *
+import os
+import requests
+import traceback
+
+import utils.dbUtils
 
 # pathlib paths works both for windows and unix OSs
 
@@ -54,7 +57,7 @@ def loadMails():
 
     queryRes = None
     try:
-      queryRes = dbGetSingle(
+      queryRes = utils.dbUtils.dbGetSingle(
         " SELECT mail, mail_name "
 	      "   FROM config AS c JOIN config_mail AS cm ON c.id = cm.config_id "
         "   WHERE c.config_name = \'coordinator mail\'; ")
@@ -64,7 +67,7 @@ def loadMails():
     
     except Exception as e:
       print("# Database config reading error:")
-      print(str(e))
+      print(e)
     
     coordinatorEmail = queryRes["mail"]
     coordinatorName = queryRes["mail_name"]
@@ -82,7 +85,7 @@ def loadPaths():
 
     queryRes = []
     try:
-      queryRes = dbGetAll(
+      queryRes = utils.dbUtils.dbGetAll(
         " SELECT config_name, system_path "
 	      "   FROM config AS c JOIN config_system_path AS csp ON c.id = csp.config_id; ")
       
@@ -101,7 +104,7 @@ def loadPaths():
     
     except Exception as e:
       print("# Database config reading error:")
-      print(str(e))
+      print(e)
     
     # creates paths if not exists
     keyFilesPath.mkdir(parents=True, exist_ok=True)
@@ -118,12 +121,12 @@ def loadHolidays():
 
   queryRes = None
   try:
-    queryRes = dbGetSingle(
+    queryRes = utils.dbUtils.dbGetSingle(
       " SELECT year FROM config_year WHERE year = %s; ",
       [(actualYear)])
   except Exception as e:
     print("# Database reading error:")
-    print(str(e))
+    print(e)
     return "Erro na base de dados", 409
 
   if not queryRes:
@@ -134,47 +137,47 @@ def loadHolidays():
       holidaysRes = requests.get('https://brasilapi.com.br/api/feriados/v1/' + actualYear).json()
     except Exception as e:
       print("# Error trying to load holidays from external API")
-      print(str(e))
+      print(e)
       return "Error reading brasilapi, consider using another holiday api if this error continues"
 
     # start transaction
-    dbObjectIns = dbStartTransactionObj()
+    dbObjectIns = utils.dbUtils.dbStartTransactionObj()
     try:
-      dbExecute(
+      utils.dbUtils.dbExecute(
         " INSERT INTO config (config_name) VALUES (%s); ",
         [(str("year " + actualYear))], True, dbObjectIns)
 
-      configQuery = dbGetSingle(
+      configQuery = utils.dbUtils.dbGetSingle(
         " SELECT id FROM config WHERE config_name = %s; ",
         [(str("year " + actualYear))], True, dbObjectIns)
 
       if not configQuery:
         raise Exception(" No configId return for inserted actual year")
 
-      dbExecute(
+      utils.dbUtils.dbExecute(
         " INSERT INTO config_year (config_id, year) VALUES (%s, %s); ",
         [configQuery["id"], actualYear], True, dbObjectIns)
       
       for holiday in holidaysRes:
-        dbExecute(
+        utils.dbUtils.dbExecute(
           " INSERT INTO config_year_holiday (year, get_by, holiday_name, holiday_date) VALUES "
           "   (%s, 'API', %s, %s); ",
           [actualYear, holiday["name"], holiday["date"]], True, dbObjectIns)
     except Exception as e:
-      dbRollback(dbObjectIns)
+      utils.dbUtils.dbRollback(dbObjectIns)
       print("# Database reading error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
     # ends transaction
-    dbCommit(dbObjectIns)
+    utils.dbUtils.dbCommit(dbObjectIns)
 
   try:
-    holidayData = dbGetAll(
+    holidayData = utils.dbUtils.dbGetAll(
       " SELECT year, get_by, holiday_name, holiday_date FROM config_year_holiday WHERE year = %s; ",
       [(actualYear)])
   except Exception as e:
     print("# Database reading error:")
-    print(str(e))
+    print(e)
     return "Erro na base de dados", 409
   
   print("# Holidays configurated")

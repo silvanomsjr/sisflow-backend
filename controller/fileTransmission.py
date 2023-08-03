@@ -36,7 +36,7 @@ class FileTransmission(Resource):
         fileFound = True
     except Exception as e:
       print("# Database reading error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
     
     if not fileFound:
@@ -57,7 +57,7 @@ class FileTransmission(Resource):
     #      fileAcessAllowed = True
     #  except Exception as e:
     #    print("# Database reading error:")
-    #    print(str(e))
+    #    print(e)
     #    return "Erro na base de dados", 409
 
     if not fileAcessAllowed:
@@ -120,7 +120,7 @@ class FileTransmission(Resource):
         [(userInsEmail)])
     except Exception as e:
       print("# Database searching error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
     
     if queryRes == None:
@@ -166,7 +166,7 @@ class FileTransmission(Resource):
     except Exception as e:
       dbRollback(dbObjectIns)
       print("# Database error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# Saving file: " + fileName)
@@ -176,7 +176,7 @@ class FileTransmission(Resource):
     except Exception as e:
       dbRollback(dbObjectIns)
       print("# Sistem directory insertion error:")
-      print(str(e))
+      print(e)
       return "Erro no servidor", 409
     
     # only commits after saving in db and in server

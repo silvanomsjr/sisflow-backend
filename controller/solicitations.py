@@ -63,7 +63,7 @@ class CoordinatorSolicitations(Resource):
 
     except Exception as e:
       print("# Database reading error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# Operation done!")
@@ -125,7 +125,7 @@ class AdvisorSolicitations(Resource):
 
     except Exception as e:
       print("# Database reading error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# Operation done!")
@@ -188,7 +188,7 @@ class StudentSolicitations(Resource):
 
     except Exception as e:
       print("# Database reading error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# Operation done!")

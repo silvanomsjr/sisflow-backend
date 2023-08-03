@@ -30,7 +30,7 @@ class Login(Resource):
         [(insEmail)])
     except Exception as e:
       print("# Database error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     if userData == None:
@@ -69,7 +69,7 @@ class Login(Resource):
       [(userData["user_id"])])
     except Exception as e:
       print("# Database error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     if userRawProfiles == None:
@@ -133,7 +133,7 @@ class Sign(Resource):
         [(insEmail)])
     except Exception as e:
       print("# Database searching error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     if queryRes == None:
@@ -149,7 +149,7 @@ class Sign(Resource):
         [(insEmail)])
     except Exception as e:
       print("# Database searching error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# Data ok, updating auth table")
@@ -167,7 +167,7 @@ class Sign(Resource):
       dbExecute(sqlScrypt, [signCode, insEmail])
     except Exception as e:
       print("# Database insertion error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# Sending mail")
@@ -184,7 +184,7 @@ class Sign(Resource):
       addToSmtpMailServer(insEmail, "Confirmação de cadastro Sisges", innerMailHtml)
     except Exception as e:
       print("# SMTP error:")
-      print(str(e))
+      print(e)
       return "Erro ao enviar emails", 409
 
     print("# Operation done!")
@@ -212,7 +212,7 @@ class Sign(Resource):
         acessToken = jwtDecode(signArgs["acess_token"])
       except Exception as e:
         print("# JWT decoding error:")
-        print(str(e))
+        print(e)
         return "Codigo de acesso invalido", 401
 
       insEmail = acessToken["institutional_email"]
@@ -232,7 +232,7 @@ class Sign(Resource):
         [insEmail, valCode])
     except Exception as e:
       print("# Database searching error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     if queryRes:
@@ -270,7 +270,7 @@ class Sign(Resource):
         [(insEmail)])
     except Exception as e:
       print("# Database searching error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     if queryRes == None:
@@ -286,7 +286,7 @@ class Sign(Resource):
         [insEmail, valCode])
     except Exception as e:
       print("# Database searching error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     if queryRes == None:
@@ -309,7 +309,7 @@ class Sign(Resource):
         [secEmail, phoneNum, hashPass, saltPass, datetimeNow, insEmail])
     except Exception as e:
       print("# Database insertion error:")
-      print(str(e))
+      print(e)
       return "Erro na base de dados", 409
 
     print("# User sign complete!")

@@ -7,20 +7,20 @@ from flask_cors import CORS
 
 from utils.dbUtils import dbCheckCreate
 from utils.cryptoFunctions import loadGenerateKeys
-from utils.eventScheduler import addMailToEventScheduler, printEventSchedulerInfo, startEventScheduler, removeEventFromScheduler
+from utils.eventScheduler import addMailToEventScheduler, printEventSchedulerInfo, removeEventFromScheduler, startEventScheduler
 from utils.sistemConfig import sisConfigStart, getMissingEnvironmentVar
 from utils.smtpMails import startSmtpServer
 
-from services.authentication import Login, Sign
-from services.advisors import Advisors
-from services.dynamicPage import DynamicPage
-from services.fileTransmission import FileTransmission
-from services.sendMail import SendMail
-from services.solicitations import CoordinatorSolicitations, AdvisorSolicitations, StudentSolicitations
-from services.solicitation import Solicitation
-from services.solicitationAdvisor import SolicitationAdvisor
-from services.solicitationTransitions import SolicitationTransitions
-from services.reasons import Reasons
+from controller.authentication import Login, Sign
+from controller.advisors import Advisors
+from controller.dynamicPage import DynamicPage
+from controller.fileTransmission import FileTransmission
+from controller.sendMail import SendMail
+from controller.solicitations import CoordinatorSolicitations, AdvisorSolicitations, StudentSolicitations
+from controller.solicitation import Solicitation
+from controller.solicitationAdvisor import SolicitationAdvisor
+from controller.solicitationTransitions import SolicitationTransitions
+from controller.reasons import Reasons
 
 # create flask api server with enabled Authorization cors to all origins used to do user authentication
 app = Flask(__name__)
@@ -60,11 +60,11 @@ if getMissingEnvironmentVar():
 dbCheckCreate()
 # Start SMTP Server
 startSmtpServer()
-# Load System Configutations
+# Load System Configutations: Mails, Paths, Holidays and EventScheduler
 sisConfigStart()
 # Load Secret Keys
 loadGenerateKeys()
-# Load System Event Scheduler
+# Start and load event scheduler
 startEventScheduler()
 
 # For testing

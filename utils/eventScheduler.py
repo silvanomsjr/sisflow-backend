@@ -1,7 +1,12 @@
 from datetime import datetime
 import sched, time
 import threading
-from utils.smtpMails import addToSmtpMailServer
+import traceback
+
+import service.scheduleService
+
+import utils.dbUtils
+import utils.smtpMails
 
 systemEventScheduler = None
 
@@ -11,6 +16,39 @@ def startEventScheduler():
 
   if systemEventScheduler == None:
     systemEventScheduler = EventScheduler()
+  
+  loadEventScheduler()
+
+def loadEventScheduler():
+
+  # Load database stored events to Scheduler
+  try:
+    schQuery = """
+      SELECT sch.id AS id, sch.scheduled_action, sch.scheduled_datetime, sch.scheduled_status, 
+      scht.state_transition_scheduled_id, scht.user_has_solicitation_state_id  
+        FROM sisgesteste.scheduling sch 
+        JOIN scheduling_state_transition scht ON sch.id = scht.scheduling_id;
+      """
+    schs = utils.dbUtils.dbGetAll(schQuery)
+    
+    # insert pending events to system schedule 
+    eventsAdded = 0
+    for sch in schs:
+      if sch["scheduled_status"] == "Pending":
+        eventsAdded += 1
+        addTransitionToEventScheduler(
+          sch["id"],
+          sch["scheduled_datetime"],
+          sch["user_has_solicitation_state_id"],
+          sch["state_transition_scheduled_id"],
+          service.scheduleService.resolveScheduledSolicitation
+        )
+    print(f"# {eventsAdded} events added to event scheduler")
+  
+  except Exception as e:
+    print("# Error while loading schedule events:")
+    print(e)
+    traceback.print_exc()
 
 def addToEventScheduler(eventId, delay, action, kwargs=None, priority=1):
 
@@ -37,9 +75,9 @@ def addMailToEventScheduler(eventId, sendDatetime, rawTo, rawSubject, rawBody, p
   actualDatetime = datetime.now()
   delay = (sendDatetime - actualDatetime).total_seconds()
 
-  systemEventScheduler.enterEvent(eventId, delay, priority, addToSmtpMailServer, kwargs)
+  systemEventScheduler.enterEvent(eventId, delay, priority, utils.smtpMails.addToSmtpMailServer, kwargs)
 
-def addTransitionToEventScheduler(eventId, sendDatetime, userHasStateId, userData, transitionId, action, priority=1):
+def addTransitionToEventScheduler(eventId, sendDatetime, userHasStateId, transitionId, action, priority=1):
   
   global systemEventScheduler
 
@@ -49,7 +87,6 @@ def addTransitionToEventScheduler(eventId, sendDatetime, userHasStateId, userDat
   kwargs = {
     'eventId': eventId,
     'userHasStateId': userHasStateId,
-    'userData': userData,
     'transitionId': transitionId
   }
 

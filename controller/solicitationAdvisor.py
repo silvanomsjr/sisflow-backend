@@ -17,7 +17,7 @@ def getSolicitationAdvisor(userHasSolicitationId):
       "   WHERE uhs.id = %s; ",(userHasSolicitationId,))
   except Exception as e:
     print("# Database reading error:")
-    print(str(e))
+    print(e)
     traceback.print_exc()
     return "Erro na base de dados", 409
   
@@ -33,7 +33,7 @@ def putSolicitationAdvisor(userHasSolicitationId, advisorSiape):
       (advisorSiape, userHasSolicitationId))
   except Exception as e:
     print("# Database insertion error:")
-    print(str(e))
+    print(e)
     traceback.print_exc()
     return "Erro na base de dados", 409
 
@@ -48,7 +48,7 @@ def allowSolicitationAdvisor(userHasSolicitationId, advisorSiape):
       (userHasSolicitationId, advisorSiape))
   except Exception as e:
     print("# Database insertion error:")
-    print(str(e))
+    print(e)
     traceback.print_exc()
     return "Erro na base de dados", 409
 

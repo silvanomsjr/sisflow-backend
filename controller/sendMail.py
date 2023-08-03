@@ -68,7 +68,7 @@ class SendMail(Resource):
       )
     except Exception as e:
       print("# Database reading error:")
-      print(str(e))
+      print(e)
       traceback.print_exc()
       return "Erro na base de dados", 409
 
