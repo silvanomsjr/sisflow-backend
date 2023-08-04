@@ -138,9 +138,9 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 			'verifique se [[[ifStudentMale?o aluno:::a aluna]]] atende às normas gerais de estágio, as regras mudam de acordo com cada modalidade de estágio.</p>'
             '<p>Algumas normas para poder efetuar o estágio obrigatório no [[[ifBCCStudent? BCC ::: BSI ]]]:</p>'
             '[[[ifBCCStudent? 
-				<p><b>Duração</b>: 10 a 20 semanas, <b>Carga horária mínima</b>: 210 horas com o máximo de 30 horas semanais, <b>Aprovação</b>: 1 ao 4 períodos completos</p>
+				<ol><li><b>Duração</b>: 10 a 20 semanas</li><li><b>Carga horária mínima</b>: 210 horas com o máximo de 30 horas semanais</li><li><b>Aprovação</b>: 1 ao 4 períodos completos</li></ol>
             ::: 
-				<p><b>Duração</b>: 16 a 32 semanas, <b>Carga horária mínima</b>: 440 horas com o máximo de 30 horas semanais, <b>Aprovação</b>: 1 ao 4 períodos completos</p>
+				<ol><li><b>Duração</b>: 16 a 32 semanas</li><li><b>Carga horária mínima</b>: 440 horas com o máximo de 30 horas semanais</li><li><b>Aprovação</b>: 1 ao 4 períodos completos</li></ol>
             ]]]'
 			'<p>As normas do seu curso podem ser visualizadas no link: '
 			'[[[ifBCCStudent?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
@@ -152,7 +152,7 @@ INSERT INTO dynamic_component_inner_html (dynamic_component_id, dynamic_componen
 		'<p>Nesta etapa [[[ifStudentMale?o aluno:::a aluna]]] solicita uma avaliação de sua documentação ao coordenador de estágios para que este '
 			'verifique se [[[ifStudentMale?o aluno:::a aluna]]] atende às normas gerais de estágio, as regras mudam de acordo com cada modalidade de estágio.</p>'
             '<p>Algumas normas para poder efetuar o estágio não obrigatório no [[[ifBCCStudent? BCC ::: BSI ]]]:</p>'
-            '<p><b>Duração</b>: 8 a 24 semanas, <b>Carga horária mínima</b>: 220 horas, <b>Aprovação</b>: 1 e 2 períodos completos</p>'
+            '<ol><li><b>Duração</b>: 8 a 24 semanas</li><li><b>Carga horária mínima</b>: 220 horas</li><li><b>Aprovação</b>: 1 e 2 períodos completos</li></ol>'
 			'<p>Com carga horária de disciplinas acima de 1200 é possível estagiar de 30 horas semanais e, caso contrário, 20 horas</p>'
 			'<p>As normas do seu curso podem ser visualizadas no link: '
 			'[[[ifBCCStudent?<a href="https://facom.ufu.br/graduacao/bcc/estagio-supervisionado">Normas de Estagio BCC</a>.</p>:::'
@@ -626,5 +626,5 @@ INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_
 	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação');
 # dynamic pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_scheduled (solicitation_state_transition_id, transition_decision, transition_reason, transition_delay_seconds) VALUES 
-	(3, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 100),
-    (7, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 100);
+	(3, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 1000),
+    (7, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 1000);
