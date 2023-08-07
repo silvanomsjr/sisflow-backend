@@ -370,7 +370,7 @@ class Solicitation(Resource):
         traceback.print_exc()
         return "Erro na base de dados", 409
 
-      errorMsg = getDPageComponentsInvalidMsg(dynamicPage["components"])
+      errorMsg = getDPageComponentsInvalidMsg(userData["user_id"], dynamicPage["components"], solicitationUserData)
       if errorMsg != None:
         return errorMsg, 401
 

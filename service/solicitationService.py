@@ -11,7 +11,7 @@ from utils.dbUtils import *
 from utils.utils import getFormatedMySQLJSON
 
 ### Validation methods ###
-def getDPageComponentsInvalidMsg(components):
+def getDPageComponentsInvalidMsg(userId, components, solicitationUserData):
 
   for component in components:
 
@@ -38,7 +38,7 @@ def getDPageComponentsInvalidMsg(components):
                 " SELECT att.hash_name "
                 "   FROM attachment AS att JOIN user_has_attachment AS uhatt ON att.id = uhatt.attachment_id "
                 "   WHERE uhatt.user_id = %s AND att.hash_name = %s; ",
-                [userData["user_id"], userUpload["upload_hash_name"]]):
+                [userId, userUpload["upload_hash_name"]]):
               found = True
               break
           except Exception as e:

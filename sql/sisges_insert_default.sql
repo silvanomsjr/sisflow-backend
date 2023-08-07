@@ -315,19 +315,18 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         '<br>'
 		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
-        '<p>Matricula: [[[studentMatricula]]]</p>'
-        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        '<p>Matricula: [[[studentMatricula]]]</p>',
         FALSE, FALSE, TRUE
     ),
-	(
+	
+    (
 		'Sistema de estágios: Solicitação de avaliação dos históricos',
         '<p>Olá [[[coordinatorName]]]</p>'
 		'<p>Você possui uma <b>solicitação de avaliação de históricos</b></p>'
         '<br>'
 		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
-        '<p>Matricula: [[[studentMatricula]]]</p>'
-        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        '<p>Matricula: [[[studentMatricula]]]</p>',
         FALSE, FALSE, TRUE
     ),
 	(
@@ -342,14 +341,31 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
     (
 		'Sistema de estágios: Cancelamento de inicio de processo de estágio',
         '<p>Olá [[[coordinatorName]]]</p>'
-		'<p>Um aluno cancelou uma solicitação de estágio obrigatório com vínculo empregatício antes de solicitar a avaliação de históricos</p>'
+		'<p>Um aluno cancelou uma solicitação de estágio antes de solicitar a avaliação de históricos</p>'
         '<br>'
 		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
-        '<p>Matricula: [[[studentMatricula]]]</p>'
-        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>',
+        '<p>Matricula: [[[studentMatricula]]]</p>',
         FALSE, FALSE, TRUE
     ),
+    (
+		'Sistema de estágios: Foi expirado o inicio de processo de estágio',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Passaram se 14 dias após a solicitação de inicío de processo de estágio e o aluno não enviou a documentação para avaliação de históricos</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios: Sua solicitação de início de estágio expirou',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[studentName]]]</p>'
+		'<p>Passaram se 14 dias após a sua solicitação de inicío de processo de estágio e o voê não enviou a documentação para avaliação de históricos</p>'
+        '<p>Por isso sua solicitação foi cancelada. Realize a solicitação novamente</p>',
+        TRUE, FALSE, FALSE
+    ),
+    
     (
 		'Sistema de estágios - Solicitação de avaliação dos históricos deferida',
         '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
@@ -361,16 +377,24 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
         TRUE, FALSE, FALSE
     ),
     (
-		'Sistema de estágios - Solicitação de avaliação dos históricos indeferida',
-        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
-		'<p>Seus históricos enviados para início de estágio foram <b>indeferidos</b></p>'
+		'Sistema de estágios: Foi expirado a avaliação dos históricos',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Passaram se 14 dias após a solicitação de avaliação dos históricos e a coordenação não realizou o validação</p>'
+        '<p>Seguem abaixo os dados do solicitante</p>'
         '<br>'
-		'<p>Motivo: To be develop</p>'
-        '<p>Artigo: To be develop</p>'
-        '<p>Qualquer dúvida enviar um email para a coordenação de estágios: </p>'
-        '<p>Você também pode solicitar ao colegiado apoio caso necessário</p>',
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios: Sua solicitação de início de estágio expirou',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[studentName]]]</p>'
+		'<p>Passaram se 14 dias após a sua solicitação de avaliação de documentos e a coordenação realizou a avaliação</p>'
+        '<p>Por isso sua solicitação foi cancelada. Realize a solicitação novamente</p>',
         TRUE, FALSE, FALSE
     ),
+    
     (
 		'Sistema de estágios - Solicitação de orientação',
         '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
@@ -379,23 +403,40 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
 		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
         '<p>Curso: [[[studentCourse]]]</p>'
         '<p>Matricula: [[[studentMatricula]]]</p>'
-        '<p>Modalidade: Estágio obrigatório com vinculo empregatício</p>'
         '<br>'
         '<p>Acesse a plataforma para aceitar ou recusar a solicitação</p>'
         '<p>Lembre-se de participar do processo de assinaturas no caso do aceite para a homologação dos documentos</p>',
         FALSE, TRUE, FALSE
     ),
     (
-		'Sistema de estágios - Solicitação de orientação rejeitada',
-        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
-		'<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] rejeitou sua solicitação</p>'
+		'Sistema de estágios: Cancelamento de inicio de processo de estágio',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Um aluno cancelou uma solicitação de estágio antes de solicitar a orientação a um orientador</p>'
         '<br>'
-		'<p>Motivo: To be develop</p>'
-        '<p>Artigo: To be develop</p>'
-        '<p>Qualquer dúvida enviar um email para a coordenação de estágios: </p>'
-        '<p>Você também pode solicitar ao colegiado apoio caso necessário</p>',
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios: Foi expirado a solicitação de orientação para início de estágio',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Passaram se 14 dias após a sua aprovação da documentação do aluno e o mesmo não solicitou um orientador</p>'
+        '<p>Seguem abaixo os dados do aluno</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios: Sua solicitação de início de estágio expirou',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[studentName]]]</p>'
+		'<p>Passaram se 14 dias após a coordenação deferir a sua documentação e você não solicitou a orientação a um orientador</p>'
+        '<p>Por isso sua solicitação foi cancelada. Realize a solicitação novamente</p>',
         TRUE, FALSE, FALSE
     ),
+    
     (
 		'Sistema de estágios - Solicitação de orientação aceita e início de coleta de assinaturas',
         '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
@@ -445,6 +486,55 @@ INSERT INTO dynamic_mail (mail_subject, mail_body_html, is_sent_to_student, is_s
 		'<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
         '<p>Siape: [[[advisorSiape]]]</p>',
         FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios - Solicitação de orientação rejeitada',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] rejeitou a solicitação [[[ifStudentMale?do aluno:::da aluna]]] [[[studentName]]] </p>'
+        '<p>Seguem abaixo os dados do aluno</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios - Solicitação de orientação rejeitada',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[ifBCCStudent?do BCC:::do BSI]]] [[[studentName]]]</p>'
+		'<p>[[[ifAdvisorMale?O orientador:::A orientadora]]] [[[advisorName]]] rejeitou sua solicitação</p>'
+        '<br>'
+        '<p>Qualquer dúvida enviar um email para a coordenação de estágios: </p>'
+        '<p>Você também pode solicitar ao colegiado apoio caso necessário</p>',
+        TRUE, FALSE, FALSE
+    ),
+    (
+		'Sistema de estágios: Foi expirado a solicitação de orientação para o inicio de estágio',
+        '<p>Olá [[[coordinatorName]]]</p>'
+		'<p>Passaram se 14 dias após o aluno solicitar orientação [[[ifAdvisorMale?ao orientador:::a orientadora]]] [[[advisorName]]] e por isso foi expirado</p>'
+        '<p>Seguem abaixo os dados do aluno e orientador</p>'
+        '<br>'
+		'<p>[[[ifStudentMale?Aluno:::Aluna]]]: [[[studentName]]]</p>'
+        '<p>Curso: [[[studentCourse]]]</p>'
+        '<p>Matricula: [[[studentMatricula]]]</p>'
+        '<br>'
+		'<p>[[[ifAdvisorMale?Orientador:::Orientadora]]]: [[[advisorName]]]</p>'
+        '<p>Siape: [[[advisorSiape]]]</p>',
+        FALSE, FALSE, TRUE
+    ),
+    (
+		'Sistema de estágios: Foi expirado a sua solicitação de orientação para o inicio de estágio',
+        '<p>Olá [[[ifAdvisorMale?orientador:::orientadora]]] [[[advisorName]]]</p>'
+        '<br>'
+        '<p>Passaram se 14 dias que [[[ifStudentMale?o aluno:::a aluna]]]: [[[studentName]]] solicitou a sua orientação e você não retornou a aprovação ou rejeição.</p>'
+		'<p>Por isso a solicitação foi cancelada. Entre em contato com [[[ifStudentMale?o aluno:::a aluna]]] ou a coordenação de estágios</p>',
+        FALSE, TRUE, FALSE
+    ),
+    (
+		'Sistema de estágios: Sua solicitação de orientação para início de estágio expirou',
+        '<p>Olá [[[ifStudentMale?aluno:::aluna]]] [[[studentName]]]</p>'
+		'<p>Passaram se 14 dias após você solicitar orientação [[[ifAdvisorMale?ao orientador:::a orientadora]]] [[[advisorName]]] e este não retornou a solicitação</p>'
+        '<p>Por isso sua solicitação foi cancelada. Realize a solicitação novamente ou entre em contato com a coordenação de estágios</p>',
+        TRUE, FALSE, FALSE
     ),
     
     (
@@ -584,15 +674,15 @@ INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitat
     
     (2, 3, 'COO: defer'),					#4:s1:  manual: state 2 to 3
     (2, NULL, 'COO: reject docs'),			#5:s1:  manual: state 2 to end
-    (2, NULL, 'COO: cancel'),				#6:s1:  manual: state 2 to end
-    (2, NULL, 'Expired'),				    #7:s1:  schedu: state 1 to end
+    (2, NULL, 'Expired'),				    #6:s1:  schedu: state 2 to end
 
-    (3, 4, 'STU: request ADV'),				#8:s1:  manual: state 3 to 4 end
-    (3, NULL, 'STU: cancel'),				#9:s1:  manual: state 3 to end
+    (3, 4, 'STU: request ADV'),				#7:s1:  manual: state 3 to 4 end
+    (3, NULL, 'STU: cancel'),				#8:s1:  manual: state 3 to end
+    (3, NULL, 'Expired'),				    #9:s1:  schedu: state 3 to end
     
     (4, 5, 'ADV: defer ADV'),				#10:s1: manual: state 4 to 5 end
     (4, NULL, 'ADV: reject ADV'),			#11:s1: manual: state 4 to end
-    (4, NULL, 'ADV: cancel ADV'),			#12:s1: manual: state 4 to end
+    (4, NULL, 'Expired'),				    #12:s1: schedu: state 4 to end
     
     (5, 5, 'STU: send docs loopback'),		#13:s1: manual: state 5 to 5
     (5, 5, 'ADV: send docs loopback'),		#14:s1: manual: state 5 to 5
@@ -604,27 +694,43 @@ INSERT INTO solicitation_state_transition (solicitation_state_id_from, solicitat
 INSERT INTO solicitation_state_transition_mail(solicitation_state_transition_id, dynamic_mail_id) VALUES
 	(1, 2), (1, 3),
     (2, 4),
-    (3, 5),
-    (5, 6),
-    (8, 7),
-    (9, 8),
-    (10, 9), (10, 10), (10, 11),
-    (13, 12), (13, 13),
-    (14, 14), (14, 15),
-    (15, 16), (15, 17),
-	(16, 18), (16, 19),
-    (17, 18), (17, 19);
+    (3, 5), (3, 6),
+    
+    (4, 7),
+    (6, 8), (6, 9),
+    
+    (7, 10),
+    (8, 11),
+    (9, 12), (9,13),
+    
+    (10, 14), (10, 15), (10, 16),
+    (11, 17), (11, 18),
+    (12, 19), (12, 20), (12, 21),
+    
+    (13, 22), (13, 23),
+    (14, 24), (14, 25),
+    (15, 26), (15, 27),
+    
+	(16, 28), (16, 29),
+    (17, 28), (17, 29);
+    
 # static pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_manual (solicitation_state_transition_id, transition_decision, transition_reason) VALUES
-    (4, 'Deferido', 'A documentação do aluno está aprovada'), (5, 'Indeferido', 'A documentação do aluno está com algum problema'), (6, 'Cancelado pela coordenação', 'Foi cancelado a solicitação pela coordenação'),
-    (8, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (9, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
-    (10, 'Deferido', 'O orientador aceitou a solicitação'), (11, 'Indeferido', 'O orientador não aceitou a solicitação'), (12, 'Cancelado pelo orientador', 'O orientador cancelou a solicitação'),
-    (13, 'Enviado', 'Atualização de documentos pelo aluno'), (14, 'Enviado', 'Atualização de documentos pelo orientador'), (15, 'Enviado', 'Atualização de documentos pela coordenação'),
-    (16, 'Deferido', 'Documentos homologados'), (17, 'Deferido', 'Documentos homologados'), (18, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
+    (4, 'Deferido', 'A documentação do aluno está aprovada'), (5, 'Indeferido', 'A documentação do aluno está com algum problema'),
+    (7, 'Solicitado', 'O aluno solicitou a orientação ao orientador'), (8, 'Cancelado pelo aluno', 'O aluno cancelou a solicitação'),
+    (10, 'Deferido', 'O orientador aceitou a solicitação'), (11, 'Indeferido', 'O orientador não aceitou a solicitação'),
+    (13, 'Enviado', 'Atualização de documentos pelo aluno'),
+    (14, 'Enviado', 'Atualização de documentos pelo orientador'),
+    (15, 'Enviado', 'Atualização de documentos pela coordenação'),
+    (16, 'Deferido', 'Documentos homologados'),
+    (17, 'Deferido', 'Documentos homologados'),
+    (18, 'Indeferido', 'Processo de assinaturas indeferido pela coordenação');
 # dynamic pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_from_dynamic_page (solicitation_state_transition_id, dynamic_page_component, transition_decision, transition_reason) VALUES 
 	(1, 'Button-Request', 'Solicitado', 'O aluno solicitou avaliação de documentos à coordenação de estágios'), (2, 'Button-Cancel', 'Cancelado pelo aluno', 'O aluno cancelou a solicitação');
 # dynamic pages transitions for states in solicitation 1
 INSERT INTO solicitation_state_transition_scheduled (solicitation_state_transition_id, transition_decision, transition_reason, transition_delay_seconds) VALUES 
-	(3, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 1000),
-    (7, 'Expirado', 'Foi alcançado o tempo limite de espera para a solicitação', 1000);
+	(3, 'Expirado', 'O aluno não enviou a documentação necessária no intervalo de 14 dias', 1209600),
+    (6, 'Expirado', 'A coordenação de estágios não conferiu a documentação no intervalo de 4 dias', 345600),
+    (9, 'Expirado', 'O aluno não enviou solicitou orientação no intervalo de 14 dias para o professor orientador', 1209600),
+    (12, 'Expirado', 'O orientador não aceitou a solicitação do discente no período de 14 dias', 1209600);
