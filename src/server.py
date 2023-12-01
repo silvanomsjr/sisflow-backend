@@ -8,7 +8,6 @@ from flask import Flask
 from flask.blueprints import Blueprint
 from flask_cors import CORS
 
-import env
 import logging
 import routes
 import sqlalchemy
@@ -17,6 +16,7 @@ import time
 sqlalchemy
 
 from models import db
+import env
 from util import db_check_create, sysconf, syssecurity, syssmtpserver, sysscheduler
 
 # configurates logger
@@ -89,4 +89,4 @@ for blueprint in vars(routes).values():
 
 # starts the app
 if __name__ == "__main__":
-    server.run(host=env.HOST, port=env.PORT)
+    server.run(host="0.0.0.0", port=5000)
