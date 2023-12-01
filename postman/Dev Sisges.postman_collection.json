@@ -1,0 +1,891 @@
+{
+	"info": {
+		"_postman_id": "f503f64d-8046-4bda-9f5a-71fb19a56be4",
+		"name": "Dev Sisges",
+		"description": "✨ Welcome to Dev Gestao Mt collection! ✨\n\nThis collection is designed to help to understand the flow of data with requests in the application.\n\nEvery request is coded to work without previous ones by using correct environment and correct request parameters(I made this using Pre-request Scripts and Tests), but to understand, let me explain the steps:\n\nFirst, we need to authenticate using auth-with-login. In this step, we get a JWT token by passing a basic auth token in the request Authorization header with user credentials.\n\nAfter, we can use the JWT as a Bearer token to authenticate in the other requests. \n\nTo update and get more 10 minutes of authentication, we can use the auth-with-token request passing Bearer with JWT in Authorization header.\n\nFinally, with the client authenticated and passing the JWT as Bearer token, we can make all other requests.\n\nGood Coding! 💻",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Advisors",
+			"item": [
+				{
+					"name": "Get Advisors",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJtYWlsX3ZhbGlkYXRpb24iOm51bGwsImluc3RpdHV0aW9uYWxfZW1haWwiOiJwcm9mLmFzb2FyZXNAdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoicHJvZi5hc29hcmVzQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkNvb3JkZW5hZG9yIEN1cnNvIiwiZ2VuZGVyIjoiTSIsInBob25lIjoiMzQzMzMzMzMzMzMiLCJjcmVhdGlvbl9kYXRldGltZSI6IjIwMjMtMTEtMTQiLCJ1c2VyX2lkIjoyLCJwcm9maWxlcyI6W3sicHJvZmlsZV9uYW1lIjoiY29vcmRpbmF0b3IiLCJwcm9maWxlX2Fjcm9ueW0iOiJDT08iLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTExLTE0IDE0OjIxOjQ1IiwiZW5kX2RhdGV0aW1lIjoiIiwic2lhcGUiOiJTSUFQRS1BTEVYIn0seyJwcm9maWxlX25hbWUiOiJhZHZpc29yIiwicHJvZmlsZV9hY3JvbnltIjoiQURWIiwicHJvZmlsZV9keW5hbWljX2ZpZWxkc19tZXRhZGF0YSI6bnVsbCwidXNlcl9kaW5hbXljX3Byb2ZpbGVfZmllbGRzX2RhdGEiOm51bGwsInN0YXJ0X2RhdGV0aW1lIjoiMjAyMy0xMS0xNCAxNDoyMTo0NSIsImVuZF9kYXRldGltZSI6IiIsInNpYXBlIjoiU0lBUEUtQUxFWCJ9XSwicHJvZmlsZV9hY3JvbnltcyI6WyJDT08iLCJBRFYiXX0.fkVGmrovIYrOc4ynaqwUDhFuPACGyBtd0bRDOXlW5a9DrwVvRWz9XMtgTCTxLNq0NWzdE_SlfxWqUMmK2GzadnhoAsokSqYkjveDiode3HuLj58klWuDp2VhO1IyeJm6SuH8KCXivVvjkihpmXUEf7LksCBSipUzOqkNLA0XsIaSu5DSBFlyByCTH55Jzw2CmqQ2tLqqdegQr1lsZu31smQyX4htPS05vjRP0DdeQm0Y3jjfA6moLaaSRcl8i59k0f7J-Ug-k-hNpSCKfbfWYXw8dTMiuSdsHoEdSrnO-u05ry8r3bVt9iGlQxJYNTBDaeCXwvRiyjNV8z8AvSVvnA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"solicitation_id\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}advisors",
+							"host": [
+								"{{base_service_url}}advisors"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{user_mail}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "12345678",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}login",
+							"host": [
+								"{{base_service_url}}login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Make Code",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"institutional_email\":\"viniciuscalixto.grad@ufu.br\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}signup",
+							"host": [
+								"{{base_service_url}}signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Do With Code",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"institutional_email\":\"viniciuscalixto.grad@ufu.br\",\r\n    \"secondary_email\":\"secundary@gmail.com\",\r\n    \"phone\":\"34997791557\",\r\n    \"plain_password\":\"12345678\",\r\n    \"validation_code\": \"oHDOixmz2x\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}signup",
+							"host": [
+								"{{base_service_url}}signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Verify Code Token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}signup?acess_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnN0aXR1dGlvbmFsX2VtYWlsIjoidmluaWNpdXNjYWxpeHRvLmdyYWRAdWZ1LmJyIiwidmFsaWRhdGlvbl9jb2RlIjoib0hET2l4bXoyeCJ9.D6Hap6TZZAzAljSQgycxJIAUZ3aKfaD4QdJRlGUDi7pnNBqbnQZolXEJFgPYa2JR-wwkNGQcdHpNf8-IWD8-vcDx1wH_gtOF_CxwF0eb2GaWr54Js9OMsQzzQs3zDPPUS7zXFGh9ueDiHnAOC4vMdaxb0BJURX6R4iaJNhgTokRSQErzD23RDiIZZJLdNRxnLfgo6XojjmV8d-0BiIQtVY-dsQU3iYKrSPUUdwsu-59zgi6-FnawWWFb8J4eHTo5rQTEYw4pWHEMLyIaSGjsSVEq8X3ELJGVb80RPAumb4H94KmJY5xSOY_pnmewqefAFpSRnAJEqQcY9YSPczI1Kg",
+							"host": [
+								"{{base_service_url}}signup"
+							],
+							"query": [
+								{
+									"key": "acess_token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpbnN0aXR1dGlvbmFsX2VtYWlsIjoidmluaWNpdXNjYWxpeHRvLmdyYWRAdWZ1LmJyIiwidmFsaWRhdGlvbl9jb2RlIjoib0hET2l4bXoyeCJ9.D6Hap6TZZAzAljSQgycxJIAUZ3aKfaD4QdJRlGUDi7pnNBqbnQZolXEJFgPYa2JR-wwkNGQcdHpNf8-IWD8-vcDx1wH_gtOF_CxwF0eb2GaWr54Js9OMsQzzQs3zDPPUS7zXFGh9ueDiHnAOC4vMdaxb0BJURX6R4iaJNhgTokRSQErzD23RDiIZZJLdNRxnLfgo6XojjmV8d-0BiIQtVY-dsQU3iYKrSPUUdwsu-59zgi6-FnawWWFb8J4eHTo5rQTEYw4pWHEMLyIaSGjsSVEq8X3ELJGVb80RPAumb4H94KmJY5xSOY_pnmewqefAFpSRnAJEqQcY9YSPczI1Kg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Verify Code Data",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}signup?institutional_email=viniciuscalixto.grad@ufu.br&validation_code=oHDOixmz2x",
+							"host": [
+								"{{base_service_url}}signup"
+							],
+							"query": [
+								{
+									"key": "institutional_email",
+									"value": "viniciuscalixto.grad@ufu.br"
+								},
+								{
+									"key": "validation_code",
+									"value": "oHDOixmz2x"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DynamicPage",
+			"item": [
+				{
+					"name": "Get Dynamic Page",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiaW5zdGl0dXRpb25hbF9lbWFpbCI6ImFsdW5vQHVmdS5iciIsInNlY29uZGFyeV9lbWFpbCI6ImFsdW5vQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkFsdW5vIEJDQyIsImdlbmRlciI6Ik0iLCJwaG9uZSI6IjM0MjIyMjIyMjIyIiwiY3JlYXRpb25fZGF0ZXRpbWUiOiIyMDIzLTEyLTAxIDA1OjUwOjEyIiwicHJvZmlsZXMiOlt7InByb2ZpbGVfbmFtZSI6InN0dWRlbnQiLCJwcm9maWxlX2Fjcm9ueW0iOiJTVFUiLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTEyLTAxIDA1OjUwOjEyIiwiZW5kX2RhdGV0aW1lIjoiIiwibWF0cmljdWxhIjoiMTExMTFCU0kxMTEiLCJjb3Vyc2UiOiJCQ0MifV0sInByb2ZpbGVfYWNyb255bXMiOlsiU1RVIl19.Ai04ySHMsgC75FZ3FMkn2tv7ihhin7Dzevw6QtNi9JN5EEofTL4juWxl1h0Vd-vQi2W1QlQ00PEF49TtXitwprTkOn8Cj99Lce7ee-DQanMU5gCvtZ4EXRShvQR0wURnFBqpNURgl-Nbw3ksqdPz7wEAv79lA6hW2GKna3Y_hOhRWMyx2vYgs38K1Bsck6OjNkYr7zGnfv_jctDRSoYAmjeMZ4hap-PyUU_Y-c7YEvzMMYZmaL3NMF9qfWn6wzGlj5sfY3tQiSpnHJFqXO9iwenHgGAsUfxQxElDnR_-uuxFPYGxbtuUVVrfbDHiJhImSzEyXBP0rUBidIGwexOWiQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}dynamic_page?page_id=1",
+							"host": [
+								"{{base_service_url}}dynamic_page"
+							],
+							"query": [
+								{
+									"key": "page_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}file",
+							"host": [
+								"{{base_service_url}}file"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Download File",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}file?bearer=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0wOC0wMiAyMTowNTo0OSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMDgtMDIgMjE6MDU6NDkiLCJlbmRfZGF0ZXRpbWUiOiJOb25lIn1dLCJwcm9maWxlX2Fjcm9ueW1zIjpbIkFETSJdfQ.aQ453-ciNLA_L5_PiPsaJT-5Ll4NQhQKVgIFCx9Bcfjxr2yD-pc4Wg-pSoUtyCTrFNPKv6vs9ErVFcjswktn3F7hKNCUrIlijD0KrB1aapgiROL1nu7m6obACazNq5saWtpN-fcg5PvlzjGdJcnUb1G7_ijJlAq2nkhqBhrd7eya8hcqqlRnFma3I-Bon_dIcWn6u-VmPio5iHuE2ejjkRmETicHEMpI-sRKsDQiQsNyK-9RA4eSTo5nLkbcGCNQuUpoWoJZCeJ0iQTBZnyUhvQbHwRjxM3OQRTCoiz0DshbU15p4b9btd4cYi_j9lFCXLFX_ItjFGlca_VAyiKKoQ&file_name=AlunoVitor_HistTextual_0sYa3J5OJD.pdf",
+							"host": [
+								"{{base_service_url}}file"
+							],
+							"query": [
+								{
+									"key": "bearer",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0wOC0wMiAyMTowNTo0OSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMDgtMDIgMjE6MDU6NDkiLCJlbmRfZGF0ZXRpbWUiOiJOb25lIn1dLCJwcm9maWxlX2Fjcm9ueW1zIjpbIkFETSJdfQ.aQ453-ciNLA_L5_PiPsaJT-5Ll4NQhQKVgIFCx9Bcfjxr2yD-pc4Wg-pSoUtyCTrFNPKv6vs9ErVFcjswktn3F7hKNCUrIlijD0KrB1aapgiROL1nu7m6obACazNq5saWtpN-fcg5PvlzjGdJcnUb1G7_ijJlAq2nkhqBhrd7eya8hcqqlRnFma3I-Bon_dIcWn6u-VmPio5iHuE2ejjkRmETicHEMpI-sRKsDQiQsNyK-9RA4eSTo5nLkbcGCNQuUpoWoJZCeJ0iQTBZnyUhvQbHwRjxM3OQRTCoiz0DshbU15p4b9btd4cYi_j9lFCXLFX_ItjFGlca_VAyiKKoQ"
+								},
+								{
+									"key": "file_name",
+									"value": "AlunoVitor_HistTextual_0sYa3J5OJD.pdf"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Solicitation",
+			"item": [
+				{
+					"name": "Put Single Solicitation - Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiaW5zdGl0dXRpb25hbF9lbWFpbCI6ImFsdW5vQHVmdS5iciIsInNlY29uZGFyeV9lbWFpbCI6ImFsdW5vQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkFsdW5vIEJDQyIsImdlbmRlciI6Ik0iLCJwaG9uZSI6IjM0MjIyMjIyMjIyIiwiY3JlYXRpb25fZGF0ZXRpbWUiOiIyMDIzLTExLTI5IDIxOjIxOjQ1IiwicHJvZmlsZXMiOlt7InByb2ZpbGVfbmFtZSI6InN0dWRlbnQiLCJwcm9maWxlX2Fjcm9ueW0iOiJTVFUiLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTExLTI5IDIxOjIxOjQ1IiwiZW5kX2RhdGV0aW1lIjoiIiwibWF0cmljdWxhIjoiMTExMTFCU0kxMTEiLCJjb3Vyc2UiOiJCQ0MifV0sInByb2ZpbGVfYWNyb255bXMiOlsiU1RVIl19.V08669J_DVxvO2jM5Jxh8E_kEwaG4WBVlfRux4Oq6OIH_Zgueqbf1-R4qeQ3g1JjD1zdHDPokGqu2jyTQUvrZAprtDJxJdgpjlwO-Q3Uw5x-9rO67ZRSUbLilnuTYtwqpXu09F8KXoy-wmGetk08MKlgD1DO3quW1Fjc8kdtQzVq_hevEk51SWHavzWQlvXvk9duv7DJAtCFX89R17bAs19lIXPltasfQTQfbMtXUHGOZFvZeaX1wiLtS1MFk0NeZrckK2TWFPafDOMqreDVWjpzhrLXRQTcOsb_AU1LxvImTQbWpGXqLWlKUiy7_jCF3ZliH2cKPU_BUUkrvH5lAg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"solicitation_id\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}solicitation",
+							"host": [
+								"{{base_service_url}}solicitation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Solicitation",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiaW5zdGl0dXRpb25hbF9lbWFpbCI6ImFsdW5vQHVmdS5iciIsInNlY29uZGFyeV9lbWFpbCI6ImFsdW5vQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkFsdW5vIEJDQyIsImdlbmRlciI6Ik0iLCJwaG9uZSI6IjM0MjIyMjIyMjIyIiwiY3JlYXRpb25fZGF0ZXRpbWUiOiIyMDIzLTExLTI5IDIxOjIxOjQ1IiwicHJvZmlsZXMiOlt7InByb2ZpbGVfbmFtZSI6InN0dWRlbnQiLCJwcm9maWxlX2Fjcm9ueW0iOiJTVFUiLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTExLTI5IDIxOjIxOjQ1IiwiZW5kX2RhdGV0aW1lIjoiIiwibWF0cmljdWxhIjoiMTExMTFCU0kxMTEiLCJjb3Vyc2UiOiJCQ0MifV0sInByb2ZpbGVfYWNyb255bXMiOlsiU1RVIl19.V08669J_DVxvO2jM5Jxh8E_kEwaG4WBVlfRux4Oq6OIH_Zgueqbf1-R4qeQ3g1JjD1zdHDPokGqu2jyTQUvrZAprtDJxJdgpjlwO-Q3Uw5x-9rO67ZRSUbLilnuTYtwqpXu09F8KXoy-wmGetk08MKlgD1DO3quW1Fjc8kdtQzVq_hevEk51SWHavzWQlvXvk9duv7DJAtCFX89R17bAs19lIXPltasfQTQfbMtXUHGOZFvZeaX1wiLtS1MFk0NeZrckK2TWFPafDOMqreDVWjpzhrLXRQTcOsb_AU1LxvImTQbWpGXqLWlKUiy7_jCF3ZliH2cKPU_BUUkrvH5lAg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}solicitation?user_has_state_id=2",
+							"host": [
+								"{{base_service_url}}solicitation"
+							],
+							"query": [
+								{
+									"key": "user_has_state_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post Single Solicitation - Resolve",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiaW5zdGl0dXRpb25hbF9lbWFpbCI6ImFsdW5vQHVmdS5iciIsInNlY29uZGFyeV9lbWFpbCI6ImFsdW5vQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkFsdW5vIEJDQyIsImdlbmRlciI6Ik0iLCJwaG9uZSI6IjM0MjIyMjIyMjIyIiwiY3JlYXRpb25fZGF0ZXRpbWUiOiIyMDIzLTExLTI5IDIxOjIxOjQ1IiwicHJvZmlsZXMiOlt7InByb2ZpbGVfbmFtZSI6InN0dWRlbnQiLCJwcm9maWxlX2Fjcm9ueW0iOiJTVFUiLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTExLTI5IDIxOjIxOjQ1IiwiZW5kX2RhdGV0aW1lIjoiIiwibWF0cmljdWxhIjoiMTExMTFCU0kxMTEiLCJjb3Vyc2UiOiJCQ0MifV0sInByb2ZpbGVfYWNyb255bXMiOlsiU1RVIl19.V08669J_DVxvO2jM5Jxh8E_kEwaG4WBVlfRux4Oq6OIH_Zgueqbf1-R4qeQ3g1JjD1zdHDPokGqu2jyTQUvrZAprtDJxJdgpjlwO-Q3Uw5x-9rO67ZRSUbLilnuTYtwqpXu09F8KXoy-wmGetk08MKlgD1DO3quW1Fjc8kdtQzVq_hevEk51SWHavzWQlvXvk9duv7DJAtCFX89R17bAs19lIXPltasfQTQfbMtXUHGOZFvZeaX1wiLtS1MFk0NeZrckK2TWFPafDOMqreDVWjpzhrLXRQTcOsb_AU1LxvImTQbWpGXqLWlKUiy7_jCF3ZliH2cKPU_BUUkrvH5lAg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_has_state_id\" : 1,\r\n    \"transition_id\" : 1,\r\n    \"solicitation_user_data\" : {\r\n        \"inputs\" : [],\r\n        \"uploads\" : [],\r\n        \"select_uploads\" : []\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}solicitation",
+							"host": [
+								"{{base_service_url}}solicitation"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SolicitationAdvisor",
+			"item": [
+				{
+					"name": "Get Solicitation Advisor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}solicitation/advisor?user_has_solicitation_id=1",
+							"host": [
+								"{{base_service_url}}solicitation"
+							],
+							"path": [
+								"advisor"
+							],
+							"query": [
+								{
+									"key": "user_has_solicitation_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Solicitation Advisor",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_has_solicitation_id\":\"1\",\r\n    \"advisor_siape\":\"SIAPE-COOR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}solicitation/advisor",
+							"host": [
+								"{{base_service_url}}solicitation"
+							],
+							"path": [
+								"advisor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Solicitation Advisor Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_has_solicitation_id\":\"1\",\r\n    \"advisor_siape\":\"SIAPE-COOR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}solicitation/advisor",
+							"host": [
+								"{{base_service_url}}solicitation"
+							],
+							"path": [
+								"advisor"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SolicitationTransitions",
+			"item": [
+				{
+					"name": "Get Transitions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiaW5zdGl0dXRpb25hbF9lbWFpbCI6ImFsdW5vQHVmdS5iciIsInNlY29uZGFyeV9lbWFpbCI6ImFsdW5vQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkFsdW5vIEJDQyIsImdlbmRlciI6Ik0iLCJwaG9uZSI6IjM0MjIyMjIyMjIyIiwiY3JlYXRpb25fZGF0ZXRpbWUiOiIyMDIzLTEyLTAxIDA1OjUwOjEyIiwicHJvZmlsZXMiOlt7InByb2ZpbGVfbmFtZSI6InN0dWRlbnQiLCJwcm9maWxlX2Fjcm9ueW0iOiJTVFUiLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTEyLTAxIDA1OjUwOjEyIiwiZW5kX2RhdGV0aW1lIjoiIiwibWF0cmljdWxhIjoiMTExMTFCU0kxMTEiLCJjb3Vyc2UiOiJCQ0MifV0sInByb2ZpbGVfYWNyb255bXMiOlsiU1RVIl19.Ai04ySHMsgC75FZ3FMkn2tv7ihhin7Dzevw6QtNi9JN5EEofTL4juWxl1h0Vd-vQi2W1QlQ00PEF49TtXitwprTkOn8Cj99Lce7ee-DQanMU5gCvtZ4EXRShvQR0wURnFBqpNURgl-Nbw3ksqdPz7wEAv79lA6hW2GKna3Y_hOhRWMyx2vYgs38K1Bsck6OjNkYr7zGnfv_jctDRSoYAmjeMZ4hap-PyUU_Y-c7YEvzMMYZmaL3NMF9qfWn6wzGlj5sfY3tQiSpnHJFqXO9iwenHgGAsUfxQxElDnR_-uuxFPYGxbtuUVVrfbDHiJhImSzEyXBP0rUBidIGwexOWiQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}solicitation/transitions?solicitation_state_id_from=1",
+							"host": [
+								"{{base_service_url}}solicitation"
+							],
+							"path": [
+								"transitions"
+							],
+							"query": [
+								{
+									"key": "solicitation_state_id_from",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Solicitations",
+			"item": [
+				{
+					"name": "Get Solicitations - Coordinator",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}solicitations/coordinator",
+							"host": [
+								"{{base_service_url}}solicitations"
+							],
+							"path": [
+								"coordinator"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Solicitations - Advisor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}solicitations/advisor",
+							"host": [
+								"{{base_service_url}}solicitations"
+							],
+							"path": [
+								"advisor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Solicitations - Student",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}solicitations/student",
+							"host": [
+								"{{base_service_url}}solicitations"
+							],
+							"path": [
+								"student"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Send Mail",
+			"item": [
+				{
+					"name": "Post Send Mail",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJpbnN0aXR1dGlvbmFsX2VtYWlsIjoiYWRtaW5AdWZ1LmJyIiwic2Vjb25kYXJ5X2VtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwidXNlcl9uYW1lIjoiQWRtaW4iLCJnZW5kZXIiOiJNIiwicGhvbmUiOiIzNDExMTExMTExMSIsImNyZWF0aW9uX2RhdGV0aW1lIjoiMjAyMy0xMS0yOSAyMToyMTo0NSIsInByb2ZpbGVzIjpbeyJwcm9maWxlX25hbWUiOiJhZG1pbiIsInByb2ZpbGVfYWNyb255bSI6IkFETSIsInByb2ZpbGVfZHluYW1pY19maWVsZHNfbWV0YWRhdGEiOm51bGwsInVzZXJfZGluYW15Y19wcm9maWxlX2ZpZWxkc19kYXRhIjpudWxsLCJzdGFydF9kYXRldGltZSI6IjIwMjMtMTEtMjkgMjE6MjE6NDUiLCJlbmRfZGF0ZXRpbWUiOiIifV0sInByb2ZpbGVfYWNyb255bXMiOlsiQURNIl19.ZMGdIPiB38sUcWN7d_W_2hn67YnUGvpe0kQA7vr-06kwm_e1az8l2rI8YcjRBZYO5Isuc5xI3RedJBtlmqHLNjo8XW2QxGupbQrjLLI0cYolZsil4o8bw1cqwHSJMO1LHlZwdWA46FTKGgA4uf5Y4My9UYw5-T1MjVy4wVjsuorb7a0Ae0KT47PwJrm3g6KYpkC-nHaYkYZUeWJI-ZthXz6i1N57GFZ8PxpDx8mwKZ1boGngjWF1o0dp5t-LL7rywwROcFF0XUMXTuMVUtaolv8qSABT1dqhHtkrAk30QSujt-nTmVadwWp2a85LUKYcvXIFNzd2mE1jrXXBRziAWg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_has_state_id\": 1,\r\n    \"mail_subject\": \"Test Subject Aluno\",\r\n    \"mail_body\": \"Test Body Aluno\",\r\n    \"is_sent_to_student\": true,\r\n    \"is_sent_to_advisor\": false,\r\n    \"is_sent_to_coordinator\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_service_url}}sendmail",
+							"host": [
+								"{{base_service_url}}sendmail"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reasons",
+			"item": [
+				{
+					"name": "Get Reasons",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywiaW5zdGl0dXRpb25hbF9lbWFpbCI6ImFsdW5vQHVmdS5iciIsInNlY29uZGFyeV9lbWFpbCI6ImFsdW5vQGdtYWlsLmNvbSIsInVzZXJfbmFtZSI6IkFsdW5vIEJDQyIsImdlbmRlciI6Ik0iLCJwaG9uZSI6IjM0MjIyMjIyMjIyIiwiY3JlYXRpb25fZGF0ZXRpbWUiOiIyMDIzLTEyLTAxIDA1OjUwOjEyIiwicHJvZmlsZXMiOlt7InByb2ZpbGVfbmFtZSI6InN0dWRlbnQiLCJwcm9maWxlX2Fjcm9ueW0iOiJTVFUiLCJwcm9maWxlX2R5bmFtaWNfZmllbGRzX21ldGFkYXRhIjpudWxsLCJ1c2VyX2RpbmFteWNfcHJvZmlsZV9maWVsZHNfZGF0YSI6bnVsbCwic3RhcnRfZGF0ZXRpbWUiOiIyMDIzLTEyLTAxIDA1OjUwOjEyIiwiZW5kX2RhdGV0aW1lIjoiIiwibWF0cmljdWxhIjoiMTExMTFCU0kxMTEiLCJjb3Vyc2UiOiJCQ0MifV0sInByb2ZpbGVfYWNyb255bXMiOlsiU1RVIl19.Ai04ySHMsgC75FZ3FMkn2tv7ihhin7Dzevw6QtNi9JN5EEofTL4juWxl1h0Vd-vQi2W1QlQ00PEF49TtXitwprTkOn8Cj99Lce7ee-DQanMU5gCvtZ4EXRShvQR0wURnFBqpNURgl-Nbw3ksqdPz7wEAv79lA6hW2GKna3Y_hOhRWMyx2vYgs38K1Bsck6OjNkYr7zGnfv_jctDRSoYAmjeMZ4hap-PyUU_Y-c7YEvzMMYZmaL3NMF9qfWn6wzGlj5sfY3tQiSpnHJFqXO9iwenHgGAsUfxQxElDnR_-uuxFPYGxbtuUVVrfbDHiJhImSzEyXBP0rUBidIGwexOWiQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_service_url}}reasons?user_has_state_id=1",
+							"host": [
+								"{{base_service_url}}reasons"
+							],
+							"query": [
+								{
+									"key": "reason_id",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "reason_content",
+									"value": "Motivo 2 <a href=\\\"htt",
+									"disabled": true
+								},
+								{
+									"key": "class_names",
+									"value": "Validação Históricos Aluno",
+									"disabled": true
+								},
+								{
+									"key": "user_has_state_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
