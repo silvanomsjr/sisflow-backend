@@ -102,7 +102,7 @@ class SmtpServer:
         to = raw_to
         subject = raw_subject
 
-        with open('./src/templates/smtpMailTemplate.html', 'r', encoding="utf8") as f:
+        with open('./templates/smtpMailTemplate.html', 'r', encoding="utf8") as f:
             template_Html = f.read()
 
             soup = BeautifulSoup(template_Html, 'html.parser')
