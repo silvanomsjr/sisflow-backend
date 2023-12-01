@@ -270,11 +270,11 @@ CREATE TABLE dynamic_component_details(
 /* Dynamic mail message */
 CREATE TABLE dynamic_mail(
 	id INT NOT NULL AUTO_INCREMENT,
-    mail_subject VARCHAR(100),
-    mail_body_html VARCHAR(2000),
-    is_sent_to_student BOOL DEFAULT FALSE,
-    is_sent_to_advisor BOOL DEFAULT FALSE,
-    is_sent_to_coordinator BOOL DEFAULT FALSE,
+    mail_subject VARCHAR(100) NOT NULL,
+    mail_body_html VARCHAR(2000) NOT NULL,
+    is_sent_to_student BOOL DEFAULT FALSE NOT NULL,
+    is_sent_to_advisor BOOL DEFAULT FALSE NOT NULL,
+    is_sent_to_coordinator BOOL DEFAULT FALSE NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -316,7 +316,7 @@ CREATE TABLE solicitation_state_transition(
 	id INT NOT NULL AUTO_INCREMENT,
     solicitation_state_id_from INT NOT NULL,
     solicitation_state_id_to INT,
-    transition_name VARCHAR(30) NOT NULL,
+    transition_name VARCHAR(100) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (solicitation_state_id_from) REFERENCES solicitation_state(id),
     FOREIGN KEY (solicitation_state_id_to) REFERENCES solicitation_state(id)

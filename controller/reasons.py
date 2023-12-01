@@ -104,32 +104,34 @@ class Reasons(Resource):
       traceback.print_exc()
       return "Erro na base de dados", 409
 
+    if qUserRes:
+      
     # Data used by parser
-    studentData={
-      "user_id": qUserRes["student_id"],
-      "institutional_email": qUserRes["student_institutional_email"],
-      "user_name": qUserRes["student_name"],
-      "gender": qUserRes["student_gender"],
-      "profiles": [{
-        "profile_acronym":"STU",
-        "matricula": qUserRes["student_matricula"],
-        "course": qUserRes["student_course"]
-      }]
-    }
-    advisorData={
-      "user_id": qUserRes["advisor_id"],
-      "institutional_email": qUserRes["advisor_institutional_email"],
-      "user_name": qUserRes["advisor_name"],
-      "gender": qUserRes["advisor_gender"],
-      "profiles": [{
-        "profile_acronym":"ADV",
-        "siape": qUserRes["advisor_siape"]
-      }]
-    }
+      studentData={
+        "user_id": qUserRes["student_id"],
+        "institutional_email": qUserRes["student_institutional_email"],
+        "user_name": qUserRes["student_name"],
+        "gender": qUserRes["student_gender"],
+        "profiles": [{
+          "profile_acronym":"STU",
+          "matricula": qUserRes["student_matricula"],
+          "course": qUserRes["student_course"]
+        }]
+      }
+      advisorData={
+        "user_id": qUserRes["advisor_id"],
+        "institutional_email": qUserRes["advisor_institutional_email"],
+        "user_name": qUserRes["advisor_name"],
+        "gender": qUserRes["advisor_gender"],
+        "profiles": [{
+          "profile_acronym":"ADV",
+          "siape": qUserRes["advisor_siape"]
+        }]
+      }
     
-    # parse reason
-    for reason in qReasonsRes:
-      reason["reason_inner_html"] = sistemStrParser(reason["reason_inner_html"], studentData, advisorData)
+      # parse reason
+      for reason in qReasonsRes:
+        reason["reason_inner_html"] = sistemStrParser(reason["reason_inner_html"], studentData, advisorData)
 
     print("# Get reasons done!")
 
