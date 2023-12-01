@@ -41,7 +41,6 @@ class SolicitationRepository:
         # add initial state
         if include_initial_state:
             initial_state_query = SolicitationState.query.filter(SolicitationState.solicitation_id == solicitation_id, SolicitationState.is_initial_state)
-            print('count', initial_state_query.count())
             initial_state = initial_state_query.one() if initial_state_query.count() == 1 else None
             solicitation_data["solicitation_initial_state"] = initial_state.json
         

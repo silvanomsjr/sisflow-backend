@@ -64,7 +64,6 @@ class FileTransmitionResource(Resource):
         if not file_path.is_file():
             return "Arquivo não encontrado na pasta do usuário", 404
         
-        print(simple_file_name)
         return send_file(file_path, as_attachment=True, download_name=simple_file_name)
 
     @staticmethod
