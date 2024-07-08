@@ -163,8 +163,8 @@ INSERT INTO dynamic_component_download (dynamic_component_id, dynamic_component_
     (15, 'download', 'Faça o download do TCE assinado', 'internal_from_upload', 'TCE', NULL, NULL),
     (16, 'download', 'Faça o download do PA assinado', 'internal_from_upload', 'PA', NULL, NULL);
 INSERT INTO dynamic_component_button (dynamic_component_id, dynamic_component_type, button_label, button_color, button_transation_type) VALUES 
-	(17, 'button', 'Solicitar', 'darkblue', 'Request'),
-    (18, 'button', 'Cancelar', 'black', 'Cancel'),
+	(17, 'button', 'Cancelar', 'black', 'Cancel'),
+    (18, 'button', 'Solicitar', 'darkblue', 'Request'),
     (19, 'button', 'Enviar', 'darkblue', 'Send'),
     (20, 'button', 'Enviar e deferir', 'darkblue', 'Send and Defer'),
     (21, 'button', 'Deferir', 'darkblue', 'Defer'),
