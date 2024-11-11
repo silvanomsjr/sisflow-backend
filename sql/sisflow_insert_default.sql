@@ -440,8 +440,8 @@ INSERT INTO solicitation_state (solicitation_id, state_description, state_max_du
 	# states for solicitation 1
     (1, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 1, NULL, TRUE),
     (1, 'Avaliação dos históricos e complementos pelo coordenador', 4, NULL, 'interbegin-coordinatoracception', FALSE),
-    (1, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
-    (1, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', FALSE),
+    (1, 'Solicitação de orientação pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
+    (1, 'Aceite de orientação', 4, NULL, 'interbegin-advisoracception', FALSE),
 	(1, 'Processo de assinaturas para início de estágio', 15, NULL, 'interbegin-signatures', FALSE),
     (1, 'Estágio iniciado', NULL, 4, NULL, FALSE),
     (1, 'Estágio iniciado', NULL, 5, NULL, FALSE),
@@ -449,8 +449,8 @@ INSERT INTO solicitation_state (solicitation_id, state_description, state_max_du
     # states for solicitation 2
     (2, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 2, NULL, TRUE),
     (2, 'Avaliação dos históricos e complementos pelo coordenador', 4, NULL, 'interbegin-coordinatoracception', FALSE),
-    (2, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
-    (2, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', FALSE),
+    (2, 'Solicitação de orientação pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
+    (2, 'Aceite de orientação', 4, NULL, 'interbegin-advisoracception', FALSE),
 	(2, 'Processo de assinaturas para início de estágio', 15, NULL, 'interbegin-signatures', FALSE),
     (2, 'Estágio iniciado', NULL, 4, NULL, FALSE),
     (2, 'Estágio iniciado', NULL, 5, NULL, FALSE),
@@ -458,8 +458,8 @@ INSERT INTO solicitation_state (solicitation_id, state_description, state_max_du
     # states for solicitation 3
     (3, 'Solicitação de avaliação dos históricos e complementos pelo aluno', 4, 3, NULL, TRUE),
     (3, 'Avaliação dos históricos e complementos pelo coordenador', 4, NULL, 'interbegin-coordinatoracception', FALSE),
-    (3, 'Escolha de orientador pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
-    (3, 'Aceite de orientado pelo orientador', 4, NULL, 'interbegin-advisoracception', FALSE),
+    (3, 'Solicitação de orientação pelo aluno', 4, NULL, 'interbegin-advisorselection', FALSE),
+    (3, 'Aceite de orientação', 4, NULL, 'interbegin-advisoracception', FALSE),
 	(3, 'Processo de assinaturas para início de estágio', 15, NULL, 'interbegin-signatures', FALSE),
     (3, 'Estágio iniciado', NULL, 4, NULL, FALSE),
     (3, 'Estágio iniciado', NULL, 5, NULL, FALSE);
