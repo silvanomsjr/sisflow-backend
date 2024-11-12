@@ -1,11 +1,11 @@
 # SisFlow Back-end - Solução da atividade de Término de Conclusão de Curso (TCC)
 
-Esta camada juntamente com o Front-end compõe a solução aplicada na minha monografia da universidade.
+Esta camada juntamente com o Front-end compõe a solução aplicada na minha monografia da universidade. Esta é a Segunda versão do sistema iniciado pelo Vinícius Calixto Rocha Acesse a [monografia](https://repositorio.ufu.br/bitstream/123456789/39771/2/AplicacaoWebAuxiliar.pdf) da primeira versão deste projeto. Posteriormente incluirei o link de minha monografia com um estudo de usabilidade mais aprofundado utilizando este sistema como base.
 
 ## **Membros**
 
-- **Aluno**: Vinicius Calixto Rocha
-- **Orientador**: Prof. Dr. Alexsandro Santos Soares
+- **Aluno**: Carlos Augusto Dantas Marquez
+- **Orientador**: Prof. Dr. Renan Gonçalves Cattelan
 
 ## **Sobre o repositório**
 
@@ -23,9 +23,9 @@ Conteúdo relevante do Back-end:
 
 ## **Links úteis** ##
 
-Acesse a [monografia](https://repositorio.ufu.br/bitstream/123456789/39771/2/AplicacaoWebAuxiliar.pdf) deste projeto.
+Acesse a primeira [monografia](https://repositorio.ufu.br/bitstream/123456789/39771/2/AplicacaoWebAuxiliar.pdf) deste projeto.
 
-Visite o repositório com o [Front-end](https://github.com/VCalixtoR/sisflow-frontend) da solução.
+Visite o repositório com o [Front-end](https://github.com/carlosadnsm/sisflow-frontend) da solução.
 
 ## **Início rápido**
 
