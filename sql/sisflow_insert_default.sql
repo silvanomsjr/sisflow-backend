@@ -49,7 +49,8 @@ INSERT INTO user_account (institutional_email, secondary_email, user_name, gende
     ("leandro@ufu.br", NULL,"Leandro Nogueira Couto", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("mauricio@ufu.br", NULL,"Mauricio Cunha Escarpinati", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("aluno@ufu.br", "aluno@gmail.com","Aluno BCC", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
-	("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL);
+    ("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL),
+    ("silvanomsjr@ufu.br", NULL, "Silvano Martins da Silva Junior", 'M', NULL, NULL, NULL, now());
 INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
 	("admin", "ADM", NULL),
     ("coordinator", "COO", NULL),
@@ -71,6 +72,7 @@ INSERT INTO user_has_profile (user_id, profile_id, user_dinamyc_profile_fields_d
     (12, 3, NULL, NOW(), NULL),
     (13, 4, NULL, NOW(), NULL),
     (14, 4, NULL, NOW(), NULL);
+    (15, 4, NULL, NOW(), NULL);
 INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape) VALUES
 	(2, 'SIAPE-COOR');
 INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
@@ -87,8 +89,8 @@ INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
     (13, 'SIAPE-MAURICIO');
 INSERT INTO user_has_profile_student_data (user_has_profile_id, matricula, course) VALUES
 	(14, '11111BSI111', 'BCC'),
-    (15, '11911BCC039', 'BCC');
-
+    (15, '11911BCC039', 'BCC'),
+    (16, '12011BCC042', 'BCC');
 /* Dynamic page */
 INSERT INTO dynamic_page (title) VALUES 
 	('Solicitação de inicio de estágio obrigatório com vínculo - Envio de históricos e comprovante de vínculo empregatício'),
