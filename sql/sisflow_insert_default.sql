@@ -71,8 +71,9 @@ INSERT INTO user_has_profile (user_id, profile_id, user_dinamyc_profile_fields_d
     (11, 3, NULL, NOW(), NULL),
     (12, 3, NULL, NOW(), NULL),
     (13, 4, NULL, NOW(), NULL),
-    (14, 4, NULL, NOW(), NULL);
+    (14, 4, NULL, NOW(), NULL),
     (15, 4, NULL, NOW(), NULL);
+
 INSERT INTO user_has_profile_coordinator_data (user_has_profile_id, siape) VALUES
 	(2, 'SIAPE-COOR');
 INSERT INTO user_has_profile_advisor_data (user_has_profile_id, siape)  VALUES
