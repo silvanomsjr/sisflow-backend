@@ -50,7 +50,7 @@ INSERT INTO user_account (institutional_email, secondary_email, user_name, gende
     ("mauricio@ufu.br", NULL,"Mauricio Cunha Escarpinati", 'M', "34333333333","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("aluno@ufu.br", "aluno@gmail.com","Aluno BCC", 'M', "34222222222","6507d069ff5e932b093715ab9a9fd415d5666b6f46b4c4943e695eaf72c9b759","GKA43F4CU71p2YF3",now()),
     ("viniciuscalixto.grad@ufu.br", NULL, "Vinicius Calixto Rocha", 'M', NULL, NULL, NULL, NULL),
-    ("silvanomsjr@ufu.br", NULL, "Silvano Martins da Silva Junior", 'M', NULL, NULL, NULL, now());
+    ("silvanomsjr@ufu.br", NULL, "Silvano Martins da Silva Junior", 'M', "34999418527", "481edd8919647eed61d328409e4587ea28867b1a270f23650bad3bf0feb0b64b" , "m6ev9ChxQ7S1shH8", now());
 INSERT INTO profile (profile_name, profile_acronym, profile_dynamic_fields_metadata) VALUES
 	("admin", "ADM", NULL),
     ("coordinator", "COO", NULL),
